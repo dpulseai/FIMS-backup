@@ -344,4 +344,3 @@ export const fetchInspectors = async () => {
     // Return empty array instead of throwing to prevent app crash
     return [];
   }
-};
