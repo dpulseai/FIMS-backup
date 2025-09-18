@@ -361,7 +361,6 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
           ...editingInspection.form_data
         }));
       }
-      }
     }
   }, [editingInspection]);
 
