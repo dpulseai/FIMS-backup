@@ -344,4 +344,101 @@ export const fetchInspectors = async () => {
     // Return empty array instead of throwing to prevent app crash
     return [];
   }
+};
+
+// School Inspection Forms functions for the new schema
+export interface SchoolInspectionFormData {
+  inspection_date: string;
+  district_name: string;
+  taluka_name: string;
+  center_name: string;
+  school_name: string;
+  management_name: string;
+  principal_name: string;
+  udise_number: string;
+  total_boys: number;
+  total_girls: number;
+  total_students: number;
+  approved_teachers: number;
+  working_teachers: number;
+  vacant_teachers: number;
+  approved_non_teaching: number;
+  working_non_teaching: number;
+  vacant_non_teaching: number;
+  inspection_items: any[];
+  district_for_chairman: string;
+  inspection_id: string;
 }
+
+export const createSchoolInspectionForm = async (formData: SchoolInspectionFormData) => {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error('Supabase client not initialized');
+  }
+
+  try {
+    // First verify that the inspection_id exists in fims_inspections
+    const { data: inspectionExists, error: inspectionError } = await supabase
+      .from('fims_inspections')
+      .select('id')
+      .eq('id', formData.inspection_id)
+      .single();
+
+    if (inspectionError || !inspectionExists) {
+      throw new Error('Cannot insert school inspection form: inspection_id does not exist in fims_inspections');
+    }
+
+    const { data, error } = await supabase
+      .from('school_inspection_forms')
+      .insert(formData)
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error creating school inspection form:', error);
+    throw error;
+  }
+};
+
+export const updateSchoolInspectionForm = async (inspectionId: string, formData: Partial<SchoolInspectionFormData>) => {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error('Supabase client not initialized');
+  }
+
+  try {
+    // First verify that the inspection_id exists in fims_inspections
+    const { data: inspectionExists, error: inspectionError } = await supabase
+      .from('fims_inspections')
+      .select('id')
+      .eq('id', inspectionId)
+      .single();
+
+    if (inspectionError || !inspectionExists) {
+      throw new Error('Cannot update school inspection form: inspection_id does not exist in fims_inspections');
+    }
+
+    const { data, error } = await supabase
+      .from('school_inspection_forms')
+      .upsert({
+        ...formData,
+        inspection_id: inspectionId,
+        updated_at: new Date().toISOString()
+      })
+      .eq('inspection_id', inspectionId)
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error updating school inspection form:', error);
+    throw error;
+  }
+};
