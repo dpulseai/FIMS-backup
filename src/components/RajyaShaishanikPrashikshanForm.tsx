@@ -356,9 +356,11 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
     if (editingInspection && editingInspection.fims_school_inspection_forms && editingInspection.fims_school_inspection_forms.length > 0) {
       const formData = editingInspection.fims_school_inspection_forms[0];
       if (formData) {
+        setFormData(prev => ({
           ...prev,
           ...editingInspection.form_data
         }));
+      }
       }
     }
   }, [editingInspection]);
