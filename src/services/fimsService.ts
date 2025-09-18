@@ -118,8 +118,7 @@ export const createInspection = async (inspectionData: Partial<Inspection>): Pro
           photo_order
         ),
         fims_anganwadi_forms (*),
-        fims_office_inspection_forms (*),
-        fims_school_inspection_forms (*)
+        fims_office_inspection_forms (*)
       `)
       .single();
 
