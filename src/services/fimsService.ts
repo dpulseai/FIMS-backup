@@ -312,6 +312,48 @@ export const reassignInspection = async (id: string, newInspectorId: string): Pr
   }
 };
 
+export const createAdarshShalaForm = async (formData: any): Promise<any> => {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error('Supabase client not initialized');
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('adarsh_shala')
+      .insert(formData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error creating adarsh shala form:', error);
+    throw error;
+  }
+};
+
+export const updateAdarshShalaForm = async (inspectionId: string, formData: any): Promise<any> => {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error('Supabase client not initialized');
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('adarsh_shala')
+      .upsert({
+        inspection_id: inspectionId,
+        ...formData
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error updating adarsh shala form:', error);
+    throw error;
+  }
+};
 export const fetchInspectors = async () => {
   // Return empty array immediately if Supabase is not configured
   if (!isSupabaseConfigured || !supabase) {

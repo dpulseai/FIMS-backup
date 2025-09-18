@@ -14,6 +14,7 @@ import {
   Award
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { createAdarshShalaForm, updateAdarshShalaForm } from '../services/fimsService';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface RajyaShaishanikPrashikshanFormProps {
@@ -311,6 +312,118 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
         // Convert empty strings to null for database compatibility
         const updateInspectionData = {
           ...inspectionData,
+      // Prepare adarsh_shala form data
+      const adarshShalaData = {
+        visit_date: schoolFormData.visit_date,
+        school_name: schoolFormData.school_name,
+        school_address: schoolFormData.school_address,
+        principal_name: schoolFormData.principal_name,
+        principal_mobile: schoolFormData.principal_mobile,
+        udise_number: schoolFormData.udise_number,
+        center_name: schoolFormData.center,
+        taluka_name: schoolFormData.taluka,
+        district_name: schoolFormData.district,
+        management_type: schoolFormData.management_type,
+        school_achievement_self: schoolFormData.school_achievement_self,
+        school_achievement_external: schoolFormData.school_achievement_external,
+        sanctioned_posts: schoolFormData.sanctioned_posts,
+        working_posts: schoolFormData.working_posts,
+        present_teachers: schoolFormData.present_teachers,
+        class_1_boys: schoolFormData.class_1_boys,
+        class_1_girls: schoolFormData.class_1_girls,
+        class_1_total: schoolFormData.class_1_total,
+        class_2_boys: schoolFormData.class_2_boys,
+        class_2_girls: schoolFormData.class_2_girls,
+        class_2_total: schoolFormData.class_2_total,
+        class_3_boys: schoolFormData.class_3_boys,
+        class_3_girls: schoolFormData.class_3_girls,
+        class_3_total: schoolFormData.class_3_total,
+        class_4_boys: schoolFormData.class_4_boys,
+        class_4_girls: schoolFormData.class_4_girls,
+        class_4_total: schoolFormData.class_4_total,
+        class_5_boys: schoolFormData.class_5_boys,
+        class_5_girls: schoolFormData.class_5_girls,
+        class_5_total: schoolFormData.class_5_total,
+        class_6_boys: schoolFormData.class_6_boys,
+        class_6_girls: schoolFormData.class_6_girls,
+        class_6_total: schoolFormData.class_6_total,
+        class_7_boys: schoolFormData.class_7_boys,
+        class_7_girls: schoolFormData.class_7_girls,
+        class_7_total: schoolFormData.class_7_total,
+        class_8_boys: schoolFormData.class_8_boys,
+        class_8_girls: schoolFormData.class_8_girls,
+        class_8_total: schoolFormData.class_8_total,
+        total_boys: schoolFormData.total_boys,
+        total_girls: schoolFormData.total_girls,
+        total_students: schoolFormData.total_students,
+        math_teachers_count: schoolFormData.math_teachers_count,
+        khan_registered_teachers: schoolFormData.khan_registered_teachers,
+        khan_registered_students: schoolFormData.khan_registered_students,
+        khan_active_students: schoolFormData.khan_active_students,
+        khan_usage_method: schoolFormData.khan_usage_method,
+        sqdp_prepared: schoolFormData.sqdp_prepared,
+        sqdp_objectives_achieved: schoolFormData.sqdp_objectives_achieved,
+        nipun_bharat_verification: schoolFormData.nipun_bharat_verification,
+        learning_outcomes_assessment: schoolFormData.learning_outcomes_assessment,
+        marathi_class_1: schoolFormData.marathi_class_1,
+        marathi_class_2: schoolFormData.marathi_class_2,
+        marathi_class_3: schoolFormData.marathi_class_3,
+        marathi_class_4: schoolFormData.marathi_class_4,
+        marathi_class_5: schoolFormData.marathi_class_5,
+        marathi_class_6: schoolFormData.marathi_class_6,
+        marathi_class_7: schoolFormData.marathi_class_7,
+        marathi_class_8: schoolFormData.marathi_class_8,
+        english_class_1: schoolFormData.english_class_1,
+        english_class_2: schoolFormData.english_class_2,
+        english_class_3: schoolFormData.english_class_3,
+        english_class_4: schoolFormData.english_class_4,
+        english_class_5: schoolFormData.english_class_5,
+        english_class_6: schoolFormData.english_class_6,
+        english_class_7: schoolFormData.english_class_7,
+        english_class_8: schoolFormData.english_class_8,
+        math_class_1: schoolFormData.math_class_1,
+        math_class_2: schoolFormData.math_class_2,
+        math_class_3: schoolFormData.math_class_3,
+        math_class_4: schoolFormData.math_class_4,
+        math_class_5: schoolFormData.math_class_5,
+        math_class_6: schoolFormData.math_class_6,
+        math_class_7: schoolFormData.math_class_7,
+        math_class_8: schoolFormData.math_class_8,
+        science_class_1: schoolFormData.science_class_1,
+        science_class_2: schoolFormData.science_class_2,
+        science_class_3: schoolFormData.science_class_3,
+        science_class_4: schoolFormData.science_class_4,
+        science_class_5: schoolFormData.science_class_5,
+        science_class_6: schoolFormData.science_class_6,
+        science_class_7: schoolFormData.science_class_7,
+        science_class_8: schoolFormData.science_class_8,
+        social_studies_class_1: schoolFormData.social_studies_class_1,
+        social_studies_class_2: schoolFormData.social_studies_class_2,
+        social_studies_class_3: schoolFormData.social_studies_class_3,
+        social_studies_class_4: schoolFormData.social_studies_class_4,
+        social_studies_class_5: schoolFormData.social_studies_class_5,
+        social_studies_class_6: schoolFormData.social_studies_class_6,
+        social_studies_class_7: schoolFormData.social_studies_class_7,
+        social_studies_class_8: schoolFormData.social_studies_class_8,
+        textbooks_usage: schoolFormData.textbooks_usage,
+        workbooks_usage: schoolFormData.workbooks_usage,
+        library_books_usage: schoolFormData.library_books_usage,
+        digital_content_usage: schoolFormData.digital_content_usage,
+        smart_board_usage: schoolFormData.smart_board_usage,
+        computer_lab_usage: schoolFormData.computer_lab_usage,
+        science_lab_usage: schoolFormData.science_lab_usage,
+        sports_equipment_usage: schoolFormData.sports_equipment_usage,
+        officer_feedback: schoolFormData.officer_feedback,
+        innovative_initiatives: schoolFormData.innovative_initiatives,
+        suggested_changes: schoolFormData.suggested_changes,
+        srujanrang_articles: schoolFormData.srujanrang_articles,
+        future_articles: schoolFormData.future_articles,
+        ngo_involvement: schoolFormData.ngo_involvement,
+        inspector_name: schoolFormData.inspector_name,
+        inspector_designation: schoolFormData.inspector_designation,
+        visit_date_inspector: schoolFormData.visit_date_inspector,
+        inspection_date: schoolFormData.visit_date ? new Date(schoolFormData.visit_date).toISOString().split('T')[0] : null
+      };
           planned_date: inspectionData.planned_date || null,
           category_id: inspectionData.category_id || schoolCategory?.id || null
         };
@@ -341,15 +454,8 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
         if (updateError) throw updateError;
         inspectionResult = updateResult;
       } else {
-        // Convert empty strings to null for database compatibility
-        const createInspectionData = {
-          ...inspectionData,
-          planned_date: inspectionData.planned_date || null,
-          category_id: inspectionData.category_id || schoolCategory?.id || null
-        };
-
-        // Validate required UUID fields
-        if (!createInspectionData.category_id) {
+        // Update adarsh_shala form record
+        await updateAdarshShalaForm(editingInspection.id, adarshShalaData);
           throw new Error('Category is required. Please select a valid inspection category.');
         }
 
@@ -378,15 +484,11 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
         if (createError) throw createError;
         inspectionResult = createResult;
       }
-        // Create school inspection form record with inspection_id
-      // Upload photos if any
-      if (uploadedPhotos.length > 0) {
-        await uploadPhotosToSupabase(inspectionResult.id);
-      }
-
-      const isUpdate = editingInspection && editingInspection.id;
-      const message = isDraft 
-        ? (isUpdate ? t('fims.inspectionUpdatedAsDraft') : t('fims.inspectionSavedAsDraft'))
+        // Create adarsh_shala form record
+        await createAdarshShalaForm({
+          inspection_id: inspectionResult.id,
+          ...adarshShalaData
+        });
         : (isUpdate ? t('fims.inspectionUpdatedSuccessfully') : t('fims.inspectionSubmittedSuccessfully'));
       
       alert(message);
