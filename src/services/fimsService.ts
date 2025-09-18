@@ -354,6 +354,26 @@ export const updateAdarshShalaForm = async (inspectionId: string, formData: any)
     throw error;
   }
 };
+
+export const getAdarshShalaForm = async (inspectionId: string): Promise<any> => {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error('Supabase client not initialized');
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('adarsh_shala')
+      .select('*')
+      .eq('inspection_id', inspectionId)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
+  } catch (error) {
+    console.error('Error fetching adarsh shala form:', error);
+    throw error;
+  }
+};
 export const fetchInspectors = async () => {
   // Return empty array immediately if Supabase is not configured
   if (!isSupabaseConfigured || !supabase) {

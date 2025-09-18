@@ -223,9 +223,139 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
         location_accuracy: editingInspection.location_accuracy
       });
 
-      // Load school form data if it exists
-      if (editingInspection.form_data) {
-        setSchoolFormData(prev => ({
+      // Load adarsh shala form data
+      const loadAdarshShalaData = async () => {
+        try {
+          const { getAdarshShalaForm } = await import('../services/fimsService');
+          const formData = await getAdarshShalaForm(editingInspection.id);
+          
+          if (formData) {
+            setSchoolFormData({
+              visit_date: formData.visit_date || '',
+              school_name: formData.school_name || '',
+              school_address: formData.school_address || '',
+              principal_name: formData.principal_name || '',
+              principal_mobile: formData.principal_mobile || '',
+              udise_number: formData.udise_number || '',
+              center_name: formData.center_name || '',
+              taluka_name: formData.taluka_name || '',
+              district_name: formData.district_name || '',
+              management_type: formData.management_type || '',
+              school_achievement_self: formData.school_achievement_self || '',
+              school_achievement_external: formData.school_achievement_external || '',
+              sanctioned_posts: formData.sanctioned_posts || 0,
+              working_posts: formData.working_posts || 0,
+              present_teachers: formData.present_teachers || 0,
+              class_1_boys: formData.class_1_boys || 0,
+              class_1_girls: formData.class_1_girls || 0,
+              class_1_total: formData.class_1_total || 0,
+              class_2_boys: formData.class_2_boys || 0,
+              class_2_girls: formData.class_2_girls || 0,
+              class_2_total: formData.class_2_total || 0,
+              class_3_boys: formData.class_3_boys || 0,
+              class_3_girls: formData.class_3_girls || 0,
+              class_3_total: formData.class_3_total || 0,
+              class_4_boys: formData.class_4_boys || 0,
+              class_4_girls: formData.class_4_girls || 0,
+              class_4_total: formData.class_4_total || 0,
+              class_5_boys: formData.class_5_boys || 0,
+              class_5_girls: formData.class_5_girls || 0,
+              class_5_total: formData.class_5_total || 0,
+              class_6_boys: formData.class_6_boys || 0,
+              class_6_girls: formData.class_6_girls || 0,
+              class_6_total: formData.class_6_total || 0,
+              class_7_boys: formData.class_7_boys || 0,
+              class_7_girls: formData.class_7_girls || 0,
+              class_7_total: formData.class_7_total || 0,
+              class_8_boys: formData.class_8_boys || 0,
+              class_8_girls: formData.class_8_girls || 0,
+              class_8_total: formData.class_8_total || 0,
+              total_boys: formData.total_boys || 0,
+              total_girls: formData.total_girls || 0,
+              total_students: formData.total_students || 0,
+              math_teachers_count: formData.math_teachers_count || 0,
+              khan_registered_teachers: formData.khan_registered_teachers || 0,
+              khan_registered_students: formData.khan_registered_students || 0,
+              khan_active_students: formData.khan_active_students || 0,
+              khan_usage_method: formData.khan_usage_method || '',
+              sqdp_prepared: formData.sqdp_prepared || '',
+              sqdp_objectives_achieved: formData.sqdp_objectives_achieved || '',
+              nipun_bharat_verification: formData.nipun_bharat_verification || '',
+              learning_outcomes_assessment: formData.learning_outcomes_assessment || '',
+              marathi_class_1: formData.marathi_class_1 || '',
+              marathi_class_2: formData.marathi_class_2 || '',
+              marathi_class_3: formData.marathi_class_3 || '',
+              marathi_class_4: formData.marathi_class_4 || '',
+              marathi_class_5: formData.marathi_class_5 || '',
+              marathi_class_6: formData.marathi_class_6 || '',
+              marathi_class_7: formData.marathi_class_7 || '',
+              marathi_class_8: formData.marathi_class_8 || '',
+              english_class_1: formData.english_class_1 || '',
+              english_class_2: formData.english_class_2 || '',
+              english_class_3: formData.english_class_3 || '',
+              english_class_4: formData.english_class_4 || '',
+              english_class_5: formData.english_class_5 || '',
+              english_class_6: formData.english_class_6 || '',
+              english_class_7: formData.english_class_7 || '',
+              english_class_8: formData.english_class_8 || '',
+              math_class_1: formData.math_class_1 || '',
+              math_class_2: formData.math_class_2 || '',
+              math_class_3: formData.math_class_3 || '',
+              math_class_4: formData.math_class_4 || '',
+              math_class_5: formData.math_class_5 || '',
+              math_class_6: formData.math_class_6 || '',
+              math_class_7: formData.math_class_7 || '',
+              math_class_8: formData.math_class_8 || '',
+              science_class_1: formData.science_class_1 || '',
+              science_class_2: formData.science_class_2 || '',
+              science_class_3: formData.science_class_3 || '',
+              science_class_4: formData.science_class_4 || '',
+              science_class_5: formData.science_class_5 || '',
+              science_class_6: formData.science_class_6 || '',
+              science_class_7: formData.science_class_7 || '',
+              science_class_8: formData.science_class_8 || '',
+              social_studies_class_1: formData.social_studies_class_1 || '',
+              social_studies_class_2: formData.social_studies_class_2 || '',
+              social_studies_class_3: formData.social_studies_class_3 || '',
+              social_studies_class_4: formData.social_studies_class_4 || '',
+              social_studies_class_5: formData.social_studies_class_5 || '',
+              social_studies_class_6: formData.social_studies_class_6 || '',
+              social_studies_class_7: formData.social_studies_class_7 || '',
+              social_studies_class_8: formData.social_studies_class_8 || '',
+              textbooks_usage: formData.textbooks_usage || '',
+              workbooks_usage: formData.workbooks_usage || '',
+              library_books_usage: formData.library_books_usage || '',
+              digital_content_usage: formData.digital_content_usage || '',
+              smart_board_usage: formData.smart_board_usage || '',
+              computer_lab_usage: formData.computer_lab_usage || '',
+              science_lab_usage: formData.science_lab_usage || '',
+              sports_equipment_usage: formData.sports_equipment_usage || '',
+              officer_feedback: formData.officer_feedback || '',
+              innovative_initiatives: formData.innovative_initiatives || '',
+              suggested_changes: formData.suggested_changes || '',
+              srujanrang_articles: formData.srujanrang_articles || '',
+              future_articles: formData.future_articles || '',
+              ngo_involvement: formData.ngo_involvement || '',
+              inspector_name: formData.inspector_name || '',
+              inspector_designation: formData.inspector_designation || '',
+              visit_date_inspector: formData.visit_date_inspector || '',
+              inspection_date: formData.inspection_date || null
+            });
+          }
+        } catch (error) {
+          console.error('Error loading adarsh shala form data:', error);
+        }
+      };
+      
+      loadAdarshShalaData();
+    }
+  }, [editingInspection]);
+
+  // Load existing inspection data when editing (old method for backward compatibility)
+  useEffect(() => {
+    if (editingInspection && editingInspection.fims_school_inspection_forms && editingInspection.fims_school_inspection_forms.length > 0) {
+      const formData = editingInspection.fims_school_inspection_forms[0];
+      if (formData) {
           ...prev,
           ...editingInspection.form_data
         }));
