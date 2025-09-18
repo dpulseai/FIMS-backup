@@ -2,31 +2,26 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
   ArrowLeft,
-  Plus,
-  FileText,
-  Camera,
-  MapPin,
-  Building2,
   School,
-  Users,
-  BookOpen,
-  GraduationCap,
-  Building,
-  UserCheck,
-  ClipboardList,
-  Award,
-  Target,
-  CheckSquare,
-  FileCheck,
-  UserPlus,
-  Settings,
-  Activity,
+  MapPin,
+  Camera,
   Save,
   Send,
-  Calendar
+  CheckCircle,
+  AlertCircle,
+  Calendar,
+  Users,
+  BookOpen,
+  Target,
+  Award,
+  Activity,
+  FileText,
+  User,
+  Phone,
+  Building,
+  GraduationCap
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { createSchoolInspectionForm, updateSchoolInspectionForm, type SchoolInspectionFormData } from '../services/fimsService';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface RajyaShaishanikPrashikshanFormProps {
@@ -35,6 +30,62 @@ interface RajyaShaishanikPrashikshanFormProps {
   categories: any[];
   onInspectionCreated: () => void;
   editingInspection?: any;
+}
+
+interface SchoolInspectionFormData {
+  // Basic school information
+  visit_date: string;
+  school_name: string;
+  school_address: string;
+  principal_name: string;
+  principal_mobile: string;
+  udise_number: string;
+  center: string;
+  taluka: string;
+  district: string;
+  management_type: string;
+  school_achievement_self: string;
+  school_achievement_external: string;
+  
+  // Teacher information
+  sanctioned_posts: number;
+  working_posts: number;
+  present_teachers: number;
+  
+  // Class-wise enrollment data
+  class_enrollment_data: any;
+  
+  // Khan Academy information
+  math_teachers_count: number;
+  khan_registered_teachers: number;
+  khan_registered_students: number;
+  khan_active_students: number;
+  
+  // Text responses
+  khan_usage_method: string;
+  sqdp_prepared: string;
+  sqdp_objectives_achieved: string;
+  nipun_bharat_verification: string;
+  learning_outcomes_assessment: string;
+  
+  // Learning outcomes data
+  learning_outcomes_data: any;
+  
+  // Officer feedback
+  officer_feedback: string;
+  innovative_initiatives: string;
+  suggested_changes: string;
+  srujanrang_articles: string;
+  future_articles: string;
+  ngo_involvement: string;
+  
+  // Materials and technology usage data
+  materials_usage_data: any;
+  
+  // Inspector information
+  inspector_name: string;
+  inspector_designation: string;
+  visit_date_inspector: string;
 }
 
 export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshanFormProps> = ({
@@ -65,40 +116,57 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
     location_accuracy: null as number | null
   });
 
-  // School inspection form data matching the new schema
-  const [schoolFormData, setSchoolFormData] = useState<Omit<SchoolInspectionFormData, 'inspection_id'>>({
-    inspection_date: new Date().toISOString().split('T')[0],
-    district_name: '',
-    taluka_name: '',
-    center_name: '',
+  // School inspection form data
+  const [schoolFormData, setSchoolFormData] = useState<SchoolInspectionFormData>({
+    visit_date: '',
     school_name: '',
-    management_name: '',
+    school_address: '',
     principal_name: '',
+    principal_mobile: '',
     udise_number: '',
-    total_boys: 0,
-    total_girls: 0,
-    total_students: 0,
-    approved_teachers: 0,
-    working_teachers: 0,
-    vacant_teachers: 0,
-    approved_non_teaching: 0,
-    working_non_teaching: 0,
-    vacant_non_teaching: 0,
-    inspection_items: [],
-    district_for_chairman: ''
+    center: '',
+    taluka: '',
+    district: '',
+    management_type: '',
+    school_achievement_self: '',
+    school_achievement_external: '',
+    sanctioned_posts: 0,
+    working_posts: 0,
+    present_teachers: 0,
+    class_enrollment_data: {},
+    math_teachers_count: 0,
+    khan_registered_teachers: 0,
+    khan_registered_students: 0,
+    khan_active_students: 0,
+    khan_usage_method: '',
+    sqdp_prepared: '',
+    sqdp_objectives_achieved: '',
+    nipun_bharat_verification: '',
+    learning_outcomes_assessment: '',
+    learning_outcomes_data: {},
+    officer_feedback: '',
+    innovative_initiatives: '',
+    suggested_changes: '',
+    srujanrang_articles: '',
+    future_articles: '',
+    ngo_involvement: '',
+    materials_usage_data: {},
+    inspector_name: '',
+    inspector_designation: '',
+    visit_date_inspector: ''
   });
 
-  // Get rajya_shaishanik category
-  const rajyaShaishanikCategory = categories.find(cat => cat.form_type === 'rajya_shaishanik');
+  // Get school inspection category
+  const schoolCategory = categories.find(cat => cat.form_type === 'rajya_shaishanik');
 
   useEffect(() => {
-    if (rajyaShaishanikCategory) {
+    if (schoolCategory) {
       setInspectionData(prev => ({
         ...prev,
-        category_id: rajyaShaishanikCategory.id
+        category_id: schoolCategory.id
       }));
     }
-  }, [rajyaShaishanikCategory]);
+  }, [schoolCategory]);
 
   // Load existing inspection data when editing
   useEffect(() => {
@@ -115,27 +183,49 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
       });
 
       // Load school form data if it exists
-      // Note: This would need to be loaded from school_inspection_forms table
-      // For now, we'll keep the default values
+      if (editingInspection.fims_school_inspection_forms && editingInspection.fims_school_inspection_forms.length > 0) {
+        const formData = editingInspection.fims_school_inspection_forms[0];
+        setSchoolFormData({
+          visit_date: formData.visit_date || '',
+          school_name: formData.school_name || '',
+          school_address: formData.school_address || '',
+          principal_name: formData.principal_name || '',
+          principal_mobile: formData.principal_mobile || '',
+          udise_number: formData.udise_number || '',
+          center: formData.center || '',
+          taluka: formData.taluka || '',
+          district: formData.district || '',
+          management_type: formData.management_type || '',
+          school_achievement_self: formData.school_achievement_self || '',
+          school_achievement_external: formData.school_achievement_external || '',
+          sanctioned_posts: formData.sanctioned_posts || 0,
+          working_posts: formData.working_posts || 0,
+          present_teachers: formData.present_teachers || 0,
+          class_enrollment_data: formData.class_enrollment_data || {},
+          math_teachers_count: formData.math_teachers_count || 0,
+          khan_registered_teachers: formData.khan_registered_teachers || 0,
+          khan_registered_students: formData.khan_registered_students || 0,
+          khan_active_students: formData.khan_active_students || 0,
+          khan_usage_method: formData.khan_usage_method || '',
+          sqdp_prepared: formData.sqdp_prepared || '',
+          sqdp_objectives_achieved: formData.sqdp_objectives_achieved || '',
+          nipun_bharat_verification: formData.nipun_bharat_verification || '',
+          learning_outcomes_assessment: formData.learning_outcomes_assessment || '',
+          learning_outcomes_data: formData.learning_outcomes_data || {},
+          officer_feedback: formData.officer_feedback || '',
+          innovative_initiatives: formData.innovative_initiatives || '',
+          suggested_changes: formData.suggested_changes || '',
+          srujanrang_articles: formData.srujanrang_articles || '',
+          future_articles: formData.future_articles || '',
+          ngo_involvement: formData.ngo_involvement || '',
+          materials_usage_data: formData.materials_usage_data || {},
+          inspector_name: formData.inspector_name || '',
+          inspector_designation: formData.inspector_designation || '',
+          visit_date_inspector: formData.visit_date_inspector || ''
+        });
+      }
     }
   }, [editingInspection]);
-
-  // Auto-calculate total students
-  useEffect(() => {
-    const total = schoolFormData.total_boys + schoolFormData.total_girls;
-    setSchoolFormData(prev => ({ ...prev, total_students: total }));
-  }, [schoolFormData.total_boys, schoolFormData.total_girls]);
-
-  // Auto-calculate vacant positions
-  useEffect(() => {
-    const vacantTeachers = schoolFormData.approved_teachers - schoolFormData.working_teachers;
-    const vacantNonTeaching = schoolFormData.approved_non_teaching - schoolFormData.working_non_teaching;
-    setSchoolFormData(prev => ({ 
-      ...prev, 
-      vacant_teachers: Math.max(0, vacantTeachers),
-      vacant_non_teaching: Math.max(0, vacantNonTeaching)
-    }));
-  }, [schoolFormData.approved_teachers, schoolFormData.working_teachers, schoolFormData.approved_non_teaching, schoolFormData.working_non_teaching]);
 
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
@@ -283,11 +373,15 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
         if (updateError) throw updateError;
         inspectionResult = updateResult;
 
-        // Update school inspection form record
-        await updateSchoolInspectionForm(editingInspection.id, {
-          ...schoolFormData,
-          inspection_id: editingInspection.id
-        });
+        // Upsert school inspection form record
+        const { error: formError } = await supabase
+          .from('fims_school_inspection_forms')
+          .upsert({
+            inspection_id: editingInspection.id,
+            ...schoolFormData
+          });
+
+        if (formError) throw formError;
       } else {
         // Create new inspection
         const inspectionNumber = generateInspectionNumber();
@@ -315,10 +409,14 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
         inspectionResult = createResult;
 
         // Create school inspection form record
-        await createSchoolInspectionForm({
-          ...schoolFormData,
-          inspection_id: inspectionResult.id
-        });
+        const { error: formError } = await supabase
+          .from('fims_school_inspection_forms')
+          .insert({
+            inspection_id: inspectionResult.id,
+            ...schoolFormData
+          });
+
+        if (formError) throw formError;
       }
 
       // Upload photos if any
@@ -364,65 +462,23 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
     </div>
   );
 
-  const renderSchoolInfo = () => (
+  const renderSchoolBasicInfo = () => (
     <div className="space-y-6">
       <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
         <School className="h-5 w-5 mr-2 text-green-600" />
-        शाळेची माहिती (School Information)
+        शाळेची मूलभूत माहिती (School Basic Information)
       </h3>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            तपासणी दिनांक *
+            भेटीची तारीख *
           </label>
           <input
             type="date"
-            value={schoolFormData.inspection_date}
-            onChange={(e) => setSchoolFormData(prev => ({...prev, inspection_date: e.target.value}))}
+            value={schoolFormData.visit_date}
+            onChange={(e) => setSchoolFormData(prev => ({...prev, visit_date: e.target.value}))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            जिल्हा *
-          </label>
-          <input
-            type="text"
-            value={schoolFormData.district_name}
-            onChange={(e) => setSchoolFormData(prev => ({...prev, district_name: e.target.value}))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            placeholder="जिल्हा नाव प्रविष्ट करा"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            तालुका *
-          </label>
-          <input
-            type="text"
-            value={schoolFormData.taluka_name}
-            onChange={(e) => setSchoolFormData(prev => ({...prev, taluka_name: e.target.value}))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            placeholder="तालुका नाव प्रविष्ट करा"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            केंद्र *
-          </label>
-          <input
-            type="text"
-            value={schoolFormData.center_name}
-            onChange={(e) => setSchoolFormData(prev => ({...prev, center_name: e.target.value}))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            placeholder="केंद्र नाव प्रविष्ट करा"
             required
           />
         </div>
@@ -441,23 +497,22 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
           />
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            व्यवस्थापन *
+            शाळेचा पत्ता
           </label>
-          <input
-            type="text"
-            value={schoolFormData.management_name}
-            onChange={(e) => setSchoolFormData(prev => ({...prev, management_name: e.target.value}))}
+          <textarea
+            value={schoolFormData.school_address}
+            onChange={(e) => setSchoolFormData(prev => ({...prev, school_address: e.target.value}))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            placeholder="व्यवस्थापन प्रकार प्रविष्ट करा"
-            required
+            rows={3}
+            placeholder="संपूर्ण पत्ता प्रविष्ट करा"
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            मुख्याध्यापकाचे नाव *
+            मुख्याध्यापकाचे नाव
           </label>
           <input
             type="text"
@@ -465,13 +520,25 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
             onChange={(e) => setSchoolFormData(prev => ({...prev, principal_name: e.target.value}))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             placeholder="मुख्याध्यापकाचे नाव प्रविष्ट करा"
-            required
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            UDISE क्रमांक *
+            मुख्याध्यापकाचा मोबाइल
+          </label>
+          <input
+            type="tel"
+            value={schoolFormData.principal_mobile}
+            onChange={(e) => setSchoolFormData(prev => ({...prev, principal_mobile: e.target.value}))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            placeholder="मोबाइल नंबर प्रविष्ट करा"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            UDISE क्रमांक
           </label>
           <input
             type="text"
@@ -479,155 +546,96 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
             onChange={(e) => setSchoolFormData(prev => ({...prev, udise_number: e.target.value}))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             placeholder="UDISE क्रमांक प्रविष्ट करा"
-            required
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            अध्यक्षासाठी जिल्हा
+            केंद्र
           </label>
           <input
             type="text"
-            value={schoolFormData.district_for_chairman}
-            onChange={(e) => setSchoolFormData(prev => ({...prev, district_for_chairman: e.target.value}))}
+            value={schoolFormData.center}
+            onChange={(e) => setSchoolFormData(prev => ({...prev, center: e.target.value}))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            placeholder="अध्यक्षासाठी जिल्हा प्रविष्ट करा"
+            placeholder="केंद्र प्रविष्ट करा"
           />
         </div>
-      </div>
 
-      {/* Student Information */}
-      <div className="bg-gray-50 p-6 rounded-lg">
-        <h4 className="text-md font-semibold text-gray-800 mb-4 flex items-center">
-          <Users className="h-5 w-5 mr-2 text-green-600" />
-          विद्यार्थी माहिती (Student Information)
-        </h4>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              एकूण मुले
-            </label>
-            <input
-              type="number"
-              min="0"
-              value={schoolFormData.total_boys}
-              onChange={(e) => setSchoolFormData(prev => ({...prev, total_boys: parseInt(e.target.value) || 0}))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              एकूण मुली
-            </label>
-            <input
-              type="number"
-              min="0"
-              value={schoolFormData.total_girls}
-              onChange={(e) => setSchoolFormData(prev => ({...prev, total_girls: parseInt(e.target.value) || 0}))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              एकूण विद्यार्थी (स्वयंचलित)
-            </label>
-            <input
-              type="number"
-              value={schoolFormData.total_students}
-              readOnly
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100"
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            तालुका
+          </label>
+          <input
+            type="text"
+            value={schoolFormData.taluka}
+            onChange={(e) => setSchoolFormData(prev => ({...prev, taluka: e.target.value}))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            placeholder="तालुका प्रविष्ट करा"
+          />
         </div>
-      </div>
 
-      {/* Staff Information */}
-      <div className="bg-gray-50 p-6 rounded-lg">
-        <h4 className="text-md font-semibold text-gray-800 mb-4 flex items-center">
-          <UserCheck className="h-5 w-5 mr-2 text-green-600" />
-          कर्मचारी माहिती (Staff Information)
-        </h4>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              मंजूर शिक्षक
-            </label>
-            <input
-              type="number"
-              min="0"
-              value={schoolFormData.approved_teachers}
-              onChange={(e) => setSchoolFormData(prev => ({...prev, approved_teachers: parseInt(e.target.value) || 0}))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            जिल्हा
+          </label>
+          <input
+            type="text"
+            value={schoolFormData.district}
+            onChange={(e) => setSchoolFormData(prev => ({...prev, district: e.target.value}))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            placeholder="जिल्हा प्रविष्ट करा"
+          />
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              कार्यरत शिक्षक
-            </label>
-            <input
-              type="number"
-              min="0"
-              value={schoolFormData.working_teachers}
-              onChange={(e) => setSchoolFormData(prev => ({...prev, working_teachers: parseInt(e.target.value) || 0}))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            व्यवस्थापन प्रकार
+          </label>
+          <select
+            value={schoolFormData.management_type}
+            onChange={(e) => setSchoolFormData(prev => ({...prev, management_type: e.target.value}))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          >
+            <option value="">प्रकार निवडा</option>
+            <option value="government">सरकारी</option>
+            <option value="aided">अनुदानित</option>
+            <option value="private">खाजगी</option>
+          </select>
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              रिक्त शिक्षक पदे (स्वयंचलित)
-            </label>
-            <input
-              type="number"
-              value={schoolFormData.vacant_teachers}
-              readOnly
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100"
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            शाळेची स्वयं कामगिरी
+          </label>
+          <select
+            value={schoolFormData.school_achievement_self}
+            onChange={(e) => setSchoolFormData(prev => ({...prev, school_achievement_self: e.target.value}))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          >
+            <option value="">निवडा</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+          </select>
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              मंजूर गैर-शिक्षण
-            </label>
-            <input
-              type="number"
-              min="0"
-              value={schoolFormData.approved_non_teaching}
-              onChange={(e) => setSchoolFormData(prev => ({...prev, approved_non_teaching: parseInt(e.target.value) || 0}))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              कार्यरत गैर-शिक्षण
-            </label>
-            <input
-              type="number"
-              min="0"
-              value={schoolFormData.working_non_teaching}
-              onChange={(e) => setSchoolFormData(prev => ({...prev, working_non_teaching: parseInt(e.target.value) || 0}))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              रिक्त गैर-शिक्षण पदे (स्वयंचलित)
-            </label>
-            <input
-              type="number"
-              value={schoolFormData.vacant_non_teaching}
-              readOnly
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100"
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            बाह्य मूल्यांकन
+          </label>
+          <select
+            value={schoolFormData.school_achievement_external}
+            onChange={(e) => setSchoolFormData(prev => ({...prev, school_achievement_external: e.target.value}))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          >
+            <option value="">निवडा</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+          </select>
         </div>
       </div>
     </div>
@@ -699,7 +707,7 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            संपूर्ण पत्ता
+            शोधलेले स्थान (Location Detected)
           </label>
           <textarea
             value={inspectionData.address}
@@ -713,40 +721,278 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
     </div>
   );
 
-  const renderInspectionItems = () => (
-    <div className="space-y-6">
+  const renderSchoolInspectionForm = () => (
+    <div className="space-y-8">
       <h3 className="text-lg font-semibold text-gray-900 mb-4">
-        तपासणी बाबी (Inspection Items)
+        आदर्श शाळा भेट प्रपत्र (School Visit Form)
       </h3>
 
+      {/* Teacher Information */}
       <div className="bg-gray-50 p-6 rounded-lg">
         <h4 className="text-md font-semibold text-gray-800 mb-4 flex items-center">
-          <ClipboardList className="h-5 w-5 mr-2 text-green-600" />
-          तपासणी यादी (Inspection Checklist)
+          <Users className="h-5 w-5 mr-2 text-green-600" />
+          शिक्षक माहिती (Teacher Information)
+        </h4>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              मंजूर पदे
+            </label>
+            <input
+              type="number"
+              value={schoolFormData.sanctioned_posts}
+              onChange={(e) => setSchoolFormData(prev => ({...prev, sanctioned_posts: parseInt(e.target.value) || 0}))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              min="0"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              कार्यरत पदे
+            </label>
+            <input
+              type="number"
+              value={schoolFormData.working_posts}
+              onChange={(e) => setSchoolFormData(prev => ({...prev, working_posts: parseInt(e.target.value) || 0}))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              min="0"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              उपस्थित शिक्षक
+            </label>
+            <input
+              type="number"
+              value={schoolFormData.present_teachers}
+              onChange={(e) => setSchoolFormData(prev => ({...prev, present_teachers: parseInt(e.target.value) || 0}))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              min="0"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Khan Academy Information */}
+      <div className="bg-gray-50 p-6 rounded-lg">
+        <h4 className="text-md font-semibold text-gray-800 mb-4 flex items-center">
+          <GraduationCap className="h-5 w-5 mr-2 text-green-600" />
+          Khan Academy Portal माहिती
+        </h4>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              गणित शिक्षकांची संख्या
+            </label>
+            <input
+              type="number"
+              value={schoolFormData.math_teachers_count}
+              onChange={(e) => setSchoolFormData(prev => ({...prev, math_teachers_count: parseInt(e.target.value) || 0}))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              min="0"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Khan नोंदणीकृत शिक्षक
+            </label>
+            <input
+              type="number"
+              value={schoolFormData.khan_registered_teachers}
+              onChange={(e) => setSchoolFormData(prev => ({...prev, khan_registered_teachers: parseInt(e.target.value) || 0}))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              min="0"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Khan नोंदणीकृत विद्यार्थी
+            </label>
+            <input
+              type="number"
+              value={schoolFormData.khan_registered_students}
+              onChange={(e) => setSchoolFormData(prev => ({...prev, khan_registered_students: parseInt(e.target.value) || 0}))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              min="0"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Khan सक्रिय विद्यार्थी
+            </label>
+            <input
+              type="number"
+              value={schoolFormData.khan_active_students}
+              onChange={(e) => setSchoolFormData(prev => ({...prev, khan_active_students: parseInt(e.target.value) || 0}))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              min="0"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Khan Academy वापराची पद्धत
+          </label>
+          <textarea
+            value={schoolFormData.khan_usage_method}
+            onChange={(e) => setSchoolFormData(prev => ({...prev, khan_usage_method: e.target.value}))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            rows={3}
+            placeholder="Khan Academy वापराची पद्धत वर्णन करा"
+          />
+        </div>
+      </div>
+
+      {/* SQDP and Nipun Bharat */}
+      <div className="bg-gray-50 p-6 rounded-lg">
+        <h4 className="text-md font-semibold text-gray-800 mb-4 flex items-center">
+          <Target className="h-5 w-5 mr-2 text-green-600" />
+          SQDP आणि निपुण भारत
         </h4>
         
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              तपासणी बाबींची नोंद (JSON Format)
+              SQDP तयार केले आहे का?
             </label>
             <textarea
-              value={JSON.stringify(schoolFormData.inspection_items, null, 2)}
-              onChange={(e) => {
-                try {
-                  const items = JSON.parse(e.target.value);
-                  setSchoolFormData(prev => ({...prev, inspection_items: items}));
-                } catch (error) {
-                  // Invalid JSON, ignore
-                }
-              }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-mono text-sm"
-              rows={10}
-              placeholder='[{"item": "तपासणी बाब", "status": "completed", "remarks": "टिप्पणी"}]'
+              value={schoolFormData.sqdp_prepared}
+              onChange={(e) => setSchoolFormData(prev => ({...prev, sqdp_prepared: e.target.value}))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              rows={3}
+              placeholder="SQDP तयारीबद्दल माहिती द्या"
             />
-            <p className="text-xs text-gray-500 mt-1">
-              तपासणी बाबींची माहिती JSON फॉर्मॅटमध्ये प्रविष्ट करा
-            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              SQDP उद्दिष्टे साध्य झाली आहेत का?
+            </label>
+            <textarea
+              value={schoolFormData.sqdp_objectives_achieved}
+              onChange={(e) => setSchoolFormData(prev => ({...prev, sqdp_objectives_achieved: e.target.value}))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              rows={3}
+              placeholder="SQDP उद्दिष्टांबद्दल माहिती द्या"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              निपुण भारत लक्ष्य सत्यापन
+            </label>
+            <textarea
+              value={schoolFormData.nipun_bharat_verification}
+              onChange={(e) => setSchoolFormData(prev => ({...prev, nipun_bharat_verification: e.target.value}))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              rows={3}
+              placeholder="निपुण भारत लक्ष्य सत्यापन माहिती द्या"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Officer Feedback */}
+      <div className="bg-gray-50 p-6 rounded-lg">
+        <h4 className="text-md font-semibold text-gray-800 mb-4 flex items-center">
+          <FileText className="h-5 w-5 mr-2 text-green-600" />
+          अधिकारी अभिप्राय
+        </h4>
+        
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              अधिकारी अभिप्राय
+            </label>
+            <textarea
+              value={schoolFormData.officer_feedback}
+              onChange={(e) => setSchoolFormData(prev => ({...prev, officer_feedback: e.target.value}))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              rows={4}
+              placeholder="अधिकारी अभिप्राय प्रविष्ट करा"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              नाविन्यपूर्ण उपक्रम
+            </label>
+            <textarea
+              value={schoolFormData.innovative_initiatives}
+              onChange={(e) => setSchoolFormData(prev => ({...prev, innovative_initiatives: e.target.value}))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              rows={3}
+              placeholder="नाविन्यपूर्ण उपक्रमांबद्दल माहिती द्या"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              सुचवलेले बदल
+            </label>
+            <textarea
+              value={schoolFormData.suggested_changes}
+              onChange={(e) => setSchoolFormData(prev => ({...prev, suggested_changes: e.target.value}))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              rows={3}
+              placeholder="सुचवलेले बदल प्रविष्ट करा"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Inspector Information */}
+      <div className="bg-gray-50 p-6 rounded-lg">
+        <h4 className="text-md font-semibold text-gray-800 mb-4 flex items-center">
+          <User className="h-5 w-5 mr-2 text-green-600" />
+          निरीक्षक माहिती
+        </h4>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              निरीक्षकाचे नाव
+            </label>
+            <input
+              type="text"
+              value={schoolFormData.inspector_name}
+              onChange={(e) => setSchoolFormData(prev => ({...prev, inspector_name: e.target.value}))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              placeholder="निरीक्षकाचे नाव प्रविष्ट करा"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              पदनाम
+            </label>
+            <input
+              type="text"
+              value={schoolFormData.inspector_designation}
+              onChange={(e) => setSchoolFormData(prev => ({...prev, inspector_designation: e.target.value}))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              placeholder="पदनाम प्रविष्ट करा"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              भेटीची तारीख
+            </label>
+            <input
+              type="date"
+              value={schoolFormData.visit_date_inspector}
+              onChange={(e) => setSchoolFormData(prev => ({...prev, visit_date_inspector: e.target.value}))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            />
           </div>
         </div>
       </div>
@@ -762,10 +1008,10 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
       <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
         <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" />
         <h4 className="text-lg font-medium text-gray-900 mb-2">
-          शाळा तपासणी फोटो अपलोड करा
+          Upload School Photos
         </h4>
         <p className="text-gray-600 mb-4">
-          शाळा तपासणीचे दस्तऐवजीकरण आणि रेकॉर्ड ठेवण्यासाठी फोटो अपलोड करा
+          Upload photos of the school for documentation and record keeping
         </p>
         
         <input
@@ -785,7 +1031,7 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
         </label>
         
         <p className="text-xs text-gray-500 mt-2">
-          जास्तीत जास्त 5 फोटो अनुमतीत आहेत
+          Maximum 5 photos allowed
         </p>
       </div>
 
@@ -819,6 +1065,42 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
         </div>
       )}
 
+      {/* Display existing photos when viewing */}
+      {isViewMode && editingInspection?.fims_inspection_photos && editingInspection.fims_inspection_photos.length > 0 && (
+        <div>
+          <h4 className="text-md font-medium text-gray-900 mb-3">
+            Inspection Photos ({editingInspection.fims_inspection_photos.length})
+          </h4>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {editingInspection.fims_inspection_photos.map((photo: any, index: number) => (
+              <div key={photo.id} className="relative">
+                <img
+                  src={photo.photo_url}
+                  alt={photo.description || `School photo ${index + 1}`}
+                  className="w-full h-32 object-cover rounded-lg"
+                />
+                <p className="text-xs text-gray-600 mt-1 truncate">
+                  {photo.photo_name || `Photo ${index + 1}`}
+                </p>
+                {photo.description && (
+                  <p className="text-xs text-gray-500 truncate">
+                    {photo.description}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Show message when no photos in view mode */}
+      {isViewMode && (!editingInspection?.fims_inspection_photos || editingInspection.fims_inspection_photos.length === 0) && (
+        <div className="text-center py-8 text-gray-500">
+          <Camera className="h-12 w-12 text-gray-300 mx-auto mb-2" />
+          <p>{t('fims.noPhotosFound')}</p>
+        </div>
+      )}
+
       {isUploading && (
         <div className="text-center py-4">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-2"></div>
@@ -831,11 +1113,11 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
-        return renderSchoolInfo();
+        return renderSchoolBasicInfo();
       case 2:
         return renderLocationDetails();
       case 3:
-        return renderInspectionItems();
+        return renderSchoolInspectionForm();
       case 4:
         return renderPhotoUpload();
       default:
@@ -846,11 +1128,11 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
   const canProceedToNext = () => {
     switch (currentStep) {
       case 1:
-        return schoolFormData.school_name && schoolFormData.district_name && schoolFormData.taluka_name && schoolFormData.center_name && schoolFormData.management_name && schoolFormData.principal_name && schoolFormData.udise_number;
+        return schoolFormData.visit_date && schoolFormData.school_name;
       case 2:
         return inspectionData.location_name;
       case 3:
-        return true; // Inspection items are optional
+        return true; // Form is optional, can proceed
       case 4:
         return true; // Photos are optional
       default:
@@ -891,13 +1173,13 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
 
           <div className="flex justify-center space-x-4 md:space-x-8 text-xs md:text-sm">
             <div className={`${currentStep === 1 ? 'text-green-600 font-medium' : 'text-gray-500'}`}>
-              शाळा माहिती
+              शाळेची माहिती
             </div>
             <div className={`${currentStep === 2 ? 'text-green-600 font-medium' : 'text-gray-500'}`}>
               {t('fims.locationDetails')}
             </div>
             <div className={`${currentStep === 3 ? 'text-green-600 font-medium' : 'text-gray-500'}`}>
-              तपासणी बाबी
+              शाळा तपासणी
             </div>
             <div className={`${currentStep === 4 ? 'text-green-600 font-medium' : 'text-gray-500'}`}>
               {t('fims.photosSubmit')}
