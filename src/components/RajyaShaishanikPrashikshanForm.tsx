@@ -7,19 +7,11 @@ import {
   Camera,
   Save,
   Send,
-  CheckCircle,
-  AlertCircle,
   Calendar,
   Users,
   BookOpen,
   Target,
-  Award,
-  Activity,
-  FileText,
-  User,
-  Phone,
-  Building,
-  GraduationCap
+  Award
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
@@ -32,7 +24,7 @@ interface RajyaShaishanikPrashikshanFormProps {
   editingInspection?: any;
 }
 
-interface SchoolInspectionFormData {
+interface SchoolFormData {
   // Basic school information
   visit_date: string;
   school_name: string;
@@ -52,8 +44,8 @@ interface SchoolInspectionFormData {
   working_posts: number;
   present_teachers: number;
   
-  // Class-wise enrollment data
-  class_enrollment_data: any;
+  // Student enrollment and attendance
+  class_enrollment: { [key: string]: { enrollment: number; attendance: number } };
   
   // Khan Academy information
   math_teachers_count: number;
@@ -68,8 +60,8 @@ interface SchoolInspectionFormData {
   nipun_bharat_verification: string;
   learning_outcomes_assessment: string;
   
-  // Learning outcomes data
-  learning_outcomes_data: any;
+  // Subject-wise learning outcomes
+  subject_learning_outcomes: { [key: string]: { [subject: string]: number } };
   
   // Officer feedback
   officer_feedback: string;
@@ -79,8 +71,8 @@ interface SchoolInspectionFormData {
   future_articles: string;
   ngo_involvement: string;
   
-  // Materials and technology usage data
-  materials_usage_data: any;
+  // Materials and technology usage
+  materials_usage: { [key: string]: { available: boolean; usage_status: string; suggestions: string } };
   
   // Inspector information
   inspector_name: string;
@@ -116,8 +108,56 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
     location_accuracy: null as number | null
   });
 
-  // School inspection form data
-  const [schoolFormData, setSchoolFormData] = useState<SchoolInspectionFormData>({
+  // Initialize class enrollment data
+  const initializeClassData = () => {
+    const classes = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+    const classData: { [key: string]: { enrollment: number; attendance: number } } = {};
+    classes.forEach(cls => {
+      classData[cls] = { enrollment: 0, attendance: 0 };
+    });
+    return classData;
+  };
+
+  // Initialize subject learning outcomes
+  const initializeSubjectData = () => {
+    const classes = ['1', '2', '3', '4', '5', '6', '7', '8'];
+    const subjects = ['मराठी', 'गणित', 'इंग्रजी', 'प.अ./विज्ञान', 'इतिहास', 'भूगोल', 'हिंदी', 'शा.शि.', 'कार्यनुभव'];
+    const subjectData: { [key: string]: { [subject: string]: number } } = {};
+    classes.forEach(cls => {
+      subjectData[cls] = {};
+      subjects.forEach(subject => {
+        subjectData[cls][subject] = 0;
+      });
+    });
+    return subjectData;
+  };
+
+  // Initialize materials usage data
+  const initializeMaterialsData = () => {
+    const materials = [
+      'मराठी/उर्दू विषय साहित्य पेटी',
+      'गणित विषय साहित्य पेटी',
+      'इंग्रजी विषय साहित्य पेटी',
+      'DIKSHA APP',
+      'तंत्रज्ञान / ई-साधने',
+      'स्वनिर्मित ई-साधने',
+      'विज्ञानविषयक साहित्य',
+      'क्रीडा साहित्य',
+      'रोबोटिक्स लॅब',
+      'डिजिटल वर्गखोली',
+      'व्हर्चुअल क्लासरूम',
+      'इतर अध्ययन-अध्यापन साहित्य',
+      'NGO कडून प्राप्त साहित्य'
+    ];
+    const materialsData: { [key: string]: { available: boolean; usage_status: string; suggestions: string } } = {};
+    materials.forEach(material => {
+      materialsData[material] = { available: false, usage_status: '', suggestions: '' };
+    });
+    return materialsData;
+  };
+
+  // School form data
+  const [schoolFormData, setSchoolFormData] = useState<SchoolFormData>({
     visit_date: '',
     school_name: '',
     school_address: '',
@@ -133,7 +173,7 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
     sanctioned_posts: 0,
     working_posts: 0,
     present_teachers: 0,
-    class_enrollment_data: {},
+    class_enrollment: initializeClassData(),
     math_teachers_count: 0,
     khan_registered_teachers: 0,
     khan_registered_students: 0,
@@ -143,14 +183,14 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
     sqdp_objectives_achieved: '',
     nipun_bharat_verification: '',
     learning_outcomes_assessment: '',
-    learning_outcomes_data: {},
+    subject_learning_outcomes: initializeSubjectData(),
     officer_feedback: '',
     innovative_initiatives: '',
     suggested_changes: '',
     srujanrang_articles: '',
     future_articles: '',
     ngo_involvement: '',
-    materials_usage_data: {},
+    materials_usage: initializeMaterialsData(),
     inspector_name: '',
     inspector_designation: '',
     visit_date_inspector: ''
@@ -166,7 +206,7 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
         category_id: schoolCategory.id
       }));
     }
-  }, [schoolCategory]);
+  }, [schoolCategory, categories]);
 
   // Load existing inspection data when editing
   useEffect(() => {
@@ -183,46 +223,11 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
       });
 
       // Load school form data if it exists
-      if (editingInspection.fims_school_inspection_forms && editingInspection.fims_school_inspection_forms.length > 0) {
-        const formData = editingInspection.fims_school_inspection_forms[0];
-        setSchoolFormData({
-          visit_date: formData.visit_date || '',
-          school_name: formData.school_name || '',
-          school_address: formData.school_address || '',
-          principal_name: formData.principal_name || '',
-          principal_mobile: formData.principal_mobile || '',
-          udise_number: formData.udise_number || '',
-          center: formData.center || '',
-          taluka: formData.taluka || '',
-          district: formData.district || '',
-          management_type: formData.management_type || '',
-          school_achievement_self: formData.school_achievement_self || '',
-          school_achievement_external: formData.school_achievement_external || '',
-          sanctioned_posts: formData.sanctioned_posts || 0,
-          working_posts: formData.working_posts || 0,
-          present_teachers: formData.present_teachers || 0,
-          class_enrollment_data: formData.class_enrollment_data || {},
-          math_teachers_count: formData.math_teachers_count || 0,
-          khan_registered_teachers: formData.khan_registered_teachers || 0,
-          khan_registered_students: formData.khan_registered_students || 0,
-          khan_active_students: formData.khan_active_students || 0,
-          khan_usage_method: formData.khan_usage_method || '',
-          sqdp_prepared: formData.sqdp_prepared || '',
-          sqdp_objectives_achieved: formData.sqdp_objectives_achieved || '',
-          nipun_bharat_verification: formData.nipun_bharat_verification || '',
-          learning_outcomes_assessment: formData.learning_outcomes_assessment || '',
-          learning_outcomes_data: formData.learning_outcomes_data || {},
-          officer_feedback: formData.officer_feedback || '',
-          innovative_initiatives: formData.innovative_initiatives || '',
-          suggested_changes: formData.suggested_changes || '',
-          srujanrang_articles: formData.srujanrang_articles || '',
-          future_articles: formData.future_articles || '',
-          ngo_involvement: formData.ngo_involvement || '',
-          materials_usage_data: formData.materials_usage_data || {},
-          inspector_name: formData.inspector_name || '',
-          inspector_designation: formData.inspector_designation || '',
-          visit_date_inspector: formData.visit_date_inspector || ''
-        });
+      if (editingInspection.form_data) {
+        setSchoolFormData(prev => ({
+          ...prev,
+          ...editingInspection.form_data
+        }));
       }
     }
   }, [editingInspection]);
@@ -287,6 +292,115 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
     setUploadedPhotos(prev => prev.filter((_, i) => i !== index));
   };
 
+  const generateInspectionNumber = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const time = String(now.getTime()).slice(-6);
+    return `SCH-${year}${month}${day}-${time}`;
+  };
+
+  const handleSubmit = async (isDraft: boolean = false) => {
+    try {
+      setIsLoading(true);
+
+      let inspectionResult;
+
+      if (editingInspection && editingInspection.id) {
+        // Convert empty strings to null for database compatibility
+        const updateInspectionData = {
+          ...inspectionData,
+          planned_date: inspectionData.planned_date || null,
+          category_id: inspectionData.category_id || schoolCategory?.id || null
+        };
+
+        // Validate required UUID fields
+        if (!updateInspectionData.category_id) {
+          throw new Error('Category is required. Please select a valid inspection category.');
+        }
+
+        // Update existing inspection
+        const { data: updateResult, error: updateError } = await supabase
+          .from('fims_inspections')
+          .update({
+            location_name: updateInspectionData.location_name,
+            latitude: updateInspectionData.latitude,
+            longitude: updateInspectionData.longitude,
+            location_accuracy: updateInspectionData.location_accuracy,
+            address: updateInspectionData.address,
+            planned_date: updateInspectionData.planned_date,
+            inspection_date: new Date().toISOString(),
+            status: isDraft ? 'draft' : 'submitted',
+            form_data: schoolFormData
+          })
+          .eq('id', editingInspection.id)
+          .select()
+          .single();
+
+        if (updateError) throw updateError;
+        inspectionResult = updateResult;
+      } else {
+        // Convert empty strings to null for database compatibility
+        const createInspectionData = {
+          ...inspectionData,
+          planned_date: inspectionData.planned_date || null,
+          category_id: inspectionData.category_id || schoolCategory?.id || null
+        };
+
+        // Validate required UUID fields
+        if (!createInspectionData.category_id) {
+          throw new Error('Category is required. Please select a valid inspection category.');
+        }
+
+        // Upsert school inspection form record with inspection_id
+        const inspectionNumber = generateInspectionNumber();
+        
+        const { data: createResult, error: createError } = await supabase
+          .from('fims_inspections')
+          .insert({
+            inspection_number: inspectionNumber,
+            category_id: createInspectionData.category_id,
+            inspector_id: user.id,
+            location_name: createInspectionData.location_name,
+            latitude: createInspectionData.latitude,
+            longitude: createInspectionData.longitude,
+            location_accuracy: createInspectionData.location_accuracy,
+            address: createInspectionData.address,
+            planned_date: createInspectionData.planned_date,
+            inspection_date: new Date().toISOString(),
+            status: isDraft ? 'draft' : 'submitted',
+            form_data: schoolFormData
+          })
+          .select()
+          .single();
+
+        if (createError) throw createError;
+        inspectionResult = createResult;
+      }
+        // Create school inspection form record with inspection_id
+      // Upload photos if any
+      if (uploadedPhotos.length > 0) {
+        await uploadPhotosToSupabase(inspectionResult.id);
+      }
+
+      const isUpdate = editingInspection && editingInspection.id;
+      const message = isDraft 
+        ? (isUpdate ? t('fims.inspectionUpdatedAsDraft') : t('fims.inspectionSavedAsDraft'))
+        : (isUpdate ? t('fims.inspectionUpdatedSuccessfully') : t('fims.inspectionSubmittedSuccessfully'));
+      
+      alert(message);
+      onInspectionCreated();
+      onBack();
+
+    } catch (error) {
+      console.error('Error saving inspection:', error);
+      alert('Error saving inspection: ' + error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const uploadPhotosToSupabase = async (inspectionId: string) => {
     if (uploadedPhotos.length === 0) return;
 
@@ -330,117 +444,6 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
     }
   };
 
-  const generateInspectionNumber = () => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const time = String(now.getTime()).slice(-6);
-    return `SCH-${year}${month}${day}-${time}`;
-  };
-
-  const handleSubmit = async (isDraft: boolean = false) => {
-    try {
-      setIsLoading(true);
-
-      // Convert empty date strings to null for database compatibility
-      const sanitizedInspectionData = {
-        ...inspectionData,
-        planned_date: inspectionData.planned_date || null
-      };
-
-      let inspectionResult;
-
-      if (editingInspection && editingInspection.id) {
-        // Update existing inspection
-        const { data: updateResult, error: updateError } = await supabase
-          .from('fims_inspections')
-          .update({
-            location_name: sanitizedInspectionData.location_name,
-            latitude: sanitizedInspectionData.latitude,
-            longitude: sanitizedInspectionData.longitude,
-            location_accuracy: sanitizedInspectionData.location_accuracy,
-            address: sanitizedInspectionData.address,
-            planned_date: sanitizedInspectionData.planned_date,
-            inspection_date: new Date().toISOString(),
-            status: isDraft ? 'draft' : 'submitted',
-            form_data: schoolFormData
-          })
-          .eq('id', editingInspection.id)
-          .select()
-          .single();
-
-        if (updateError) throw updateError;
-        inspectionResult = updateResult;
-
-        // Upsert school inspection form record
-        const { error: formError } = await supabase
-          .from('fims_school_inspection_forms')
-          .upsert({
-            inspection_id: editingInspection.id,
-            ...schoolFormData
-          });
-
-        if (formError) throw formError;
-      } else {
-        // Create new inspection
-        const inspectionNumber = generateInspectionNumber();
-
-        const { data: createResult, error: createError } = await supabase
-          .from('fims_inspections')
-          .insert({
-            inspection_number: inspectionNumber,
-            category_id: sanitizedInspectionData.category_id,
-            inspector_id: user.id,
-            location_name: sanitizedInspectionData.location_name,
-            latitude: sanitizedInspectionData.latitude,
-            longitude: sanitizedInspectionData.longitude,
-            location_accuracy: sanitizedInspectionData.location_accuracy,
-            address: sanitizedInspectionData.address,
-            planned_date: sanitizedInspectionData.planned_date,
-            inspection_date: new Date().toISOString(),
-            status: isDraft ? 'draft' : 'submitted',
-            form_data: schoolFormData
-          })
-          .select()
-          .single();
-
-        if (createError) throw createError;
-        inspectionResult = createResult;
-
-        // Create school inspection form record
-        const { error: formError } = await supabase
-          .from('fims_school_inspection_forms')
-          .insert({
-            inspection_id: inspectionResult.id,
-            ...schoolFormData
-          });
-
-        if (formError) throw formError;
-      }
-
-      // Upload photos if any
-      if (uploadedPhotos.length > 0) {
-        await uploadPhotosToSupabase(inspectionResult.id);
-      }
-
-      const isUpdate = editingInspection && editingInspection.id;
-      const message = isDraft 
-        ? (isUpdate ? t('fims.inspectionUpdatedAsDraft') : t('fims.inspectionSavedAsDraft'))
-        : (isUpdate ? t('fims.inspectionUpdatedSuccessfully') : t('fims.inspectionSubmittedSuccessfully'));
-      
-      alert(message);
-      onInspectionCreated();
-      onBack();
-
-    } catch (error) {
-      console.error('Error saving inspection:', error);
-      alert('Error saving inspection: ' + error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const renderStepIndicator = () => (
     <div className="flex items-center justify-center mb-8">
       {[1, 2, 3, 4].map((step) => (
@@ -466,13 +469,13 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
     <div className="space-y-6">
       <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
         <School className="h-5 w-5 mr-2 text-green-600" />
-        शाळेची मूलभूत माहिती (School Basic Information)
+        शाळेची मूलभूत माहिती (Basic School Information)
       </h3>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            भेटीची तारीख *
+            भेटीचा दिनांक *
           </label>
           <input
             type="date"
@@ -480,6 +483,7 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
             onChange={(e) => setSchoolFormData(prev => ({...prev, visit_date: e.target.value}))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             required
+            disabled={isViewMode}
           />
         </div>
 
@@ -494,6 +498,7 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             placeholder="शाळेचे नाव प्रविष्ट करा"
             required
+            disabled={isViewMode}
           />
         </div>
 
@@ -505,8 +510,9 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
             value={schoolFormData.school_address}
             onChange={(e) => setSchoolFormData(prev => ({...prev, school_address: e.target.value}))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            rows={3}
-            placeholder="संपूर्ण पत्ता प्रविष्ट करा"
+            rows={2}
+            placeholder="शाळेचा संपूर्ण पत्ता प्रविष्ट करा"
+            disabled={isViewMode}
           />
         </div>
 
@@ -520,25 +526,27 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
             onChange={(e) => setSchoolFormData(prev => ({...prev, principal_name: e.target.value}))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             placeholder="मुख्याध्यापकाचे नाव प्रविष्ट करा"
+            disabled={isViewMode}
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            मुख्याध्यापकाचा मोबाइल
+            मोबाईल क्रमांक
           </label>
           <input
             type="tel"
             value={schoolFormData.principal_mobile}
             onChange={(e) => setSchoolFormData(prev => ({...prev, principal_mobile: e.target.value}))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            placeholder="मोबाइल नंबर प्रविष्ट करा"
+            placeholder="मोबाईल क्रमांक प्रविष्ट करा"
+            disabled={isViewMode}
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            UDISE क्रमांक
+            शाळेचा युडायस क्रमांक
           </label>
           <input
             type="text"
@@ -546,6 +554,7 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
             onChange={(e) => setSchoolFormData(prev => ({...prev, udise_number: e.target.value}))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             placeholder="UDISE क्रमांक प्रविष्ट करा"
+            disabled={isViewMode}
           />
         </div>
 
@@ -559,6 +568,7 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
             onChange={(e) => setSchoolFormData(prev => ({...prev, center: e.target.value}))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             placeholder="केंद्र प्रविष्ट करा"
+            disabled={isViewMode}
           />
         </div>
 
@@ -572,6 +582,7 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
             onChange={(e) => setSchoolFormData(prev => ({...prev, taluka: e.target.value}))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             placeholder="तालुका प्रविष्ट करा"
+            disabled={isViewMode}
           />
         </div>
 
@@ -585,57 +596,196 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
             onChange={(e) => setSchoolFormData(prev => ({...prev, district: e.target.value}))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             placeholder="जिल्हा प्रविष्ट करा"
+            disabled={isViewMode}
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            व्यवस्थापन प्रकार
+            शाळा व्यवस्थापन प्रकार
           </label>
           <select
             value={schoolFormData.management_type}
             onChange={(e) => setSchoolFormData(prev => ({...prev, management_type: e.target.value}))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            disabled={isViewMode}
           >
-            <option value="">प्रकार निवडा</option>
+            <option value="">व्यवस्थापन प्रकार निवडा</option>
             <option value="government">सरकारी</option>
             <option value="aided">अनुदानित</option>
             <option value="private">खाजगी</option>
+            <option value="other">इतर</option>
           </select>
         </div>
+      </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            शाळेची स्वयं कामगिरी
-          </label>
-          <select
-            value={schoolFormData.school_achievement_self}
-            onChange={(e) => setSchoolFormData(prev => ({...prev, school_achievement_self: e.target.value}))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          >
-            <option value="">निवडा</option>
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
-            <option value="D">D</option>
-          </select>
+      {/* School Achievement Section */}
+      <div className="bg-gray-50 p-6 rounded-lg">
+        <h4 className="text-md font-semibold text-gray-800 mb-4">
+          शाळा सिद्धी (School Achievement)
+        </h4>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              स्वयं-मूल्यांकनानुसार श्रेणी
+            </label>
+            <select
+              value={schoolFormData.school_achievement_self}
+              onChange={(e) => setSchoolFormData(prev => ({...prev, school_achievement_self: e.target.value}))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              disabled={isViewMode}
+            >
+              <option value="">श्रेणी निवडा</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="C">C</option>
+              <option value="D">D</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              बाह्य मूल्यांकनानुसार श्रेणी
+            </label>
+            <select
+              value={schoolFormData.school_achievement_external}
+              onChange={(e) => setSchoolFormData(prev => ({...prev, school_achievement_external: e.target.value}))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              disabled={isViewMode}
+            >
+              <option value="">श्रेणी निवडा</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="C">C</option>
+              <option value="D">D</option>
+            </select>
+          </div>
         </div>
+      </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            बाह्य मूल्यांकन
-          </label>
-          <select
-            value={schoolFormData.school_achievement_external}
-            onChange={(e) => setSchoolFormData(prev => ({...prev, school_achievement_external: e.target.value}))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          >
-            <option value="">निवडा</option>
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
-            <option value="D">D</option>
-          </select>
+      {/* Teacher Information */}
+      <div className="bg-gray-50 p-6 rounded-lg">
+        <h4 className="text-md font-semibold text-gray-800 mb-4 flex items-center">
+          <Users className="h-5 w-5 mr-2 text-green-600" />
+          शाळेतील शिक्षक संख्या (Teacher Information)
+        </h4>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              मंजूर पदे
+            </label>
+            <input
+              type="number"
+              value={schoolFormData.sanctioned_posts}
+              onChange={(e) => setSchoolFormData(prev => ({...prev, sanctioned_posts: parseInt(e.target.value) || 0}))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              min="0"
+              disabled={isViewMode}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              कार्यरत पदे
+            </label>
+            <input
+              type="number"
+              value={schoolFormData.working_posts}
+              onChange={(e) => setSchoolFormData(prev => ({...prev, working_posts: parseInt(e.target.value) || 0}))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              min="0"
+              disabled={isViewMode}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              आज उपस्थित शिक्षक संख्या
+            </label>
+            <input
+              type="number"
+              value={schoolFormData.present_teachers}
+              onChange={(e) => setSchoolFormData(prev => ({...prev, present_teachers: parseInt(e.target.value) || 0}))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              min="0"
+              disabled={isViewMode}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Class-wise Enrollment and Attendance */}
+      <div className="bg-gray-50 p-6 rounded-lg">
+        <h4 className="text-md font-semibold text-gray-800 mb-4">
+          शाळेतील इयत्तानिहाय पटसंख्या आणि उपस्थिती
+        </h4>
+        
+        <div className="overflow-x-auto">
+          <table className="w-full border border-gray-300">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="border border-gray-300 px-4 py-2 text-left">वर्ग</th>
+                <th className="border border-gray-300 px-4 py-2 text-left">पटसंख्या</th>
+                <th className="border border-gray-300 px-4 py-2 text-left">उपस्थिती</th>
+              </tr>
+            </thead>
+            <tbody>
+              {['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'].map((cls) => (
+                <tr key={cls}>
+                  <td className="border border-gray-300 px-4 py-2 font-medium">{cls}</td>
+                  <td className="border border-gray-300 px-2 py-1">
+                    <input
+                      type="number"
+                      value={schoolFormData.class_enrollment[cls]?.enrollment || 0}
+                      onChange={(e) => setSchoolFormData(prev => ({
+                        ...prev,
+                        class_enrollment: {
+                          ...prev.class_enrollment,
+                          [cls]: {
+                            ...prev.class_enrollment[cls],
+                            enrollment: parseInt(e.target.value) || 0
+                          }
+                        }
+                      }))}
+                      className="w-full px-2 py-1 border border-gray-200 rounded text-sm"
+                      min="0"
+                      disabled={isViewMode}
+                    />
+                  </td>
+                  <td className="border border-gray-300 px-2 py-1">
+                    <input
+                      type="number"
+                      value={schoolFormData.class_enrollment[cls]?.attendance || 0}
+                      onChange={(e) => setSchoolFormData(prev => ({
+                        ...prev,
+                        class_enrollment: {
+                          ...prev.class_enrollment,
+                          [cls]: {
+                            ...prev.class_enrollment[cls],
+                            attendance: parseInt(e.target.value) || 0
+                          }
+                        }
+                      }))}
+                      className="w-full px-2 py-1 border border-gray-200 rounded text-sm"
+                      min="0"
+                      disabled={isViewMode}
+                    />
+                  </td>
+                </tr>
+              ))}
+              <tr className="bg-gray-50 font-semibold">
+                <td className="border border-gray-300 px-4 py-2">एकूण</td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {Object.values(schoolFormData.class_enrollment).reduce((sum, cls) => sum + (cls.enrollment || 0), 0)}
+                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {Object.values(schoolFormData.class_enrollment).reduce((sum, cls) => sum + (cls.attendance || 0), 0)}
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -643,7 +793,7 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
 
   const renderLocationDetails = () => (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-t-lg">
+      <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 rounded-t-lg">
         <h3 className="text-lg font-semibold flex items-center">
           <MapPin className="h-5 w-5 mr-2" />
           स्थान माहिती (Location Information)
@@ -653,18 +803,18 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
       <div className="bg-white p-6 rounded-b-lg border border-gray-200 space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            स्थानाचे नाव *
+            {t('fims.locationName')} *
           </label>
           <input
             type="text"
             value={inspectionData.location_name}
             onChange={(e) => setInspectionData(prev => ({...prev, location_name: e.target.value}))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            placeholder="स्थानाचे नाव प्रविष्ट करा"
+            placeholder={t('fims.enterLocationName')}
             required
+            disabled={isViewMode}
           />
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -675,6 +825,7 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
               value={inspectionData.planned_date}
               onChange={(e) => setInspectionData(prev => ({...prev, planned_date: e.target.value}))}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              disabled={isViewMode}
             />
           </div>
 
@@ -685,8 +836,8 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
             <button
               type="button"
               onClick={getCurrentLocation}
-              disabled={isLoading}
-              className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+              disabled={isLoading || isViewMode}
+              className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
             >
               <MapPin className="h-4 w-4" />
               <span>{isLoading ? 'स्थान मिळवत आहे...' : 'सध्याचे स्थान मिळवा'}</span>
@@ -705,7 +856,7 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
           </div>
         )}
 
-        <div>
+        <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             शोधलेले स्थान (Location Detected)
           </label>
@@ -714,79 +865,31 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
             onChange={(e) => setInspectionData(prev => ({...prev, address: e.target.value}))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             rows={3}
-            placeholder="संपूर्ण पत्ता प्रविष्ट करा"
+            placeholder={t('fims.enterFullAddress')}
+            disabled={isViewMode}
           />
         </div>
       </div>
     </div>
   );
 
-  const renderSchoolInspectionForm = () => (
+  const renderSchoolAssessmentForm = () => (
     <div className="space-y-8">
       <h3 className="text-lg font-semibold text-gray-900 mb-4">
-        आदर्श शाळा भेट प्रपत्र (School Visit Form)
+        शैक्षणिक मूल्यांकन प्रपत्र (Educational Assessment Form)
       </h3>
-
-      {/* Teacher Information */}
-      <div className="bg-gray-50 p-6 rounded-lg">
-        <h4 className="text-md font-semibold text-gray-800 mb-4 flex items-center">
-          <Users className="h-5 w-5 mr-2 text-green-600" />
-          शिक्षक माहिती (Teacher Information)
-        </h4>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              मंजूर पदे
-            </label>
-            <input
-              type="number"
-              value={schoolFormData.sanctioned_posts}
-              onChange={(e) => setSchoolFormData(prev => ({...prev, sanctioned_posts: parseInt(e.target.value) || 0}))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              min="0"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              कार्यरत पदे
-            </label>
-            <input
-              type="number"
-              value={schoolFormData.working_posts}
-              onChange={(e) => setSchoolFormData(prev => ({...prev, working_posts: parseInt(e.target.value) || 0}))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              min="0"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              उपस्थित शिक्षक
-            </label>
-            <input
-              type="number"
-              value={schoolFormData.present_teachers}
-              onChange={(e) => setSchoolFormData(prev => ({...prev, present_teachers: parseInt(e.target.value) || 0}))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              min="0"
-            />
-          </div>
-        </div>
-      </div>
 
       {/* Khan Academy Information */}
       <div className="bg-gray-50 p-6 rounded-lg">
         <h4 className="text-md font-semibold text-gray-800 mb-4 flex items-center">
-          <GraduationCap className="h-5 w-5 mr-2 text-green-600" />
-          Khan Academy Portal माहिती
+          <Target className="h-5 w-5 mr-2 text-green-600" />
+          SCERTM, पुणे मार्फत गणित ई-साहित्य वापराच्या अनुषंगाने खाण अकॅडमी पोर्टल बाबतची माहिती
         </h4>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              गणित शिक्षकांची संख्या
+              गणित विषय शिकविणाऱ्या शिक्षकांची संख्या (इयत्ता १ ते १०)
             </label>
             <input
               type="number"
@@ -794,12 +897,13 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
               onChange={(e) => setSchoolFormData(prev => ({...prev, math_teachers_count: parseInt(e.target.value) || 0}))}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               min="0"
+              disabled={isViewMode}
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Khan नोंदणीकृत शिक्षक
+              Khan Academy पोर्टलवर नोंदणी झालेल्या शिक्षकांची संख्या
             </label>
             <input
               type="number"
@@ -807,12 +911,13 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
               onChange={(e) => setSchoolFormData(prev => ({...prev, khan_registered_teachers: parseInt(e.target.value) || 0}))}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               min="0"
+              disabled={isViewMode}
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Khan नोंदणीकृत विद्यार्थी
+              Khan Academy पोर्टलवर नोंदणी झालेल्या विद्यार्थ्यांची संख्या
             </label>
             <input
               type="number"
@@ -820,12 +925,13 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
               onChange={(e) => setSchoolFormData(prev => ({...prev, khan_registered_students: parseInt(e.target.value) || 0}))}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               min="0"
+              disabled={isViewMode}
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Khan सक्रिय विद्यार्थी
+              Khan Academy पोर्टलवर स्वाध्याय सोडवित असलेल्या विद्यार्थ्यांची संख्या
             </label>
             <input
               type="number"
@@ -833,167 +939,316 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
               onChange={(e) => setSchoolFormData(prev => ({...prev, khan_active_students: parseInt(e.target.value) || 0}))}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               min="0"
+              disabled={isViewMode}
             />
           </div>
         </div>
 
-        <div>
+        <div className="mt-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Khan Academy वापराची पद्धत
+            १. SCERTM, पुणे मार्फत Khan Academy च्या पोर्टलवर उपलब्ध करून दिलेल्या ई साहित्याचा वापर शाळेत कशाप्रकारे केला जातो?
           </label>
           <textarea
             value={schoolFormData.khan_usage_method}
             onChange={(e) => setSchoolFormData(prev => ({...prev, khan_usage_method: e.target.value}))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            rows={3}
-            placeholder="Khan Academy वापराची पद्धत वर्णन करा"
+            rows={4}
+            placeholder="Khan Academy ई साहित्याचा वापर पद्धती वर्णन करा"
+            disabled={isViewMode}
           />
         </div>
       </div>
 
-      {/* SQDP and Nipun Bharat */}
-      <div className="bg-gray-50 p-6 rounded-lg">
-        <h4 className="text-md font-semibold text-gray-800 mb-4 flex items-center">
-          <Target className="h-5 w-5 mr-2 text-green-600" />
-          SQDP आणि निपुण भारत
-        </h4>
-        
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              SQDP तयार केले आहे का?
-            </label>
-            <textarea
-              value={schoolFormData.sqdp_prepared}
-              onChange={(e) => setSchoolFormData(prev => ({...prev, sqdp_prepared: e.target.value}))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              rows={3}
-              placeholder="SQDP तयारीबद्दल माहिती द्या"
-            />
-          </div>
+      {/* SQDP and Assessment Questions */}
+      <div className="space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            २. शैक्षणिक वर्ष २०२२-२३ मधील SQDP च्या आधारे सन २०२३-२४ साठी सुधारित SQDP तयार केला आहे का?
+          </label>
+          <textarea
+            value={schoolFormData.sqdp_prepared}
+            onChange={(e) => setSchoolFormData(prev => ({...prev, sqdp_prepared: e.target.value}))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            rows={3}
+            placeholder="SQDP तयारी बाबत तपशील द्यावा"
+            disabled={isViewMode}
+          />
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              SQDP उद्दिष्टे साध्य झाली आहेत का?
-            </label>
-            <textarea
-              value={schoolFormData.sqdp_objectives_achieved}
-              onChange={(e) => setSchoolFormData(prev => ({...prev, sqdp_objectives_achieved: e.target.value}))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              rows={3}
-              placeholder="SQDP उद्दिष्टांबद्दल माहिती द्या"
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            ३. २०२२-२३ मधील शाळा गुणवत्ता विकास आराखड्यानुसार (SQDP) ठरविलेली उद्दिष्टे पूर्ण झाली आहेत काय? नसल्यास कारणे द्यावी.
+          </label>
+          <textarea
+            value={schoolFormData.sqdp_objectives_achieved}
+            onChange={(e) => setSchoolFormData(prev => ({...prev, sqdp_objectives_achieved: e.target.value}))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            rows={4}
+            placeholder="SQDP उद्दिष्टे पूर्णता बाबत तपशील द्यावा"
+            disabled={isViewMode}
+          />
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              निपुण भारत लक्ष्य सत्यापन
-            </label>
-            <textarea
-              value={schoolFormData.nipun_bharat_verification}
-              onChange={(e) => setSchoolFormData(prev => ({...prev, nipun_bharat_verification: e.target.value}))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              rows={3}
-              placeholder="निपुण भारत लक्ष्य सत्यापन माहिती द्या"
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            ४. शाळेमध्ये निपुण भारत लक्ष्य पडताळणी प्रपत्र (भाषा व गणित) नुसार पडताळणी झाली का? असल्यास प्रपत्र सोबत जोडावे, नसल्यास शाळेने पडताळणी करून अहवाल प्रपत्र तपासणी अधिकाऱ्याकडे दोन दिवसात सादर करावा.
+          </label>
+          <textarea
+            value={schoolFormData.nipun_bharat_verification}
+            onChange={(e) => setSchoolFormData(prev => ({...prev, nipun_bharat_verification: e.target.value}))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            rows={3}
+            placeholder="निपुण भारत पडताळणी बाबत तपशील द्यावा"
+            disabled={isViewMode}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            ५. सध्या शिकवत असलेल्या इयत्तावार व विषयवार घटकानुसार किती विद्यार्थ्यामध्ये अध्ययन निष्पती दिसून येते (न्यादर्श पद्धतीने कोणत्याही एका वर्गाची, सर्व विषयाची अध्ययन निष्पती तपासावी)
+          </label>
+          <textarea
+            value={schoolFormData.learning_outcomes_assessment}
+            onChange={(e) => setSchoolFormData(prev => ({...prev, learning_outcomes_assessment: e.target.value}))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            rows={4}
+            placeholder="अध्ययन निष्पती मूल्यांकन तपशील द्यावा"
+            disabled={isViewMode}
+          />
         </div>
       </div>
 
-      {/* Officer Feedback */}
+      {/* Subject-wise Learning Outcomes Table */}
       <div className="bg-gray-50 p-6 rounded-lg">
-        <h4 className="text-md font-semibold text-gray-800 mb-4 flex items-center">
-          <FileText className="h-5 w-5 mr-2 text-green-600" />
-          अधिकारी अभिप्राय
+        <h4 className="text-md font-semibold text-gray-800 mb-4">
+          वर्गनिहाय विषय अध्ययन निष्पती
         </h4>
         
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              अधिकारी अभिप्राय
-            </label>
-            <textarea
-              value={schoolFormData.officer_feedback}
-              onChange={(e) => setSchoolFormData(prev => ({...prev, officer_feedback: e.target.value}))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              rows={4}
-              placeholder="अधिकारी अभिप्राय प्रविष्ट करा"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              नाविन्यपूर्ण उपक्रम
-            </label>
-            <textarea
-              value={schoolFormData.innovative_initiatives}
-              onChange={(e) => setSchoolFormData(prev => ({...prev, innovative_initiatives: e.target.value}))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              rows={3}
-              placeholder="नाविन्यपूर्ण उपक्रमांबद्दल माहिती द्या"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              सुचवलेले बदल
-            </label>
-            <textarea
-              value={schoolFormData.suggested_changes}
-              onChange={(e) => setSchoolFormData(prev => ({...prev, suggested_changes: e.target.value}))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              rows={3}
-              placeholder="सुचवलेले बदल प्रविष्ट करा"
-            />
-          </div>
+        <div className="overflow-x-auto">
+          <table className="w-full border border-gray-300">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="border border-gray-300 px-2 py-2 text-left text-sm">वर्ग</th>
+                <th className="border border-gray-300 px-2 py-2 text-left text-sm">मराठी</th>
+                <th className="border border-gray-300 px-2 py-2 text-left text-sm">गणित</th>
+                <th className="border border-gray-300 px-2 py-2 text-left text-sm">इंग्रजी</th>
+                <th className="border border-gray-300 px-2 py-2 text-left text-sm">प.अ./विज्ञान</th>
+                <th className="border border-gray-300 px-2 py-2 text-left text-sm">इतिहास</th>
+                <th className="border border-gray-300 px-2 py-2 text-left text-sm">भूगोल</th>
+                <th className="border border-gray-300 px-2 py-2 text-left text-sm">हिंदी</th>
+                <th className="border border-gray-300 px-2 py-2 text-left text-sm">शा.शि.</th>
+                <th className="border border-gray-300 px-2 py-2 text-left text-sm">कार्यनुभव</th>
+              </tr>
+            </thead>
+            <tbody>
+              {['1', '2', '3', '4', '5', '6', '7', '8'].map((cls) => (
+                <tr key={cls}>
+                  <td className="border border-gray-300 px-2 py-1 font-medium text-sm">{cls}</td>
+                  {['मराठी', 'गणित', 'इंग्रजी', 'प.अ./विज्ञान', 'इतिहास', 'भूगोल', 'हिंदी', 'शा.शि.', 'कार्यनुभव'].map((subject) => (
+                    <td key={subject} className="border border-gray-300 px-1 py-1">
+                      <input
+                        type="number"
+                        value={schoolFormData.subject_learning_outcomes[cls]?.[subject] || 0}
+                        onChange={(e) => setSchoolFormData(prev => ({
+                          ...prev,
+                          subject_learning_outcomes: {
+                            ...prev.subject_learning_outcomes,
+                            [cls]: {
+                              ...prev.subject_learning_outcomes[cls],
+                              [subject]: parseInt(e.target.value) || 0
+                            }
+                          }
+                        }))}
+                        className="w-full px-1 py-1 border border-gray-200 rounded text-xs"
+                        min="0"
+                        disabled={isViewMode}
+                      />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+              <tr className="bg-gray-50 font-semibold">
+                <td className="border border-gray-300 px-2 py-1 text-sm">एकूण</td>
+                {['मराठी', 'गणित', 'इंग्रजी', 'प.अ./विज्ञान', 'इतिहास', 'भूगोल', 'हिंदी', 'शा.शि.', 'कार्यनुभव'].map((subject) => (
+                  <td key={subject} className="border border-gray-300 px-2 py-1 text-sm">
+                    {Object.keys(schoolFormData.subject_learning_outcomes).reduce((sum, cls) => 
+                      sum + (schoolFormData.subject_learning_outcomes[cls]?.[subject] || 0), 0
+                    )}
+                  </td>
+                ))}
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
-      {/* Inspector Information */}
+      {/* Additional Questions */}
+      <div className="space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            ६. शाळा भेट देणाऱ्या अधिकाऱ्यांनी सध्या शिकवत असलेल्या इयत्तावार व विषयवार घटकानुसार अध्ययन निष्पती तपासल्या नंतर विद्यार्थ्यांच्या संपादणुकीबाबत / विद्यार्थी प्रगती बाबत अभिप्राय द्यावा.
+          </label>
+          <textarea
+            value={schoolFormData.officer_feedback}
+            onChange={(e) => setSchoolFormData(prev => ({...prev, officer_feedback: e.target.value}))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            rows={4}
+            placeholder="अधिकाऱ्यांचे अभिप्राय द्यावा"
+            disabled={isViewMode}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            ७. विद्यार्थ्यामध्ये शैक्षणिक गुणवत्ता निर्माण होण्याकरीता शाळेमध्ये नाविन्यपूर्ण उपक्रम राबविले आहेत का? असल्यास कोणते?
+          </label>
+          <textarea
+            value={schoolFormData.innovative_initiatives}
+            onChange={(e) => setSchoolFormData(prev => ({...prev, innovative_initiatives: e.target.value}))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            rows={4}
+            placeholder="नाविन्यपूर्ण उपक्रमांचे तपशील द्यावा"
+            disabled={isViewMode}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            ८. विद्यार्थ्यामध्ये शैक्षणिक गुणवत्ता निर्माण होण्याकरिता व सदर शाळा तालुक्यातील इतर शाळांना मार्गदर्शक व्हावी यासाठी भेट देणाऱ्या अधिकाऱ्यांच्या मते शाळेत कोणत्या बदलाची आवश्यकता आहे?
+          </label>
+          <textarea
+            value={schoolFormData.suggested_changes}
+            onChange={(e) => setSchoolFormData(prev => ({...prev, suggested_changes: e.target.value}))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            rows={4}
+            placeholder="सुधारणेसाठी सूचना द्यावा"
+            disabled={isViewMode}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            ९. सृजनरंग या ई अंकामध्ये शाळेद्वारा लेख तसेच यशोगाथा पाठविले आहे का? असल्यास सृजनरंग या ई अंकामध्ये प्रसिद्ध झाला आहे का
+          </label>
+          <textarea
+            value={schoolFormData.srujanrang_articles}
+            onChange={(e) => setSchoolFormData(prev => ({...prev, srujanrang_articles: e.target.value}))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            rows={3}
+            placeholder="सृजनरंग लेख बाबत तपशील द्यावा"
+            disabled={isViewMode}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            १०. सृजनरंग या पुढील ई अंकांसाठी लेख पाठवले आहेत का?
+          </label>
+          <textarea
+            value={schoolFormData.future_articles}
+            onChange={(e) => setSchoolFormData(prev => ({...prev, future_articles: e.target.value}))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            rows={3}
+            placeholder="भविष्यातील लेख बाबत तपशील द्यावा"
+            disabled={isViewMode}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            ११. शाळेमध्ये काम करत असलेल्या स्वयंसेवी संस्था कार्यरत आहेत? असल्यास कोणत्या विषयाच्या अनुषंगाने काम करत आहेत.
+          </label>
+          <textarea
+            value={schoolFormData.ngo_involvement}
+            onChange={(e) => setSchoolFormData(prev => ({...prev, ngo_involvement: e.target.value}))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            rows={3}
+            placeholder="स्वयंसेवी संस्था बाबत तपशील द्यावा"
+            disabled={isViewMode}
+          />
+        </div>
+      </div>
+
+      {/* Materials and Technology Usage Table */}
       <div className="bg-gray-50 p-6 rounded-lg">
-        <h4 className="text-md font-semibold text-gray-800 mb-4 flex items-center">
-          <User className="h-5 w-5 mr-2 text-green-600" />
-          निरीक्षक माहिती
+        <h4 className="text-md font-semibold text-gray-800 mb-4">
+          शाळेतील साहित्याचा / तंत्रज्ञानाचा अध्ययन-अध्यापनात वापर
         </h4>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              निरीक्षकाचे नाव
-            </label>
-            <input
-              type="text"
-              value={schoolFormData.inspector_name}
-              onChange={(e) => setSchoolFormData(prev => ({...prev, inspector_name: e.target.value}))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              placeholder="निरीक्षकाचे नाव प्रविष्ट करा"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              पदनाम
-            </label>
-            <input
-              type="text"
-              value={schoolFormData.inspector_designation}
-              onChange={(e) => setSchoolFormData(prev => ({...prev, inspector_designation: e.target.value}))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              placeholder="पदनाम प्रविष्ट करा"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              भेटीची तारीख
-            </label>
-            <input
-              type="date"
-              value={schoolFormData.visit_date_inspector}
-              onChange={(e) => setSchoolFormData(prev => ({...prev, visit_date_inspector: e.target.value}))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            />
-          </div>
+        <div className="overflow-x-auto">
+          <table className="w-full border border-gray-300">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="border border-gray-300 px-2 py-2 text-left text-sm">अ.क्र.</th>
+                <th className="border border-gray-300 px-2 py-2 text-left text-sm">तपशील</th>
+                <th className="border border-gray-300 px-2 py-2 text-left text-sm">उपलब्ध आहे का?</th>
+                <th className="border border-gray-300 px-2 py-2 text-left text-sm">अध्ययन-अध्यापन प्रक्रियेत वापराची सद्यस्थिती</th>
+                <th className="border border-gray-300 px-2 py-2 text-left text-sm">सुधारणात्मक सूचना</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.keys(schoolFormData.materials_usage).map((material, idx) => (
+                <tr key={material}>
+                  <td className="border border-gray-300 px-2 py-1 text-sm">{idx + 1}</td>
+                  <td className="border border-gray-300 px-2 py-1 text-sm">{material}</td>
+                  <td className="border border-gray-300 px-1 py-1">
+                    <input
+                      type="checkbox"
+                      checked={schoolFormData.materials_usage[material]?.available || false}
+                      onChange={(e) => setSchoolFormData(prev => ({
+                        ...prev,
+                        materials_usage: {
+                          ...prev.materials_usage,
+                          [material]: {
+                            ...prev.materials_usage[material],
+                            available: e.target.checked
+                          }
+                        }
+                      }))}
+                      className="w-4 h-4"
+                      disabled={isViewMode}
+                    />
+                  </td>
+                  <td className="border border-gray-300 px-1 py-1">
+                    <textarea
+                      value={schoolFormData.materials_usage[material]?.usage_status || ''}
+                      onChange={(e) => setSchoolFormData(prev => ({
+                        ...prev,
+                        materials_usage: {
+                          ...prev.materials_usage,
+                          [material]: {
+                            ...prev.materials_usage[material],
+                            usage_status: e.target.value
+                          }
+                        }
+                      }))}
+                      className="w-full px-1 py-1 border border-gray-200 rounded text-xs"
+                      rows={2}
+                      disabled={isViewMode}
+                    />
+                  </td>
+                  <td className="border border-gray-300 px-1 py-1">
+                    <textarea
+                      value={schoolFormData.materials_usage[material]?.suggestions || ''}
+                      onChange={(e) => setSchoolFormData(prev => ({
+                        ...prev,
+                        materials_usage: {
+                          ...prev.materials_usage,
+                          [material]: {
+                            ...prev.materials_usage[material],
+                            suggestions: e.target.value
+                          }
+                        }
+                      }))}
+                      className="w-full px-1 py-1 border border-gray-200 rounded text-xs"
+                      rows={2}
+                      disabled={isViewMode}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -1005,35 +1260,37 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
         {t('fims.photoDocumentation')}
       </h3>
       
-      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-        <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-        <h4 className="text-lg font-medium text-gray-900 mb-2">
-          Upload School Photos
-        </h4>
-        <p className="text-gray-600 mb-4">
-          Upload photos of the school for documentation and record keeping
-        </p>
-        
-        <input
-          type="file"
-          multiple
-          accept="image/*"
-          onChange={handlePhotoUpload}
-          className="hidden"
-          id="photo-upload"
-        />
-        <label
-          htmlFor="photo-upload"
-          className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg cursor-pointer transition-colors duration-200"
-        >
-          <Camera className="h-4 w-4 mr-2" />
-          {t('fims.chooseFiles')}
-        </label>
-        
-        <p className="text-xs text-gray-500 mt-2">
-          Maximum 5 photos allowed
-        </p>
-      </div>
+      {!isViewMode && (
+        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+          <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h4 className="text-lg font-medium text-gray-900 mb-2">
+            Upload School Photos
+          </h4>
+          <p className="text-gray-600 mb-4">
+            Upload photos of the school for documentation and record keeping
+          </p>
+          
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            onChange={handlePhotoUpload}
+            className="hidden"
+            id="photo-upload"
+          />
+          <label
+            htmlFor="photo-upload"
+            className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg cursor-pointer transition-colors duration-200"
+          >
+            <Camera className="h-4 w-4 mr-2" />
+            {t('fims.chooseFiles')}
+          </label>
+          
+          <p className="text-xs text-gray-500 mt-2">
+            Maximum 5 photos allowed
+          </p>
+        </div>
+      )}
 
       {uploadedPhotos.length > 0 && (
         <div>
@@ -1107,6 +1364,57 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
           <p className="text-gray-600">{t('fims.uploadingPhotos')}</p>
         </div>
       )}
+
+      {/* Inspector Information */}
+      <div className="bg-gray-50 p-6 rounded-lg">
+        <h4 className="text-md font-semibold text-gray-800 mb-4 flex items-center">
+          <Award className="h-5 w-5 mr-2 text-green-600" />
+          निरीक्षण अधिकारी माहिती (Inspector Information)
+        </h4>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              निरीक्षण अधिकाऱ्याचे नाव
+            </label>
+            <input
+              type="text"
+              value={schoolFormData.inspector_name}
+              onChange={(e) => setSchoolFormData(prev => ({...prev, inspector_name: e.target.value}))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              placeholder="अधिकाऱ्याचे नाव प्रविष्ट करा"
+              disabled={isViewMode}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              पदनाम
+            </label>
+            <input
+              type="text"
+              value={schoolFormData.inspector_designation}
+              onChange={(e) => setSchoolFormData(prev => ({...prev, inspector_designation: e.target.value}))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              placeholder="पदनाम प्रविष्ट करा"
+              disabled={isViewMode}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              भेटीचा दिनांक
+            </label>
+            <input
+              type="date"
+              value={schoolFormData.visit_date_inspector}
+              onChange={(e) => setSchoolFormData(prev => ({...prev, visit_date_inspector: e.target.value}))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              disabled={isViewMode}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 
@@ -1117,7 +1425,7 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
       case 2:
         return renderLocationDetails();
       case 3:
-        return renderSchoolInspectionForm();
+        return renderSchoolAssessmentForm();
       case 4:
         return renderPhotoUpload();
       default:
@@ -1132,7 +1440,7 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
       case 2:
         return inspectionData.location_name;
       case 3:
-        return true; // Form is optional, can proceed
+        return true; // Assessment form is optional, can proceed
       case 4:
         return true; // Photos are optional
       default:
@@ -1142,7 +1450,7 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 mb-4 md:mb-6">
           {editingInspection?.mode === 'view' && (
@@ -1161,11 +1469,14 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
               <ArrowLeft className="h-5 w-5" />
               <span>Back</span>
             </button>
-            <h1 className="text-lg md:text-2xl font-bold text-gray-900 text-center">
-              {editingInspection?.mode === 'view' ? t('fims.viewInspection') : 
-               editingInspection?.mode === 'edit' ? t('fims.editInspection') : 
-               t('fims.newInspection')} - आदर्श शाळा भेट प्रपत्र
-            </h1>
+            <div className="text-center">
+              <h1 className="text-lg md:text-2xl font-bold text-gray-900 mb-2">
+                राज्य शैक्षणिक संशोधन व प्रशिक्षण परिषद, महाराष्ट्र, पुणे
+              </h1>
+              <h2 className="text-md md:text-lg font-semibold text-gray-700">
+                आदर्श शाळा भेट प्रपत्र
+              </h2>
+            </div>
             <div className="w-20"></div>
           </div>
 
@@ -1179,7 +1490,7 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
               {t('fims.locationDetails')}
             </div>
             <div className={`${currentStep === 3 ? 'text-green-600 font-medium' : 'text-gray-500'}`}>
-              शाळा तपासणी
+              शैक्षणिक मूल्यांकन
             </div>
             <div className={`${currentStep === 4 ? 'text-green-600 font-medium' : 'text-gray-500'}`}>
               {t('fims.photosSubmit')}
