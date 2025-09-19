@@ -26,7 +26,6 @@ import { supabase } from '../lib/supabase';
 import { AnganwadiTapasaniForm } from './AnganwadiTapasaniForm';
 import { FIMSOfficeInspection } from './FIMSOfficeInspection';
 import { RajyaShaishanikPrashikshanForm } from './RajyaShaishanikPrashikshanForm';
-import { BandhakamVibhag1Form} from './BandhakamVibhag1Form';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface FIMSNewInspectionProps {
@@ -121,17 +120,7 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
         />
       );
     }
-    if (selectedInspectionType === 'bandhakamvibhag1') {
-      return (
-        <BandhakamVibhag1Form
-          user={user}
-          onBack={handleBackToSelection}
-          categories={categories}
-          onInspectionCreated={onInspectionCreated}
-          editingInspection={editingInspection}
-        />
-      );
-    }
+    
 
     return null;
   };
