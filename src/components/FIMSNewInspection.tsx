@@ -278,7 +278,7 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
 
           {/* bandhakamvibhag1 */}
           <div 
-            onClick={() => handleInspectionTypeSelect('BandahkamVibhag1')}
+            onClick={() => handleInspectionTypeSelect('bandahkamvibhag1')}
             className="bg-gradient-to-br from-green-100 via-green-50 to-emerald-50 rounded-lg shadow-lg border-2 border-green-200 p-4 md:p-6 hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer hover:border-green-400 touch-manipulation hover:from-green-200 hover:via-green-100 hover:to-emerald-100"
           >
             <div className="flex items-center space-x-4 mb-4">
