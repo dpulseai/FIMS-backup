@@ -27,6 +27,7 @@ import { AnganwadiTapasaniForm } from './AnganwadiTapasaniForm';
 import { FIMSOfficeInspection } from './FIMSOfficeInspection';
 import { RajyaShaishanikPrashikshanForm } from './RajyaShaishanikPrashikshanForm';
 import { BandhkamVibhag1Form } from './BandhkamVibhag1Form';
+import { BandhkamVibhag2Form } from './BandhkamVibhag2Form';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface FIMSNewInspectionProps {
@@ -113,6 +114,18 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
     if (selectedInspectionType === 'bandhkam_vibhag1') {
       return (
         <BandhkamVibhag1Form
+          user={user}
+          onBack={handleBackToSelection}
+          categories={categories}
+          onInspectionCreated={onInspectionCreated}
+          editingInspection={editingInspection}
+        />
+      );
+    }
+
+    if (selectedInspectionType === 'bandhkam_vibhag2') {
+      return (
+        <BandhkamVibhag2Form
           user={user}
           onBack={handleBackToSelection}
           categories={categories}
@@ -284,7 +297,7 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
           {/* Placeholder cards for the remaining 12 forms */}
           {[
             { key: 'bandhkam_vibhag1', title: 'बांधकाम विभाग प्रपत्र-1', subtitle: 'Construction Department Form-1', color: 'orange', active: true },
-            { key: 'form_5', title: 'Form 5 Title', subtitle: 'Form 5 Description', color: 'indigo' },
+            { key: 'bandhkam_vibhag2', title: 'बांधकाम विभाग प्रपत्र-2', subtitle: 'Construction Department Form-2', color: 'teal', active: true },
             { key: 'form_6', title: 'Form 6 Title', subtitle: 'Form 6 Description', color: 'pink' },
             { key: 'form_7', title: 'Form 7 Title', subtitle: 'Form 7 Description', color: 'teal' },
             { key: 'form_8', title: 'Form 8 Title', subtitle: 'Form 8 Description', color: 'red' },
@@ -322,6 +335,13 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
                     <p>• कारनामा व ठेकेदार माहिती</p>
                     <p>• कामाची सद्यस्थिती व प्रगती</p>
                     <p>• देयक व मोजमाप तपशील</p>
+                  </>
+                ) : form.key === 'bandhkam_vibhag2' ? (
+                  <>
+                    <p>• तपासणी दिनांक व उपस्थित अधिकारी</p>
+                    <p>• कामाची सद्यस्थिती व दर्जा</p>
+                    <p>• दोषदायित्व कालावधी</p>
+                    <p>• तपासणी अहवाल</p>
                   </>
                 ) : (
                   <>
