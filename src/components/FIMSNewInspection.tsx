@@ -26,7 +26,7 @@ import { supabase } from '../lib/supabase';
 import { AnganwadiTapasaniForm } from './AnganwadiTapasaniForm';
 import { FIMSOfficeInspection } from './FIMSOfficeInspection';
 import { RajyaShaishanikPrashikshanForm } from './RajyaShaishanikPrashikshanForm';
-import { BandhakamVibhag1Form} from './BandhakamVibhag1';
+import { BandhakamVibhag1Form} from './BandhakamVibhag1Form';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface FIMSNewInspectionProps {
@@ -121,9 +121,9 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
         />
       );
     }
-    if (selectedInspectionType === 'BandhakamVibhag1') {
+    if (selectedInspectionType === 'bandhakamvibhag1') {
       return (
-        <BandhakamVibhag1
+        <BandhakamVibhag1Form
           user={user}
           onBack={handleBackToSelection}
           categories={categories}
