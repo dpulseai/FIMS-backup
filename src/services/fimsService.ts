@@ -407,3 +407,66 @@ export const fetchInspectors = async () => {
     return [];
   }
 };
+
+export const createBandhkamVibhag1Form = async (formData: any): Promise<any> => {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error('Supabase client not initialized');
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('bandhakam_vibhag1')
+      .insert(formData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error creating bandhkam vibhag1 form:', error);
+    throw error;
+  }
+};
+
+export const updateBandhkamVibhag1Form = async (inspectionId: string, formData: any): Promise<any> => {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error('Supabase client not initialized');
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('bandhakam_vibhag1')
+      .upsert({
+        inspection_id: inspectionId,
+        ...formData
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error updating bandhkam vibhag1 form:', error);
+    throw error;
+  }
+};
+
+export const getBandhkamVibhag1Form = async (inspectionId: string): Promise<any> => {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error('Supabase client not initialized');
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('bandhakam_vibhag1')
+      .select('*')
+      .eq('inspection_id', inspectionId)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
+  } catch (error) {
+    console.error('Error fetching bandhkam vibhag1 form:', error);
+    throw error;
+  }
+};

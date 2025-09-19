@@ -296,6 +296,28 @@ export const BandhkamVibhag1Form: React.FC<BandhkamVibhag1FormProps> = ({
 
         if (updateError) throw updateError;
         inspectionResult = updateResult;
+
+        // Upsert bandhakam_vibhag1 form record
+        const { error: formError } = await supabase
+          .from('bandhakam_vibhag1')
+          .upsert({
+            inspection_id: editingInspection.id,
+            work_name: bandhkamFormData.work_name,
+            budget_head: bandhkamFormData.account_head,
+            admin_approval_details: `${bandhkamFormData.admin_approval_number} | ${bandhkamFormData.admin_approval_date} | ${bandhkamFormData.admin_approval_amount}`,
+            technical_approval_details: `${bandhkamFormData.technical_approval_number} | ${bandhkamFormData.technical_approval_date}`,
+            road_length_building_area: bandhkamFormData.road_length_building_area,
+            karnama_details: `${bandhkamFormData.contract_number} | ${bandhkamFormData.contract_amount} | ${bandhkamFormData.contract_percentage}`,
+            contractor_name: bandhkamFormData.contractor_name,
+            work_order_details: `${bandhkamFormData.work_start_order_number} | ${bandhkamFormData.work_start_date} | ${bandhkamFormData.work_duration_from} - ${bandhkamFormData.work_duration_to}`,
+            extension_details: `${bandhkamFormData.extension_details} | Reasons: ${bandhkamFormData.extension_reasons}`,
+            estimate_scope: bandhkamFormData.approved_estimate_scope,
+            current_work_status: bandhkamFormData.current_work_status,
+            measurement_book_details: bandhkamFormData.measurement_book_page,
+            payment_status: bandhkamFormData.payment_status
+          });
+
+        if (formError) throw formError;
       } else {
         // Create new inspection
         const inspectionNumber = generateInspectionNumber();
@@ -321,6 +343,28 @@ export const BandhkamVibhag1Form: React.FC<BandhkamVibhag1FormProps> = ({
 
         if (createError) throw createError;
         inspectionResult = createResult;
+
+        // Create bandhakam_vibhag1 form record
+        const { error: formError } = await supabase
+          .from('bandhakam_vibhag1')
+          .insert({
+            inspection_id: inspectionResult.id,
+            work_name: bandhkamFormData.work_name,
+            budget_head: bandhkamFormData.account_head,
+            admin_approval_details: `${bandhkamFormData.admin_approval_number} | ${bandhkamFormData.admin_approval_date} | ${bandhkamFormData.admin_approval_amount}`,
+            technical_approval_details: `${bandhkamFormData.technical_approval_number} | ${bandhkamFormData.technical_approval_date}`,
+            road_length_building_area: bandhkamFormData.road_length_building_area,
+            karnama_details: `${bandhkamFormData.contract_number} | ${bandhkamFormData.contract_amount} | ${bandhkamFormData.contract_percentage}`,
+            contractor_name: bandhkamFormData.contractor_name,
+            work_order_details: `${bandhkamFormData.work_start_order_number} | ${bandhkamFormData.work_start_date} | ${bandhkamFormData.work_duration_from} - ${bandhkamFormData.work_duration_to}`,
+            extension_details: `${bandhkamFormData.extension_details} | Reasons: ${bandhkamFormData.extension_reasons}`,
+            estimate_scope: bandhkamFormData.approved_estimate_scope,
+            current_work_status: bandhkamFormData.current_work_status,
+            measurement_book_details: bandhkamFormData.measurement_book_page,
+            payment_status: bandhkamFormData.payment_status
+          });
+
+        if (formError) throw formError;
       }
 
       // Upload photos if any
