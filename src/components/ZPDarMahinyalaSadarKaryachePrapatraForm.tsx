@@ -302,6 +302,65 @@ export const ZPDarMahinyalaSadarKaryachePrapatraForm: React.FC<ZPDarMahinyalaFor
 
         if (updateError) throw updateError;
         inspectionResult = updateResult;
+
+        // Delete existing bhet_praptra records for this inspection
+        const { error: deleteError } = await supabase
+          .from('bhet_praptra')
+          .delete()
+          .eq('inspection_id', editingInspection.id);
+
+        if (deleteError) throw deleteError;
+
+        // Insert new bhet_praptra records for each row
+        const bhetPraptraRecords = [];
+        for (let i = 1; i <= 3; i++) {
+          const districtName = zpDarMahinyalaFormData[`row_${i}_district_name` as keyof ZPDarMahinyalaFormData] as string;
+          const projectName = zpDarMahinyalaFormData[`row_${i}_project_name` as keyof ZPDarMahinyalaFormData] as string;
+          
+          // Only create record if district name or project name is provided
+          if (districtName || projectName) {
+            const visitDetails = zpDarMahinyalaFormData[`row_${i}_dpo_project_visit_details` as keyof ZPDarMahinyalaFormData] as string;
+            
+            // Parse visit details to extract project visit status and total centers visited
+            let projectVisitStatus = 'नाही';
+            let totalCentersVisited = 0;
+            
+            if (visitDetails) {
+              // Try to extract "होय" or "नाही" from the text
+              if (visitDetails.toLowerCase().includes('होय')) {
+                projectVisitStatus = 'होय';
+              }
+              
+              // Try to extract numbers from the text for centers visited
+              const numberMatch = visitDetails.match(/(\d+)/);
+              if (numberMatch) {
+                totalCentersVisited = parseInt(numberMatch[1], 10);
+              }
+            }
+            
+            bhetPraptraRecords.push({
+              inspection_id: editingInspection.id,
+              row_no: i,
+              district_name: districtName || '',
+              project_name: projectName || '',
+              total_anganwadi_centers: parseInt(zpDarMahinyalaFormData[`row_${i}_total_anganwadi_centers` as keyof ZPDarMahinyalaFormData] as string) || 0,
+              total_supervisors: parseInt(zpDarMahinyalaFormData[`row_${i}_total_supervisors` as keyof ZPDarMahinyalaFormData] as string) || 0,
+              supervisors_achieved_centers_count: parseInt(zpDarMahinyalaFormData[`row_${i}_supervisor_target_achieved` as keyof ZPDarMahinyalaFormData] as string) || 0,
+              bavipra_achieved_centers_count: parseInt(zpDarMahinyalaFormData[`row_${i}_bavipraa_target_achieved` as keyof ZPDarMahinyalaFormData] as string) || 0,
+              dpo_visit_details: visitDetails || '',
+              project_visit_status: projectVisitStatus,
+              total_centers_visited: totalCentersVisited
+            });
+          }
+        }
+
+        if (bhetPraptraRecords.length > 0) {
+          const { error: bhetPraptraError } = await supabase
+            .from('bhet_praptra')
+            .insert(bhetPraptraRecords);
+
+          if (bhetPraptraError) throw bhetPraptraError;
+        }
       } else {
         // Create new inspection
         const inspectionNumber = generateInspectionNumber();
@@ -327,6 +386,57 @@ export const ZPDarMahinyalaSadarKaryachePrapatraForm: React.FC<ZPDarMahinyalaFor
 
         if (createError) throw createError;
         inspectionResult = createResult;
+
+        // Insert bhet_praptra records for each row
+        const bhetPraptraRecords = [];
+        for (let i = 1; i <= 3; i++) {
+          const districtName = zpDarMahinyalaFormData[`row_${i}_district_name` as keyof ZPDarMahinyalaFormData] as string;
+          const projectName = zpDarMahinyalaFormData[`row_${i}_project_name` as keyof ZPDarMahinyalaFormData] as string;
+          
+          // Only create record if district name or project name is provided
+          if (districtName || projectName) {
+            const visitDetails = zpDarMahinyalaFormData[`row_${i}_dpo_project_visit_details` as keyof ZPDarMahinyalaFormData] as string;
+            
+            // Parse visit details to extract project visit status and total centers visited
+            let projectVisitStatus = 'नाही';
+            let totalCentersVisited = 0;
+            
+            if (visitDetails) {
+              // Try to extract "होय" or "नाही" from the text
+              if (visitDetails.toLowerCase().includes('होय')) {
+                projectVisitStatus = 'होय';
+              }
+              
+              // Try to extract numbers from the text for centers visited
+              const numberMatch = visitDetails.match(/(\d+)/);
+              if (numberMatch) {
+                totalCentersVisited = parseInt(numberMatch[1], 10);
+              }
+            }
+            
+            bhetPraptraRecords.push({
+              inspection_id: inspectionResult.id,
+              row_no: i,
+              district_name: districtName || '',
+              project_name: projectName || '',
+              total_anganwadi_centers: parseInt(zpDarMahinyalaFormData[`row_${i}_total_anganwadi_centers` as keyof ZPDarMahinyalaFormData] as string) || 0,
+              total_supervisors: parseInt(zpDarMahinyalaFormData[`row_${i}_total_supervisors` as keyof ZPDarMahinyalaFormData] as string) || 0,
+              supervisors_achieved_centers_count: parseInt(zpDarMahinyalaFormData[`row_${i}_supervisor_target_achieved` as keyof ZPDarMahinyalaFormData] as string) || 0,
+              bavipra_achieved_centers_count: parseInt(zpDarMahinyalaFormData[`row_${i}_bavipraa_target_achieved` as keyof ZPDarMahinyalaFormData] as string) || 0,
+              dpo_visit_details: visitDetails || '',
+              project_visit_status: projectVisitStatus,
+              total_centers_visited: totalCentersVisited
+            });
+          }
+        }
+
+        if (bhetPraptraRecords.length > 0) {
+          const { error: bhetPraptraError } = await supabase
+            .from('bhet_praptra')
+            .insert(bhetPraptraRecords);
+
+          if (bhetPraptraError) throw bhetPraptraError;
+        }
       }
 
       // Upload photos if any

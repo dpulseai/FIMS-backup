@@ -533,3 +533,74 @@ export const getBandhkamVibhag2Form = async (inspectionId: string): Promise<any>
     throw error;
   }
 };
+
+export const createBhetPraptraForm = async (formData: any): Promise<any> => {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error('Supabase client not initialized');
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('bhet_praptra')
+      .insert(formData)
+      .select();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error creating bhet praptra form:', error);
+    throw error;
+  }
+};
+
+export const updateBhetPraptraForm = async (inspectionId: string, formData: any[]): Promise<any> => {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error('Supabase client not initialized');
+  }
+
+  try {
+    // Delete existing records
+    const { error: deleteError } = await supabase
+      .from('bhet_praptra')
+      .delete()
+      .eq('inspection_id', inspectionId);
+
+    if (deleteError) throw deleteError;
+
+    // Insert new records
+    if (formData.length > 0) {
+      const { data, error } = await supabase
+        .from('bhet_praptra')
+        .insert(formData)
+        .select();
+
+      if (error) throw error;
+      return data;
+    }
+
+    return [];
+  } catch (error) {
+    console.error('Error updating bhet praptra form:', error);
+    throw error;
+  }
+};
+
+export const getBhetPraptraForm = async (inspectionId: string): Promise<any[]> => {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error('Supabase client not initialized');
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('bhet_praptra')
+      .select('*')
+      .eq('inspection_id', inspectionId)
+      .order('row_no');
+
+    if (error && error.code !== 'PGRST116') throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching bhet praptra form:', error);
+    throw error;
+  }
+};
