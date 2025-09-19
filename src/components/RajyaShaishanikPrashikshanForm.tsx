@@ -237,42 +237,16 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
               principal_name: formData.principal_name || '',
               principal_mobile: formData.principal_mobile || '',
               udise_number: formData.udise_number || '',
-              center_name: formData.center_name || '',
-              taluka_name: formData.taluka_name || '',
-              district_name: formData.district_name || '',
+              center: formData.center_name || '',
+              taluka: formData.taluka_name || '',
+              district: formData.district_name || '',
               management_type: formData.management_type || '',
               school_achievement_self: formData.school_achievement_self || '',
               school_achievement_external: formData.school_achievement_external || '',
               sanctioned_posts: formData.sanctioned_posts || 0,
               working_posts: formData.working_posts || 0,
               present_teachers: formData.present_teachers || 0,
-              class_1_boys: formData.class_1_boys || 0,
-              class_1_girls: formData.class_1_girls || 0,
-              class_1_total: formData.class_1_total || 0,
-              class_2_boys: formData.class_2_boys || 0,
-              class_2_girls: formData.class_2_girls || 0,
-              class_2_total: formData.class_2_total || 0,
-              class_3_boys: formData.class_3_boys || 0,
-              class_3_girls: formData.class_3_girls || 0,
-              class_3_total: formData.class_3_total || 0,
-              class_4_boys: formData.class_4_boys || 0,
-              class_4_girls: formData.class_4_girls || 0,
-              class_4_total: formData.class_4_total || 0,
-              class_5_boys: formData.class_5_boys || 0,
-              class_5_girls: formData.class_5_girls || 0,
-              class_5_total: formData.class_5_total || 0,
-              class_6_boys: formData.class_6_boys || 0,
-              class_6_girls: formData.class_6_girls || 0,
-              class_6_total: formData.class_6_total || 0,
-              class_7_boys: formData.class_7_boys || 0,
-              class_7_girls: formData.class_7_girls || 0,
-              class_7_total: formData.class_7_total || 0,
-              class_8_boys: formData.class_8_boys || 0,
-              class_8_girls: formData.class_8_girls || 0,
-              class_8_total: formData.class_8_total || 0,
-              total_boys: formData.total_boys || 0,
-              total_girls: formData.total_girls || 0,
-              total_students: formData.total_students || 0,
+              class_enrollment: initializeClassData(),
               math_teachers_count: formData.math_teachers_count || 0,
               khan_registered_teachers: formData.khan_registered_teachers || 0,
               khan_registered_students: formData.khan_registered_students || 0,
@@ -282,64 +256,17 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
               sqdp_objectives_achieved: formData.sqdp_objectives_achieved || '',
               nipun_bharat_verification: formData.nipun_bharat_verification || '',
               learning_outcomes_assessment: formData.learning_outcomes_assessment || '',
-              marathi_class_1: formData.marathi_class_1 || '',
-              marathi_class_2: formData.marathi_class_2 || '',
-              marathi_class_3: formData.marathi_class_3 || '',
-              marathi_class_4: formData.marathi_class_4 || '',
-              marathi_class_5: formData.marathi_class_5 || '',
-              marathi_class_6: formData.marathi_class_6 || '',
-              marathi_class_7: formData.marathi_class_7 || '',
-              marathi_class_8: formData.marathi_class_8 || '',
-              english_class_1: formData.english_class_1 || '',
-              english_class_2: formData.english_class_2 || '',
-              english_class_3: formData.english_class_3 || '',
-              english_class_4: formData.english_class_4 || '',
-              english_class_5: formData.english_class_5 || '',
-              english_class_6: formData.english_class_6 || '',
-              english_class_7: formData.english_class_7 || '',
-              english_class_8: formData.english_class_8 || '',
-              math_class_1: formData.math_class_1 || '',
-              math_class_2: formData.math_class_2 || '',
-              math_class_3: formData.math_class_3 || '',
-              math_class_4: formData.math_class_4 || '',
-              math_class_5: formData.math_class_5 || '',
-              math_class_6: formData.math_class_6 || '',
-              math_class_7: formData.math_class_7 || '',
-              math_class_8: formData.math_class_8 || '',
-              science_class_1: formData.science_class_1 || '',
-              science_class_2: formData.science_class_2 || '',
-              science_class_3: formData.science_class_3 || '',
-              science_class_4: formData.science_class_4 || '',
-              science_class_5: formData.science_class_5 || '',
-              science_class_6: formData.science_class_6 || '',
-              science_class_7: formData.science_class_7 || '',
-              science_class_8: formData.science_class_8 || '',
-              social_studies_class_1: formData.social_studies_class_1 || '',
-              social_studies_class_2: formData.social_studies_class_2 || '',
-              social_studies_class_3: formData.social_studies_class_3 || '',
-              social_studies_class_4: formData.social_studies_class_4 || '',
-              social_studies_class_5: formData.social_studies_class_5 || '',
-              social_studies_class_6: formData.social_studies_class_6 || '',
-              social_studies_class_7: formData.social_studies_class_7 || '',
-              social_studies_class_8: formData.social_studies_class_8 || '',
-              textbooks_usage: formData.textbooks_usage || '',
-              workbooks_usage: formData.workbooks_usage || '',
-              library_books_usage: formData.library_books_usage || '',
-              digital_content_usage: formData.digital_content_usage || '',
-              smart_board_usage: formData.smart_board_usage || '',
-              computer_lab_usage: formData.computer_lab_usage || '',
-              science_lab_usage: formData.science_lab_usage || '',
-              sports_equipment_usage: formData.sports_equipment_usage || '',
+              subject_learning_outcomes: initializeSubjectData(),
               officer_feedback: formData.officer_feedback || '',
               innovative_initiatives: formData.innovative_initiatives || '',
               suggested_changes: formData.suggested_changes || '',
               srujanrang_articles: formData.srujanrang_articles || '',
               future_articles: formData.future_articles || '',
               ngo_involvement: formData.ngo_involvement || '',
+              materials_usage: initializeMaterialsData(),
               inspector_name: formData.inspector_name || '',
               inspector_designation: formData.inspector_designation || '',
-              visit_date_inspector: formData.visit_date_inspector || '',
-              inspection_date: formData.inspection_date || null
+              visit_date_inspector: formData.visit_date_inspector || ''
             });
           }
         } catch (error) {
@@ -356,7 +283,7 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
     if (editingInspection && editingInspection.fims_school_inspection_forms && editingInspection.fims_school_inspection_forms.length > 0) {
       const formData = editingInspection.fims_school_inspection_forms[0];
       if (formData) {
-        setFormData(prev => ({
+        setSchoolFormData(prev => ({
           ...prev,
           ...editingInspection.form_data
         }));
@@ -466,7 +393,11 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
             status: isDraft ? 'draft' : 'submitted',
             form_data: schoolFormData
           })
-          .eq('id', editingInspection.id)
+          .eq('id', editingInspection.id);
+
+        if (updateError) throw updateError;
+        inspectionResult = { id: editingInspection.id };
+
         // Upsert adarsha_shala record
         const { error: formError } = await supabase
           .from('adarsha_shala')
@@ -503,147 +434,31 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
             question10: schoolFormData.future_articles || null,
             question11: schoolFormData.ngo_involvement || null,
             class_data: JSON.stringify([
-              { class: '1', boys: schoolFormData.class_1_boys || 0, girls: schoolFormData.class_1_girls || 0, total: schoolFormData.class_1_total || 0 },
-              { class: '2', boys: schoolFormData.class_2_boys || 0, girls: schoolFormData.class_2_girls || 0, total: schoolFormData.class_2_total || 0 },
-              { class: '3', boys: schoolFormData.class_3_boys || 0, girls: schoolFormData.class_3_girls || 0, total: schoolFormData.class_3_total || 0 },
-              { class: '4', boys: schoolFormData.class_4_boys || 0, girls: schoolFormData.class_4_girls || 0, total: schoolFormData.class_4_total || 0 },
-              { class: '5', boys: schoolFormData.class_5_boys || 0, girls: schoolFormData.class_5_girls || 0, total: schoolFormData.class_5_total || 0 },
-              { class: '6', boys: schoolFormData.class_6_boys || 0, girls: schoolFormData.class_6_girls || 0, total: schoolFormData.class_6_total || 0 },
-              { class: '7', boys: schoolFormData.class_7_boys || 0, girls: schoolFormData.class_7_girls || 0, total: schoolFormData.class_7_total || 0 },
-              { class: '8', boys: schoolFormData.class_8_boys || 0, girls: schoolFormData.class_8_girls || 0, total: schoolFormData.class_8_total || 0 }
+              { class: '1', boys: 0, girls: 0, total: schoolFormData.class_enrollment['1']?.enrollment || 0 },
+              { class: '2', boys: 0, girls: 0, total: schoolFormData.class_enrollment['2']?.enrollment || 0 },
+              { class: '3', boys: 0, girls: 0, total: schoolFormData.class_enrollment['3']?.enrollment || 0 },
+              { class: '4', boys: 0, girls: 0, total: schoolFormData.class_enrollment['4']?.enrollment || 0 },
+              { class: '5', boys: 0, girls: 0, total: schoolFormData.class_enrollment['5']?.enrollment || 0 },
+              { class: '6', boys: 0, girls: 0, total: schoolFormData.class_enrollment['6']?.enrollment || 0 },
+              { class: '7', boys: 0, girls: 0, total: schoolFormData.class_enrollment['7']?.enrollment || 0 },
+              { class: '8', boys: 0, girls: 0, total: schoolFormData.class_enrollment['8']?.enrollment || 0 }
             ]),
             subject_performance: JSON.stringify([
-              { subject: 'Marathi', class_1: schoolFormData.marathi_class_1 || '', class_2: schoolFormData.marathi_class_2 || '', class_3: schoolFormData.marathi_class_3 || '', class_4: schoolFormData.marathi_class_4 || '', class_5: schoolFormData.marathi_class_5 || '', class_6: schoolFormData.marathi_class_6 || '', class_7: schoolFormData.marathi_class_7 || '', class_8: schoolFormData.marathi_class_8 || '' },
-              { subject: 'English', class_1: schoolFormData.english_class_1 || '', class_2: schoolFormData.english_class_2 || '', class_3: schoolFormData.english_class_3 || '', class_4: schoolFormData.english_class_4 || '', class_5: schoolFormData.english_class_5 || '', class_6: schoolFormData.english_class_6 || '', class_7: schoolFormData.english_class_7 || '', class_8: schoolFormData.english_class_8 || '' },
-              { subject: 'Math', class_1: schoolFormData.math_class_1 || '', class_2: schoolFormData.math_class_2 || '', class_3: schoolFormData.math_class_3 || '', class_4: schoolFormData.math_class_4 || '', class_5: schoolFormData.math_class_5 || '', class_6: schoolFormData.math_class_6 || '', class_7: schoolFormData.math_class_7 || '', class_8: schoolFormData.math_class_8 || '' },
-              { subject: 'Science', class_1: schoolFormData.science_class_1 || '', class_2: schoolFormData.science_class_2 || '', class_3: schoolFormData.science_class_3 || '', class_4: schoolFormData.science_class_4 || '', class_5: schoolFormData.science_class_5 || '', class_6: schoolFormData.science_class_6 || '', class_7: schoolFormData.science_class_7 || '', class_8: schoolFormData.science_class_8 || '' },
-              { subject: 'Social Studies', class_1: schoolFormData.social_studies_class_1 || '', class_2: schoolFormData.social_studies_class_2 || '', class_3: schoolFormData.social_studies_class_3 || '', class_4: schoolFormData.social_studies_class_4 || '', class_5: schoolFormData.social_studies_class_5 || '', class_6: schoolFormData.social_studies_class_6 || '', class_7: schoolFormData.social_studies_class_7 || '', class_8: schoolFormData.social_studies_class_8 || '' }
+              { subject: 'Marathi', class_1: schoolFormData.subject_learning_outcomes['1']?.['मराठी'] || 0, class_2: schoolFormData.subject_learning_outcomes['2']?.['मराठी'] || 0, class_3: schoolFormData.subject_learning_outcomes['3']?.['मराठी'] || 0, class_4: schoolFormData.subject_learning_outcomes['4']?.['मराठी'] || 0, class_5: schoolFormData.subject_learning_outcomes['5']?.['मराठी'] || 0, class_6: schoolFormData.subject_learning_outcomes['6']?.['मराठी'] || 0, class_7: schoolFormData.subject_learning_outcomes['7']?.['मराठी'] || 0, class_8: schoolFormData.subject_learning_outcomes['8']?.['मराठी'] || 0 },
+              { subject: 'English', class_1: schoolFormData.subject_learning_outcomes['1']?.['इंग्रजी'] || 0, class_2: schoolFormData.subject_learning_outcomes['2']?.['इंग्रजी'] || 0, class_3: schoolFormData.subject_learning_outcomes['3']?.['इंग्रजी'] || 0, class_4: schoolFormData.subject_learning_outcomes['4']?.['इंग्रजी'] || 0, class_5: schoolFormData.subject_learning_outcomes['5']?.['इंग्रजी'] || 0, class_6: schoolFormData.subject_learning_outcomes['6']?.['इंग्रजी'] || 0, class_7: schoolFormData.subject_learning_outcomes['7']?.['इंग्रजी'] || 0, class_8: schoolFormData.subject_learning_outcomes['8']?.['इंग्रजी'] || 0 },
+              { subject: 'Math', class_1: schoolFormData.subject_learning_outcomes['1']?.['गणित'] || 0, class_2: schoolFormData.subject_learning_outcomes['2']?.['गणित'] || 0, class_3: schoolFormData.subject_learning_outcomes['3']?.['गणित'] || 0, class_4: schoolFormData.subject_learning_outcomes['4']?.['गणित'] || 0, class_5: schoolFormData.subject_learning_outcomes['5']?.['गणित'] || 0, class_6: schoolFormData.subject_learning_outcomes['6']?.['गणित'] || 0, class_7: schoolFormData.subject_learning_outcomes['7']?.['गणित'] || 0, class_8: schoolFormData.subject_learning_outcomes['8']?.['गणित'] || 0 },
+              { subject: 'Science', class_1: schoolFormData.subject_learning_outcomes['1']?.['प.अ./विज्ञान'] || 0, class_2: schoolFormData.subject_learning_outcomes['2']?.['प.अ./विज्ञान'] || 0, class_3: schoolFormData.subject_learning_outcomes['3']?.['प.अ./विज्ञान'] || 0, class_4: schoolFormData.subject_learning_outcomes['4']?.['प.अ./विज्ञान'] || 0, class_5: schoolFormData.subject_learning_outcomes['5']?.['प.अ./विज्ञान'] || 0, class_6: schoolFormData.subject_learning_outcomes['6']?.['प.अ./विज्ञान'] || 0, class_7: schoolFormData.subject_learning_outcomes['7']?.['प.अ./विज्ञान'] || 0, class_8: schoolFormData.subject_learning_outcomes['8']?.['प.अ./विज्ञान'] || 0 },
+              { subject: 'Social Studies', class_1: schoolFormData.subject_learning_outcomes['1']?.['इतिहास'] || 0, class_2: schoolFormData.subject_learning_outcomes['2']?.['इतिहास'] || 0, class_3: schoolFormData.subject_learning_outcomes['3']?.['इतिहास'] || 0, class_4: schoolFormData.subject_learning_outcomes['4']?.['इतिहास'] || 0, class_5: schoolFormData.subject_learning_outcomes['5']?.['इतिहास'] || 0, class_6: schoolFormData.subject_learning_outcomes['6']?.['इतिहास'] || 0, class_7: schoolFormData.subject_learning_outcomes['7']?.['इतिहास'] || 0, class_8: schoolFormData.subject_learning_outcomes['8']?.['इतिहास'] || 0 }
             ]),
-            material_usage: JSON.stringify([
-              { material: 'Textbooks', usage: schoolFormData.textbooks_usage || '' },
-              { material: 'Workbooks', usage: schoolFormData.workbooks_usage || '' },
-              { material: 'Library Books', usage: schoolFormData.library_books_usage || '' },
-              { material: 'Digital Content', usage: schoolFormData.digital_content_usage || '' },
-              { material: 'Smart Board', usage: schoolFormData.smart_board_usage || '' },
-              { material: 'Computer Lab', usage: schoolFormData.computer_lab_usage || '' },
-              { material: 'Science Lab', usage: schoolFormData.science_lab_usage || '' },
-              { material: 'Sports Equipment', usage: schoolFormData.sports_equipment_usage || '' }
-            ])
+            material_usage: JSON.stringify(Object.keys(schoolFormData.materials_usage).map(material => ({
+              material: material,
+              available: schoolFormData.materials_usage[material].available,
+              usage: schoolFormData.materials_usage[material].usage_status,
+              suggestions: schoolFormData.materials_usage[material].suggestions
+            })))
           });
 
         if (formError) throw formError;
-          school_name: schoolFormData.school_name,
-          school_address: schoolFormData.school_address,
-          principal_name: schoolFormData.principal_name,
-          principal_mobile: schoolFormData.principal_mobile,
-          udise_number: schoolFormData.udise_number,
-          center_name: schoolFormData.center,
-          taluka_name: schoolFormData.taluka,
-          district_name: schoolFormData.district,
-          management_type: schoolFormData.management_type,
-          school_achievement_self: schoolFormData.school_achievement_self,
-          school_achievement_external: schoolFormData.school_achievement_external,
-          sanctioned_posts: schoolFormData.sanctioned_posts,
-          working_posts: schoolFormData.working_posts,
-          present_teachers: schoolFormData.present_teachers,
-          class_1_boys: schoolFormData.class_1_boys,
-          class_1_girls: schoolFormData.class_1_girls,
-          class_1_total: schoolFormData.class_1_total,
-          class_2_boys: schoolFormData.class_2_boys,
-          class_2_girls: schoolFormData.class_2_girls,
-          class_2_total: schoolFormData.class_2_total,
-          class_3_boys: schoolFormData.class_3_boys,
-          class_3_girls: schoolFormData.class_3_girls,
-          class_3_total: schoolFormData.class_3_total,
-          class_4_boys: schoolFormData.class_4_boys,
-          class_4_girls: schoolFormData.class_4_girls,
-          class_4_total: schoolFormData.class_4_total,
-          class_5_boys: schoolFormData.class_5_boys,
-          class_5_girls: schoolFormData.class_5_girls,
-          class_5_total: schoolFormData.class_5_total,
-          class_6_boys: schoolFormData.class_6_boys,
-          class_6_girls: schoolFormData.class_6_girls,
-          class_6_total: schoolFormData.class_6_total,
-          class_7_boys: schoolFormData.class_7_boys,
-          class_7_girls: schoolFormData.class_7_girls,
-          class_7_total: schoolFormData.class_7_total,
-          class_8_boys: schoolFormData.class_8_boys,
-          class_8_girls: schoolFormData.class_8_girls,
-          class_8_total: schoolFormData.class_8_total,
-          total_boys: schoolFormData.total_boys,
-          total_girls: schoolFormData.total_girls,
-          total_students: schoolFormData.total_students,
-          math_teachers_count: schoolFormData.math_teachers_count,
-          khan_registered_teachers: schoolFormData.khan_registered_teachers,
-          khan_registered_students: schoolFormData.khan_registered_students,
-          khan_active_students: schoolFormData.khan_active_students,
-          khan_usage_method: schoolFormData.khan_usage_method,
-          sqdp_prepared: schoolFormData.sqdp_prepared,
-          sqdp_objectives_achieved: schoolFormData.sqdp_objectives_achieved,
-          nipun_bharat_verification: schoolFormData.nipun_bharat_verification,
-          learning_outcomes_assessment: schoolFormData.learning_outcomes_assessment,
-          marathi_class_1: schoolFormData.marathi_class_1,
-          marathi_class_2: schoolFormData.marathi_class_2,
-          marathi_class_3: schoolFormData.marathi_class_3,
-          marathi_class_4: schoolFormData.marathi_class_4,
-          marathi_class_5: schoolFormData.marathi_class_5,
-          marathi_class_6: schoolFormData.marathi_class_6,
-          marathi_class_7: schoolFormData.marathi_class_7,
-          marathi_class_8: schoolFormData.marathi_class_8,
-          english_class_1: schoolFormData.english_class_1,
-          english_class_2: schoolFormData.english_class_2,
-          english_class_3: schoolFormData.english_class_3,
-          english_class_4: schoolFormData.english_class_4,
-          english_class_5: schoolFormData.english_class_5,
-          english_class_6: schoolFormData.english_class_6,
-          english_class_7: schoolFormData.english_class_7,
-          english_class_8: schoolFormData.english_class_8,
-          math_class_1: schoolFormData.math_class_1,
-          math_class_2: schoolFormData.math_class_2,
-          math_class_3: schoolFormData.math_class_3,
-          math_class_4: schoolFormData.math_class_4,
-          math_class_5: schoolFormData.math_class_5,
-          math_class_6: schoolFormData.math_class_6,
-          math_class_7: schoolFormData.math_class_7,
-          math_class_8: schoolFormData.math_class_8,
-          science_class_1: schoolFormData.science_class_1,
-          science_class_2: schoolFormData.science_class_2,
-          science_class_3: schoolFormData.science_class_3,
-          science_class_4: schoolFormData.science_class_4,
-          science_class_5: schoolFormData.science_class_5,
-          science_class_6: schoolFormData.science_class_6,
-          science_class_7: schoolFormData.science_class_7,
-          science_class_8: schoolFormData.science_class_8,
-          social_studies_class_1: schoolFormData.social_studies_class_1,
-          social_studies_class_2: schoolFormData.social_studies_class_2,
-          social_studies_class_3: schoolFormData.social_studies_class_3,
-          social_studies_class_4: schoolFormData.social_studies_class_4,
-          social_studies_class_5: schoolFormData.social_studies_class_5,
-          social_studies_class_6: schoolFormData.social_studies_class_6,
-          social_studies_class_7: schoolFormData.social_studies_class_7,
-          social_studies_class_8: schoolFormData.social_studies_class_8,
-          textbooks_usage: schoolFormData.textbooks_usage,
-          workbooks_usage: schoolFormData.workbooks_usage,
-          library_books_usage: schoolFormData.library_books_usage,
-          digital_content_usage: schoolFormData.digital_content_usage,
-          smart_board_usage: schoolFormData.smart_board_usage,
-          computer_lab_usage: schoolFormData.computer_lab_usage,
-          science_lab_usage: schoolFormData.science_lab_usage,
-          sports_equipment_usage: schoolFormData.sports_equipment_usage,
-          officer_feedback: schoolFormData.officer_feedback,
-          innovative_initiatives: schoolFormData.innovative_initiatives,
-          suggested_changes: schoolFormData.suggested_changes,
-          srujanrang_articles: schoolFormData.srujanrang_articles,
-          future_articles: schoolFormData.future_articles,
-          ngo_involvement: schoolFormData.ngo_involvement,
-          inspector_name: schoolFormData.inspector_name,
-          inspector_designation: schoolFormData.inspector_designation,
-          visit_date_inspector: schoolFormData.visit_date_inspector,
-          inspection_date: schoolFormData.visit_date ? new Date(schoolFormData.visit_date).toISOString().split('T')[0] : null
-        };
-
-        // Update adarsh_shala form record
-        await updateAdarshShalaForm(editingInspection.id, adarshShalaData);
       } else {
         // Convert empty strings to null for database compatibility
         const createInspectionData = {
@@ -657,7 +472,7 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
           throw new Error('Category is required. Please select a valid inspection category.');
         }
 
-        // Upsert school inspection form record with inspection_id
+        // Create new inspection
         const inspectionNumber = generateInspectionNumber();
         
         const { data: createResult, error: createError } = await supabase
@@ -670,6 +485,18 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
             latitude: createInspectionData.latitude,
             longitude: createInspectionData.longitude,
             location_accuracy: createInspectionData.location_accuracy,
+            address: createInspectionData.address,
+            planned_date: createInspectionData.planned_date,
+            inspection_date: new Date().toISOString(),
+            status: isDraft ? 'draft' : 'submitted',
+            form_data: schoolFormData
+          })
+          .select()
+          .single();
+
+        if (createError) throw createError;
+        inspectionResult = createResult;
+
         // Create adarsha_shala record
         const { error: formError } = await supabase
           .from('adarsha_shala')
@@ -706,156 +533,31 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
             question10: schoolFormData.future_articles || null,
             question11: schoolFormData.ngo_involvement || null,
             class_data: JSON.stringify([
-              { class: '1', boys: schoolFormData.class_1_boys || 0, girls: schoolFormData.class_1_girls || 0, total: schoolFormData.class_1_total || 0 },
-              { class: '2', boys: schoolFormData.class_2_boys || 0, girls: schoolFormData.class_2_girls || 0, total: schoolFormData.class_2_total || 0 },
-              { class: '3', boys: schoolFormData.class_3_boys || 0, girls: schoolFormData.class_3_girls || 0, total: schoolFormData.class_3_total || 0 },
-              { class: '4', boys: schoolFormData.class_4_boys || 0, girls: schoolFormData.class_4_girls || 0, total: schoolFormData.class_4_total || 0 },
-              { class: '5', boys: schoolFormData.class_5_boys || 0, girls: schoolFormData.class_5_girls || 0, total: schoolFormData.class_5_total || 0 },
-              { class: '6', boys: schoolFormData.class_6_boys || 0, girls: schoolFormData.class_6_girls || 0, total: schoolFormData.class_6_total || 0 },
-              { class: '7', boys: schoolFormData.class_7_boys || 0, girls: schoolFormData.class_7_girls || 0, total: schoolFormData.class_7_total || 0 },
-              { class: '8', boys: schoolFormData.class_8_boys || 0, girls: schoolFormData.class_8_girls || 0, total: schoolFormData.class_8_total || 0 }
+              { class: '1', boys: 0, girls: 0, total: schoolFormData.class_enrollment['1']?.enrollment || 0 },
+              { class: '2', boys: 0, girls: 0, total: schoolFormData.class_enrollment['2']?.enrollment || 0 },
+              { class: '3', boys: 0, girls: 0, total: schoolFormData.class_enrollment['3']?.enrollment || 0 },
+              { class: '4', boys: 0, girls: 0, total: schoolFormData.class_enrollment['4']?.enrollment || 0 },
+              { class: '5', boys: 0, girls: 0, total: schoolFormData.class_enrollment['5']?.enrollment || 0 },
+              { class: '6', boys: 0, girls: 0, total: schoolFormData.class_enrollment['6']?.enrollment || 0 },
+              { class: '7', boys: 0, girls: 0, total: schoolFormData.class_enrollment['7']?.enrollment || 0 },
+              { class: '8', boys: 0, girls: 0, total: schoolFormData.class_enrollment['8']?.enrollment || 0 }
             ]),
             subject_performance: JSON.stringify([
-              { subject: 'Marathi', class_1: schoolFormData.marathi_class_1 || '', class_2: schoolFormData.marathi_class_2 || '', class_3: schoolFormData.marathi_class_3 || '', class_4: schoolFormData.marathi_class_4 || '', class_5: schoolFormData.marathi_class_5 || '', class_6: schoolFormData.marathi_class_6 || '', class_7: schoolFormData.marathi_class_7 || '', class_8: schoolFormData.marathi_class_8 || '' },
-              { subject: 'English', class_1: schoolFormData.english_class_1 || '', class_2: schoolFormData.english_class_2 || '', class_3: schoolFormData.english_class_3 || '', class_4: schoolFormData.english_class_4 || '', class_5: schoolFormData.english_class_5 || '', class_6: schoolFormData.english_class_6 || '', class_7: schoolFormData.english_class_7 || '', class_8: schoolFormData.english_class_8 || '' },
-              { subject: 'Math', class_1: schoolFormData.math_class_1 || '', class_2: schoolFormData.math_class_2 || '', class_3: schoolFormData.math_class_3 || '', class_4: schoolFormData.math_class_4 || '', class_5: schoolFormData.math_class_5 || '', class_6: schoolFormData.math_class_6 || '', class_7: schoolFormData.math_class_7 || '', class_8: schoolFormData.math_class_8 || '' },
-              { subject: 'Science', class_1: schoolFormData.science_class_1 || '', class_2: schoolFormData.science_class_2 || '', class_3: schoolFormData.science_class_3 || '', class_4: schoolFormData.science_class_4 || '', class_5: schoolFormData.science_class_5 || '', class_6: schoolFormData.science_class_6 || '', class_7: schoolFormData.science_class_7 || '', class_8: schoolFormData.science_class_8 || '' },
-              { subject: 'Social Studies', class_1: schoolFormData.social_studies_class_1 || '', class_2: schoolFormData.social_studies_class_2 || '', class_3: schoolFormData.social_studies_class_3 || '', class_4: schoolFormData.social_studies_class_4 || '', class_5: schoolFormData.social_studies_class_5 || '', class_6: schoolFormData.social_studies_class_6 || '', class_7: schoolFormData.social_studies_class_7 || '', class_8: schoolFormData.social_studies_class_8 || '' }
+              { subject: 'Marathi', class_1: schoolFormData.subject_learning_outcomes['1']?.['मराठी'] || 0, class_2: schoolFormData.subject_learning_outcomes['2']?.['मराठी'] || 0, class_3: schoolFormData.subject_learning_outcomes['3']?.['मराठी'] || 0, class_4: schoolFormData.subject_learning_outcomes['4']?.['मराठी'] || 0, class_5: schoolFormData.subject_learning_outcomes['5']?.['मराठी'] || 0, class_6: schoolFormData.subject_learning_outcomes['6']?.['मराठी'] || 0, class_7: schoolFormData.subject_learning_outcomes['7']?.['मराठी'] || 0, class_8: schoolFormData.subject_learning_outcomes['8']?.['मराठी'] || 0 },
+              { subject: 'English', class_1: schoolFormData.subject_learning_outcomes['1']?.['इंग्रजी'] || 0, class_2: schoolFormData.subject_learning_outcomes['2']?.['इंग्रजी'] || 0, class_3: schoolFormData.subject_learning_outcomes['3']?.['इंग्रजी'] || 0, class_4: schoolFormData.subject_learning_outcomes['4']?.['इंग्रजी'] || 0, class_5: schoolFormData.subject_learning_outcomes['5']?.['इंग्रजी'] || 0, class_6: schoolFormData.subject_learning_outcomes['6']?.['इंग्रजी'] || 0, class_7: schoolFormData.subject_learning_outcomes['7']?.['इंग्रजी'] || 0, class_8: schoolFormData.subject_learning_outcomes['8']?.['इंग्रजी'] || 0 },
+              { subject: 'Math', class_1: schoolFormData.subject_learning_outcomes['1']?.['गणित'] || 0, class_2: schoolFormData.subject_learning_outcomes['2']?.['गणित'] || 0, class_3: schoolFormData.subject_learning_outcomes['3']?.['गणित'] || 0, class_4: schoolFormData.subject_learning_outcomes['4']?.['गणित'] || 0, class_5: schoolFormData.subject_learning_outcomes['5']?.['गणित'] || 0, class_6: schoolFormData.subject_learning_outcomes['6']?.['गणित'] || 0, class_7: schoolFormData.subject_learning_outcomes['7']?.['गणित'] || 0, class_8: schoolFormData.subject_learning_outcomes['8']?.['गणित'] || 0 },
+              { subject: 'Science', class_1: schoolFormData.subject_learning_outcomes['1']?.['प.अ./विज्ञान'] || 0, class_2: schoolFormData.subject_learning_outcomes['2']?.['प.अ./विज्ञान'] || 0, class_3: schoolFormData.subject_learning_outcomes['3']?.['प.अ./विज्ञान'] || 0, class_4: schoolFormData.subject_learning_outcomes['4']?.['प.अ./विज्ञान'] || 0, class_5: schoolFormData.subject_learning_outcomes['5']?.['प.अ./विज्ञान'] || 0, class_6: schoolFormData.subject_learning_outcomes['6']?.['प.अ./विज्ञान'] || 0, class_7: schoolFormData.subject_learning_outcomes['7']?.['प.अ./विज्ञान'] || 0, class_8: schoolFormData.subject_learning_outcomes['8']?.['प.अ./विज्ञान'] || 0 },
+              { subject: 'Social Studies', class_1: schoolFormData.subject_learning_outcomes['1']?.['इतिहास'] || 0, class_2: schoolFormData.subject_learning_outcomes['2']?.['इतिहास'] || 0, class_3: schoolFormData.subject_learning_outcomes['3']?.['इतिहास'] || 0, class_4: schoolFormData.subject_learning_outcomes['4']?.['इतिहास'] || 0, class_5: schoolFormData.subject_learning_outcomes['5']?.['इतिहास'] || 0, class_6: schoolFormData.subject_learning_outcomes['6']?.['इतिहास'] || 0, class_7: schoolFormData.subject_learning_outcomes['7']?.['इतिहास'] || 0, class_8: schoolFormData.subject_learning_outcomes['8']?.['इतिहास'] || 0 }
             ]),
-            material_usage: JSON.stringify([
-              { material: 'Textbooks', usage: schoolFormData.textbooks_usage || '' },
-              { material: 'Workbooks', usage: schoolFormData.workbooks_usage || '' },
-              { material: 'Library Books', usage: schoolFormData.library_books_usage || '' },
-              { material: 'Digital Content', usage: schoolFormData.digital_content_usage || '' },
-              { material: 'Smart Board', usage: schoolFormData.smart_board_usage || '' },
-              { material: 'Computer Lab', usage: schoolFormData.computer_lab_usage || '' },
-              { material: 'Science Lab', usage: schoolFormData.science_lab_usage || '' },
-              { material: 'Sports Equipment', usage: schoolFormData.sports_equipment_usage || '' }
-            ])
+            material_usage: JSON.stringify(Object.keys(schoolFormData.materials_usage).map(material => ({
+              material: material,
+              available: schoolFormData.materials_usage[material].available,
+              usage: schoolFormData.materials_usage[material].usage_status,
+              suggestions: schoolFormData.materials_usage[material].suggestions
+            })))
           });
 
         if (formError) throw formError;
-        if (createError) throw createError;
-        inspectionResult = createResult;
-
-        // Prepare adarsh_shala form data
-        const adarshShalaData = {
-          visit_date: schoolFormData.visit_date,
-          school_name: schoolFormData.school_name,
-          school_address: schoolFormData.school_address,
-          principal_name: schoolFormData.principal_name,
-          principal_mobile: schoolFormData.principal_mobile,
-          udise_number: schoolFormData.udise_number,
-          center_name: schoolFormData.center,
-          taluka_name: schoolFormData.taluka,
-          district_name: schoolFormData.district,
-          management_type: schoolFormData.management_type,
-          school_achievement_self: schoolFormData.school_achievement_self,
-          school_achievement_external: schoolFormData.school_achievement_external,
-          sanctioned_posts: schoolFormData.sanctioned_posts,
-          working_posts: schoolFormData.working_posts,
-          present_teachers: schoolFormData.present_teachers,
-          class_1_boys: schoolFormData.class_1_boys,
-          class_1_girls: schoolFormData.class_1_girls,
-          class_1_total: schoolFormData.class_1_total,
-          class_2_boys: schoolFormData.class_2_boys,
-          class_2_girls: schoolFormData.class_2_girls,
-          class_2_total: schoolFormData.class_2_total,
-          class_3_boys: schoolFormData.class_3_boys,
-          class_3_girls: schoolFormData.class_3_girls,
-          class_3_total: schoolFormData.class_3_total,
-          class_4_boys: schoolFormData.class_4_boys,
-          class_4_girls: schoolFormData.class_4_girls,
-          class_4_total: schoolFormData.class_4_total,
-          class_5_boys: schoolFormData.class_5_boys,
-          class_5_girls: schoolFormData.class_5_girls,
-          class_5_total: schoolFormData.class_5_total,
-          class_6_boys: schoolFormData.class_6_boys,
-          class_6_girls: schoolFormData.class_6_girls,
-          class_6_total: schoolFormData.class_6_total,
-          class_7_boys: schoolFormData.class_7_boys,
-          class_7_girls: schoolFormData.class_7_girls,
-          class_7_total: schoolFormData.class_7_total,
-          class_8_boys: schoolFormData.class_8_boys,
-          class_8_girls: schoolFormData.class_8_girls,
-          class_8_total: schoolFormData.class_8_total,
-          total_boys: schoolFormData.total_boys,
-          total_girls: schoolFormData.total_girls,
-          total_students: schoolFormData.total_students,
-          math_teachers_count: schoolFormData.math_teachers_count,
-          khan_registered_teachers: schoolFormData.khan_registered_teachers,
-          khan_registered_students: schoolFormData.khan_registered_students,
-          khan_active_students: schoolFormData.khan_active_students,
-          khan_usage_method: schoolFormData.khan_usage_method,
-          sqdp_prepared: schoolFormData.sqdp_prepared,
-          sqdp_objectives_achieved: schoolFormData.sqdp_objectives_achieved,
-          nipun_bharat_verification: schoolFormData.nipun_bharat_verification,
-          learning_outcomes_assessment: schoolFormData.learning_outcomes_assessment,
-          marathi_class_1: schoolFormData.marathi_class_1,
-          marathi_class_2: schoolFormData.marathi_class_2,
-          marathi_class_3: schoolFormData.marathi_class_3,
-          marathi_class_4: schoolFormData.marathi_class_4,
-          marathi_class_5: schoolFormData.marathi_class_5,
-          marathi_class_6: schoolFormData.marathi_class_6,
-          marathi_class_7: schoolFormData.marathi_class_7,
-          marathi_class_8: schoolFormData.marathi_class_8,
-          english_class_1: schoolFormData.english_class_1,
-          english_class_2: schoolFormData.english_class_2,
-          english_class_3: schoolFormData.english_class_3,
-          english_class_4: schoolFormData.english_class_4,
-          english_class_5: schoolFormData.english_class_5,
-          english_class_6: schoolFormData.english_class_6,
-          english_class_7: schoolFormData.english_class_7,
-          english_class_8: schoolFormData.english_class_8,
-          math_class_1: schoolFormData.math_class_1,
-          math_class_2: schoolFormData.math_class_2,
-          math_class_3: schoolFormData.math_class_3,
-          math_class_4: schoolFormData.math_class_4,
-          math_class_5: schoolFormData.math_class_5,
-          math_class_6: schoolFormData.math_class_6,
-          math_class_7: schoolFormData.math_class_7,
-          math_class_8: schoolFormData.math_class_8,
-          science_class_1: schoolFormData.science_class_1,
-          science_class_2: schoolFormData.science_class_2,
-          science_class_3: schoolFormData.science_class_3,
-          science_class_4: schoolFormData.science_class_4,
-          science_class_5: schoolFormData.science_class_5,
-          science_class_6: schoolFormData.science_class_6,
-          science_class_7: schoolFormData.science_class_7,
-          science_class_8: schoolFormData.science_class_8,
-          social_studies_class_1: schoolFormData.social_studies_class_1,
-          social_studies_class_2: schoolFormData.social_studies_class_2,
-          social_studies_class_3: schoolFormData.social_studies_class_3,
-          social_studies_class_4: schoolFormData.social_studies_class_4,
-          social_studies_class_5: schoolFormData.social_studies_class_5,
-          social_studies_class_6: schoolFormData.social_studies_class_6,
-          social_studies_class_7: schoolFormData.social_studies_class_7,
-          social_studies_class_8: schoolFormData.social_studies_class_8,
-          textbooks_usage: schoolFormData.textbooks_usage,
-          workbooks_usage: schoolFormData.workbooks_usage,
-          library_books_usage: schoolFormData.library_books_usage,
-          digital_content_usage: schoolFormData.digital_content_usage,
-          smart_board_usage: schoolFormData.smart_board_usage,
-          computer_lab_usage: schoolFormData.computer_lab_usage,
-          science_lab_usage: schoolFormData.science_lab_usage,
-          sports_equipment_usage: schoolFormData.sports_equipment_usage,
-          officer_feedback: schoolFormData.officer_feedback,
-          innovative_initiatives: schoolFormData.innovative_initiatives,
-          suggested_changes: schoolFormData.suggested_changes,
-          srujanrang_articles: schoolFormData.srujanrang_articles,
-          future_articles: schoolFormData.future_articles,
-          ngo_involvement: schoolFormData.ngo_involvement,
-          inspector_name: schoolFormData.inspector_name,
-          inspector_designation: schoolFormData.inspector_designation,
-          visit_date_inspector: schoolFormData.visit_date_inspector,
-          inspection_date: schoolFormData.visit_date ? new Date(schoolFormData.visit_date).toISOString().split('T')[0] : null
-        };
-
-        // Create adarsh_shala form record
-        await createAdarshShalaForm({
-          inspection_id: inspectionResult.id,
-          ...adarshShalaData
-        });
       }
 
       // Upload photos if any
