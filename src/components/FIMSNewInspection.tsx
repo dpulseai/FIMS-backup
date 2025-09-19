@@ -26,7 +26,7 @@ import { supabase } from '../lib/supabase';
 import { AnganwadiTapasaniForm } from './AnganwadiTapasaniForm';
 import { FIMSOfficeInspection } from './FIMSOfficeInspection';
 import { RajyaShaishanikPrashikshanForm } from './RajyaShaishanikPrashikshanForm';
-import { BandhakamVibhag1} from './BandhakamVibhag1';
+import { BandhakamVibhag1Form} from './BandhakamVibhag1';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface FIMSNewInspectionProps {
