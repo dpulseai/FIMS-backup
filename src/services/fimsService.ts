@@ -319,7 +319,7 @@ export const createAdarshShalaForm = async (formData: any): Promise<any> => {
 
   try {
     const { data, error } = await supabase
-      .from('adarsh_shala')
+      .from('adarsha_shala')
       .insert(formData)
       .select()
       .single();
@@ -339,7 +339,7 @@ export const updateAdarshShalaForm = async (inspectionId: string, formData: any)
 
   try {
     const { data, error } = await supabase
-      .from('adarsh_shala')
+      .from('adarsha_shala')
       .upsert({
         inspection_id: inspectionId,
         ...formData
@@ -362,7 +362,7 @@ export const getAdarshShalaForm = async (inspectionId: string): Promise<any> => 
 
   try {
     const { data, error } = await supabase
-      .from('adarsh_shala')
+      .from('adarsha_shala')
       .select('*')
       .eq('inspection_id', inspectionId)
       .single();
