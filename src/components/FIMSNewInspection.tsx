@@ -28,6 +28,7 @@ import { FIMSOfficeInspection } from './FIMSOfficeInspection';
 import { RajyaShaishanikPrashikshanForm } from './RajyaShaishanikPrashikshanForm';
 import { BandhkamVibhag1Form } from './BandhkamVibhag1Form';
 import { BandhkamVibhag2Form } from './BandhkamVibhag2Form';
+import { ZPDarMahinyalaSadarKaryachePrapatraForm } from './ZPDarMahinyalaSadarKaryachePrapatraForm';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface FIMSNewInspectionProps {
@@ -147,6 +148,17 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
       );
     }
     
+    if (selectedInspectionType === 'zp_dar_mahinyala') {
+      return (
+        <ZPDarMahinyalaSadarKaryachePrapatraForm
+          user={user}
+          onBack={handleBackToSelection}
+          categories={categories}
+          onInspectionCreated={onInspectionCreated}
+          editingInspection={editingInspection}
+        />
+      );
+    }
 
     return null;
   };
@@ -298,7 +310,7 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
           {[
             { key: 'bandhkam_vibhag1', title: 'बांधकाम विभाग प्रपत्र-1', subtitle: 'Construction Department Form-1', color: 'orange', active: true },
             { key: 'bandhkam_vibhag2', title: 'बांधकाम विभाग प्रपत्र-2', subtitle: 'Construction Department Form-2', color: 'teal', active: true },
-            { key: 'form_6', title: 'Form 6 Title', subtitle: 'Form 6 Description', color: 'pink' },
+            { key: 'zp_dar_mahinyala', title: 'दर महिन्याला सादर करावयाचे प्रपत्र', subtitle: 'ZP Monthly Report Form', color: 'indigo', active: true },
             { key: 'form_7', title: 'Form 7 Title', subtitle: 'Form 7 Description', color: 'teal' },
             { key: 'form_8', title: 'Form 8 Title', subtitle: 'Form 8 Description', color: 'red' },
             { key: 'form_9', title: 'Form 9 Title', subtitle: 'Form 9 Description', color: 'yellow' },
@@ -342,6 +354,13 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
                     <p>• कामाची सद्यस्थिती व दर्जा</p>
                     <p>• दोषदायित्व कालावधी</p>
                     <p>• तपासणी अहवाल</p>
+                  </>
+                ) : form.key === 'zp_dar_mahinyala' ? (
+                  <>
+                    <p>• जिल्हा परिषद मासिक अहवाल</p>
+                    <p>• अंगणवाडी केंद्रांची संख्या</p>
+                    <p>• पर्यवेक्षकांचे उद्दिष्ट साध्यीकरण</p>
+                    <p>• प्रकल्प भेट तपशील</p>
                   </>
                 ) : (
                   <>
