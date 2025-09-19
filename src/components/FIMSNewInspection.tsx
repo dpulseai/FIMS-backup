@@ -265,42 +265,7 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
             </div>
           </div>
 
-          {/* bandhakamvibhag1 */}
-          <div 
-            onClick={() => handleInspectionTypeSelect('bandahkamvibhag1')}
-            className="bg-gradient-to-br from-green-100 via-green-50 to-emerald-50 rounded-lg shadow-lg border-2 border-green-200 p-4 md:p-6 hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer hover:border-green-400 touch-manipulation hover:from-green-200 hover:via-green-100 hover:to-emerald-100"
-          >
-            <div className="flex items-center space-x-4 mb-4">
-              <div className="bg-gradient-to-br from-green-500 to-green-600 p-3 rounded-xl shadow-lg">
-                <School className="h-6 w-6 md:h-8 md:w-8 text-white" />
-              </div>
-              <div>
-                <h3 className="text-lg md:text-xl font-semibold text-gray-900">
-                  आदर्श शाळा भेट प्रपत्र
-                </h3>
-                <p className="text-sm md:text-base text-green-700 font-medium">
-                  राज्य शैक्षणिक संशोधन व प्रशिक्षण
-                </p>
-              </div>
-            </div>
-            
-            <div className="space-y-2 text-sm text-green-800">
-              <p>• शाळेची माहिती आणि पटसंख्या</p>
-              <p>• Khan Academy पोर्टल वापर</p>
-              <p>• SQDP आणि निपुण भारत लक्ष्य</p>
-              <p>• शैक्षणिक गुणवत्ता मूल्यांकन</p>
-            </div>
-            
-            <div className="mt-4 flex items-center justify-between">
-              <span className="text-sm font-bold text-green-700 bg-white/50 px-3 py-1 rounded-full">
-                तपासणी सुरू करण्यासाठी निवडा
-              </span>
-              <div className="bg-gradient-to-r from-green-500 to-green-600 p-2 rounded-full shadow-lg">
-                <Plus className="h-5 w-5 text-white" />
-              </div>
-            </div>
-          </div>
-          
+        
           
 
           {/* Placeholder cards for the remaining 12 forms */}
