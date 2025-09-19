@@ -26,7 +26,7 @@ import { supabase } from '../lib/supabase';
 import { AnganwadiTapasaniForm } from './AnganwadiTapasaniForm';
 import { FIMSOfficeInspection } from './FIMSOfficeInspection';
 import { RajyaShaishanikPrashikshanForm } from './RajyaShaishanikPrashikshanForm';
-import { BandhkamVibhag1} from './BandhkamVibhag1';
+import { BandhakamVibhag1} from './BandhakamVibhag1';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface FIMSNewInspectionProps {
@@ -121,9 +121,9 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
         />
       );
     }
-    if (selectedInspectionType === 'BandhkamVibhag1') {
+    if (selectedInspectionType === 'BandhakamVibhag1') {
       return (
-        <BandhkamVibhag1
+        <BandhakamVibhag1
           user={user}
           onBack={handleBackToSelection}
           categories={categories}
@@ -276,9 +276,9 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
             </div>
           </div>
 
-          {/* bandhkamvibhag1 */}
+          {/* bandhakamvibhag1 */}
           <div 
-            onClick={() => handleInspectionTypeSelect('BandhkamVibhag1')}
+            onClick={() => handleInspectionTypeSelect('BandahkamVibhag1')}
             className="bg-gradient-to-br from-green-100 via-green-50 to-emerald-50 rounded-lg shadow-lg border-2 border-green-200 p-4 md:p-6 hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer hover:border-green-400 touch-manipulation hover:from-green-200 hover:via-green-100 hover:to-emerald-100"
           >
             <div className="flex items-center space-x-4 mb-4">
@@ -316,7 +316,7 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
 
           {/* Placeholder cards for the remaining 12 forms */}
           {[
-            { key: 'form_4', title: 'BandhkamVibhag1', subtitle: 'BandhkamVibhag1', color: 'orange' },
+            { key: 'form_4', title: 'BandhakamVibhag1', subtitle: 'BandhakamVibhag1', color: 'orange' },
             { key: 'form_5', title: 'Form 5 Title', subtitle: 'Form 5 Description', color: 'indigo' },
             { key: 'form_6', title: 'Form 6 Title', subtitle: 'Form 6 Description', color: 'pink' },
             { key: 'form_7', title: 'Form 7 Title', subtitle: 'Form 7 Description', color: 'teal' },
