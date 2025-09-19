@@ -534,6 +534,69 @@ export const getBandhkamVibhag2Form = async (inspectionId: string): Promise<any>
   }
 };
 
+export const createRajyaTapasaniForm = async (formData: any): Promise<any> => {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error('Supabase client not initialized');
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('rajya_tapasani')
+      .insert(formData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error creating rajya tapasani form:', error);
+    throw error;
+  }
+};
+
+export const updateRajyaTapasaniForm = async (inspectionId: string, formData: any): Promise<any> => {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error('Supabase client not initialized');
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('rajya_tapasani')
+      .upsert({
+        inspection_id: inspectionId,
+        ...formData
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error updating rajya tapasani form:', error);
+    throw error;
+  }
+};
+
+export const getRajyaTapasaniForm = async (inspectionId: string): Promise<any> => {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error('Supabase client not initialized');
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('rajya_tapasani')
+      .select('*')
+      .eq('inspection_id', inspectionId)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
+  } catch (error) {
+    console.error('Error fetching rajya tapasani form:', error);
+    throw error;
+  }
+};
+
 export const createBhetPraptraForm = async (formData: any): Promise<any> => {
   if (!isSupabaseConfigured || !supabase) {
     throw new Error('Supabase client not initialized');

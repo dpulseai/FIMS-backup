@@ -253,6 +253,24 @@ export const RajyaGunwattaNirikshakTapasaniForm: React.FC<RajyaGunwattaNirikshak
 
         if (updateError) throw updateError;
         inspectionResult = updateResult;
+
+        // Upsert rajya_tapasani form record
+        const { error: formError } = await supabase
+          .from('rajya_tapasani')
+          .upsert({
+            inspection_id: editingInspection.id,
+            inspector_name: rajyaGunwattaFormData.state_quality_inspector_name,
+            inspection_date: rajyaGunwattaFormData.inspection_date,
+            work_name: rajyaGunwattaFormData.work_name,
+            photos: uploadedPhotos.map((photo, index) => ({
+              name: photo.name,
+              size: photo.size,
+              type: photo.type,
+              order: index + 1
+            }))
+          });
+
+        if (formError) throw formError;
       } else {
         // Create new inspection
         const inspectionNumber = generateInspectionNumber();
@@ -278,6 +296,24 @@ export const RajyaGunwattaNirikshakTapasaniForm: React.FC<RajyaGunwattaNirikshak
 
         if (createError) throw createError;
         inspectionResult = createResult;
+
+        // Create rajya_tapasani form record
+        const { error: formError } = await supabase
+          .from('rajya_tapasani')
+          .insert({
+            inspection_id: inspectionResult.id,
+            inspector_name: rajyaGunwattaFormData.state_quality_inspector_name,
+            inspection_date: rajyaGunwattaFormData.inspection_date,
+            work_name: rajyaGunwattaFormData.work_name,
+            photos: uploadedPhotos.map((photo, index) => ({
+              name: photo.name,
+              size: photo.size,
+              type: photo.type,
+              order: index + 1
+            }))
+          });
+
+        if (formError) throw formError;
       }
 
       // Upload photos if any
