@@ -26,6 +26,7 @@ import { supabase } from '../lib/supabase';
 import { AnganwadiTapasaniForm } from './AnganwadiTapasaniForm';
 import { FIMSOfficeInspection } from './FIMSOfficeInspection';
 import { RajyaShaishanikPrashikshanForm } from './RajyaShaishanikPrashikshanForm';
+import { BandhkamVibhag1Form } from './BandhkamVibhag1Form';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface FIMSNewInspectionProps {
@@ -100,6 +101,18 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
     if (selectedInspectionType === 'office') {
       return (
         <FIMSOfficeInspection
+          user={user}
+          onBack={handleBackToSelection}
+          categories={categories}
+          onInspectionCreated={onInspectionCreated}
+          editingInspection={editingInspection}
+        />
+      );
+    }
+
+    if (selectedInspectionType === 'bandhkam_vibhag1') {
+      return (
+        <BandhkamVibhag1Form
           user={user}
           onBack={handleBackToSelection}
           categories={categories}
@@ -270,7 +283,7 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
 
           {/* Placeholder cards for the remaining 12 forms */}
           {[
-            { key: 'form_4', title: 'BandhakamVibhag1', subtitle: 'BandhakamVibhag1', color: 'orange' },
+            { key: 'bandhkam_vibhag1', title: 'बांधकाम विभाग प्रपत्र-1', subtitle: 'Construction Department Form-1', color: 'orange', active: true },
             { key: 'form_5', title: 'Form 5 Title', subtitle: 'Form 5 Description', color: 'indigo' },
             { key: 'form_6', title: 'Form 6 Title', subtitle: 'Form 6 Description', color: 'pink' },
             { key: 'form_7', title: 'Form 7 Title', subtitle: 'Form 7 Description', color: 'teal' },
@@ -285,8 +298,8 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
           ].map((form, index) => (
             <div 
               key={form.key}
-              onClick={() => alert(`${form.title} - Coming Soon!`)}
-              className={`bg-gradient-to-br from-${form.color}-100 via-${form.color}-50 to-${form.color}-50 rounded-lg shadow-lg border-2 border-${form.color}-200 p-4 md:p-6 hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer hover:border-${form.color}-400 touch-manipulation opacity-75`}
+              onClick={() => form.active ? handleInspectionTypeSelect(form.key) : alert(`${form.title} - Coming Soon!`)}
+              className={`bg-gradient-to-br from-${form.color}-100 via-${form.color}-50 to-${form.color}-50 rounded-lg shadow-lg border-2 border-${form.color}-200 p-4 md:p-6 hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer hover:border-${form.color}-400 touch-manipulation ${!form.active ? 'opacity-75' : ''}`}
             >
               <div className="flex items-center space-x-4 mb-4">
                 <div className={`bg-gradient-to-br from-${form.color}-500 to-${form.color}-600 p-3 rounded-xl shadow-lg`}>
@@ -303,15 +316,26 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
               </div>
               
               <div className="space-y-2 text-sm text-gray-600">
-                <p>• Feature 1</p>
-                <p>• Feature 2</p>
-                <p>• Feature 3</p>
-                <p>• Feature 4</p>
+                {form.key === 'bandhkam_vibhag1' ? (
+                  <>
+                    <p>• प्रशासकीय व तांत्रिक मान्यता तपशील</p>
+                    <p>• कारनामा व ठेकेदार माहिती</p>
+                    <p>• कामाची सद्यस्थिती व प्रगती</p>
+                    <p>• देयक व मोजमाप तपशील</p>
+                  </>
+                ) : (
+                  <>
+                    <p>• Feature 1</p>
+                    <p>• Feature 2</p>
+                    <p>• Feature 3</p>
+                    <p>• Feature 4</p>
+                  </>
+                )}
               </div>
               
               <div className="mt-4 flex items-center justify-between">
                 <span className={`text-sm font-bold text-${form.color}-700 bg-white/50 px-3 py-1 rounded-full`}>
-                  Coming Soon
+                  {form.active ? 'तपासणी सुरू करण्यासाठी निवडा' : 'Coming Soon'}
                 </span>
                 <div className={`bg-gradient-to-r from-${form.color}-500 to-${form.color}-600 p-2 rounded-full shadow-lg`}>
                   <Plus className="h-5 w-5 text-white" />
