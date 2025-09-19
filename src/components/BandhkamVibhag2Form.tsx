@@ -283,6 +283,41 @@ export const BandhkamVibhag2Form: React.FC<BandhkamVibhag2FormProps> = ({
 
         if (updateError) throw updateError;
         inspectionResult = updateResult;
+
+        // Upsert bandhakam_vibhag2 form record
+        const officersArray = [
+          bandhkamVibhag2FormData.officer_1_name && bandhkamVibhag2FormData.officer_1_designation ? {
+            name: bandhkamVibhag2FormData.officer_1_name,
+            designation: bandhkamVibhag2FormData.officer_1_designation
+          } : null,
+          bandhkamVibhag2FormData.officer_2_name && bandhkamVibhag2FormData.officer_2_designation ? {
+            name: bandhkamVibhag2FormData.officer_2_name,
+            designation: bandhkamVibhag2FormData.officer_2_designation
+          } : null,
+          bandhkamVibhag2FormData.officer_3_name && bandhkamVibhag2FormData.officer_3_designation ? {
+            name: bandhkamVibhag2FormData.officer_3_name,
+            designation: bandhkamVibhag2FormData.officer_3_designation
+          } : null,
+          bandhkamVibhag2FormData.officer_4_name && bandhkamVibhag2FormData.officer_4_designation ? {
+            name: bandhkamVibhag2FormData.officer_4_name,
+            designation: bandhkamVibhag2FormData.officer_4_designation
+          } : null
+        ].filter(officer => officer !== null);
+
+        const { error: formError } = await supabase
+          .from('bandhakam_vibhag2')
+          .upsert({
+            inspection_id: editingInspection.id,
+            inspection_date: bandhkamVibhag2FormData.inspection_date,
+            officers: officersArray,
+            current_work_status: bandhkamVibhag2FormData.current_work_status,
+            work_quality: bandhkamVibhag2FormData.work_quality,
+            liability_period: bandhkamVibhag2FormData.defect_liability_period,
+            report_work_name: bandhkamVibhag2FormData.work_name,
+            detailed_report: bandhkamVibhag2FormData.inspection_report
+          });
+
+        if (formError) throw formError;
       } else {
         // Create new inspection
         const inspectionNumber = generateInspectionNumber();
@@ -308,6 +343,41 @@ export const BandhkamVibhag2Form: React.FC<BandhkamVibhag2FormProps> = ({
 
         if (createError) throw createError;
         inspectionResult = createResult;
+
+        // Create bandhakam_vibhag2 form record
+        const officersArray = [
+          bandhkamVibhag2FormData.officer_1_name && bandhkamVibhag2FormData.officer_1_designation ? {
+            name: bandhkamVibhag2FormData.officer_1_name,
+            designation: bandhkamVibhag2FormData.officer_1_designation
+          } : null,
+          bandhkamVibhag2FormData.officer_2_name && bandhkamVibhag2FormData.officer_2_designation ? {
+            name: bandhkamVibhag2FormData.officer_2_name,
+            designation: bandhkamVibhag2FormData.officer_2_designation
+          } : null,
+          bandhkamVibhag2FormData.officer_3_name && bandhkamVibhag2FormData.officer_3_designation ? {
+            name: bandhkamVibhag2FormData.officer_3_name,
+            designation: bandhkamVibhag2FormData.officer_3_designation
+          } : null,
+          bandhkamVibhag2FormData.officer_4_name && bandhkamVibhag2FormData.officer_4_designation ? {
+            name: bandhkamVibhag2FormData.officer_4_name,
+            designation: bandhkamVibhag2FormData.officer_4_designation
+          } : null
+        ].filter(officer => officer !== null);
+
+        const { error: formError } = await supabase
+          .from('bandhakam_vibhag2')
+          .insert({
+            inspection_id: inspectionResult.id,
+            inspection_date: bandhkamVibhag2FormData.inspection_date,
+            officers: officersArray,
+            current_work_status: bandhkamVibhag2FormData.current_work_status,
+            work_quality: bandhkamVibhag2FormData.work_quality,
+            liability_period: bandhkamVibhag2FormData.defect_liability_period,
+            report_work_name: bandhkamVibhag2FormData.work_name,
+            detailed_report: bandhkamVibhag2FormData.inspection_report
+          });
+
+        if (formError) throw formError;
       }
 
       // Upload photos if any
