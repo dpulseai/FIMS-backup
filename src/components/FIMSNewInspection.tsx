@@ -26,6 +26,7 @@ import { supabase } from '../lib/supabase';
 import { AnganwadiTapasaniForm } from './AnganwadiTapasaniForm';
 import { FIMSOfficeInspection } from './FIMSOfficeInspection';
 import { RajyaShaishanikPrashikshanForm } from './RajyaShaishanikPrashikshanForm';
+import { BandhkamVibhag1} from './BandhkamVibhag1';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface FIMSNewInspectionProps {
@@ -112,6 +113,17 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
     if (selectedInspectionType === 'rajya_shaishanik') {
       return (
         <RajyaShaishanikPrashikshanForm
+          user={user}
+          onBack={handleBackToSelection}
+          categories={categories}
+          onInspectionCreated={onInspectionCreated}
+          editingInspection={editingInspection}
+        />
+      );
+    }
+    if (selectedInspectionType === 'BandhkamVibhag1') {
+      return (
+        <BandhkamVibhag1
           user={user}
           onBack={handleBackToSelection}
           categories={categories}
@@ -264,9 +276,47 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
             </div>
           </div>
 
+          {/* bandhkamvibhag1 */}
+          <div 
+            onClick={() => handleInspectionTypeSelect('BandhkamVibhag1')}
+            className="bg-gradient-to-br from-green-100 via-green-50 to-emerald-50 rounded-lg shadow-lg border-2 border-green-200 p-4 md:p-6 hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer hover:border-green-400 touch-manipulation hover:from-green-200 hover:via-green-100 hover:to-emerald-100"
+          >
+            <div className="flex items-center space-x-4 mb-4">
+              <div className="bg-gradient-to-br from-green-500 to-green-600 p-3 rounded-xl shadow-lg">
+                <School className="h-6 w-6 md:h-8 md:w-8 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg md:text-xl font-semibold text-gray-900">
+                  आदर्श शाळा भेट प्रपत्र
+                </h3>
+                <p className="text-sm md:text-base text-green-700 font-medium">
+                  राज्य शैक्षणिक संशोधन व प्रशिक्षण
+                </p>
+              </div>
+            </div>
+            
+            <div className="space-y-2 text-sm text-green-800">
+              <p>• शाळेची माहिती आणि पटसंख्या</p>
+              <p>• Khan Academy पोर्टल वापर</p>
+              <p>• SQDP आणि निपुण भारत लक्ष्य</p>
+              <p>• शैक्षणिक गुणवत्ता मूल्यांकन</p>
+            </div>
+            
+            <div className="mt-4 flex items-center justify-between">
+              <span className="text-sm font-bold text-green-700 bg-white/50 px-3 py-1 rounded-full">
+                तपासणी सुरू करण्यासाठी निवडा
+              </span>
+              <div className="bg-gradient-to-r from-green-500 to-green-600 p-2 rounded-full shadow-lg">
+                <Plus className="h-5 w-5 text-white" />
+              </div>
+            </div>
+          </div>
+          
+          
+
           {/* Placeholder cards for the remaining 12 forms */}
           {[
-            { key: 'form_4', title: 'Form 4 Title', subtitle: 'Form 4 Description', color: 'orange' },
+            { key: 'form_4', title: 'BandhkamVibhag1', subtitle: 'BandhkamVibhag1', color: 'orange' },
             { key: 'form_5', title: 'Form 5 Title', subtitle: 'Form 5 Description', color: 'indigo' },
             { key: 'form_6', title: 'Form 6 Title', subtitle: 'Form 6 Description', color: 'pink' },
             { key: 'form_7', title: 'Form 7 Title', subtitle: 'Form 7 Description', color: 'teal' },
