@@ -590,9 +590,9 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
       for (let i = 0; i < uploadedPhotos.length; i++) {
         const file = uploadedPhotos[i];
         const fileExt = file.name.split('.').pop();
-        const fileName = `${inspectionId}_${Date.now()}_${i}.${fileExt}`;
+        const fileName = `rajya_shaishanik_${inspectionId}_${Date.now()}_${i}.${fileExt}`;
 
-        // Upload to Supabase Storage
+        // Upload to field-visit-images bucket in Supabase Storage
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('field-visit-images')
           .upload(fileName, file);
@@ -611,7 +611,7 @@ export const RajyaShaishanikPrashikshanForm: React.FC<RajyaShaishanikPrashikshan
             inspection_id: inspectionId,
             photo_url: publicUrl,
             photo_name: file.name,
-            description: `School inspection photo ${i + 1}`,
+            description: `Rajya Shaishanik inspection photo ${i + 1}`,
             photo_order: i + 1
           });
 
