@@ -597,6 +597,69 @@ export const getRajyaTapasaniForm = async (inspectionId: string): Promise<any> =
   }
 };
 
+export const createMumbaiHighCourtForm = async (formData: any): Promise<any> => {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error('Supabase client not initialized');
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('mumbai_high_court_school_inspection_form')
+      .insert(formData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error creating mumbai high court form:', error);
+    throw error;
+  }
+};
+
+export const updateMumbaiHighCourtForm = async (inspectionId: string, formData: any): Promise<any> => {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error('Supabase client not initialized');
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('mumbai_high_court_school_inspection_form')
+      .upsert({
+        inspection_id: inspectionId,
+        ...formData
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error updating mumbai high court form:', error);
+    throw error;
+  }
+};
+
+export const getMumbaiHighCourtForm = async (inspectionId: string): Promise<any> => {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error('Supabase client not initialized');
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('mumbai_high_court_school_inspection_form')
+      .select('*')
+      .eq('inspection_id', inspectionId)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
+  } catch (error) {
+    console.error('Error fetching mumbai high court form:', error);
+    throw error;
+  }
+};
+
 export const createBhetPraptraForm = async (formData: any): Promise<any> => {
   if (!isSupabaseConfigured || !supabase) {
     throw new Error('Supabase client not initialized');
