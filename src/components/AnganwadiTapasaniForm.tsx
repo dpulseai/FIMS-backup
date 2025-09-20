@@ -475,10 +475,10 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
         }
 
         // Validate file size (5MB limit)
-        if (file.size > 5 * 1024 * 1024) {
-          alert(`${file.name} is too large. Maximum size is 5MB`);
-          continue;
-        }
+        //if (file.size > 5 * 1024 * 1024) {
+        //  alert(`${file.name} is too large. Maximum size is 5MB`);
+        //  continue;
+        //}
 
         newFiles.push(file);
         newPreviewUrls.push(URL.createObjectURL(file));
