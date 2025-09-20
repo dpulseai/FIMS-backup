@@ -345,136 +345,11 @@ export const MahatmaGandhiRojgarHamiForm: React.FC<MahatmaGandhiRojgarHamiFormPr
         // Save photo record to database
         const { error: dbError } = await supabase
           .from('fims_inspection_photos')
-        // Upsert mahatma_gandhi_rastriya_gramin_tapasani_praptra form record
-        const { error: formError } = await supabase
-          .from('mahatma_gandhi_rastriya_gramin_tapasani_praptra')
-          .upsert({
-            inspection_id: editingInspection.id,
-            inspection_date: mgnregaFormData.inspection_date || new Date().toISOString().split('T')[0],
-            officer_name: mgnregaFormData.officer_name,
-            work_name: mgnregaFormData.work_name,
-            gram_panchayat: mgnregaFormData.gram_panchayat,
-            village: mgnregaFormData.village,
-            tehsil: mgnregaFormData.tehsil,
-            district: mgnregaFormData.district,
-            work_type: mgnregaFormData.work_type,
-            annual_plan: mgnregaFormData.annual_plan,
-            plan_year: mgnregaFormData.plan_year,
-            implementing_agency: mgnregaFormData.implementing_agency,
-            work_code: mgnregaFormData.work_code,
-            unskilled_amount: parseFloat(mgnregaFormData.unskilled_amount) || 0,
-            skilled_amount: parseFloat(mgnregaFormData.skilled_amount) || 0,
-            total_amount: parseFloat(mgnregaFormData.total_amount) || 0,
-            dsr_department: mgnregaFormData.dsr_department,
-            dsr_year: mgnregaFormData.dsr_year,
-            nrega_records: mgnregaFormData.nrega_records,
-            nrega_form_a: mgnregaFormData.nrega_form_a,
-            nrega_form_b: mgnregaFormData.nrega_form_b,
-            convergence: mgnregaFormData.convergence,
-            department_name: mgnregaFormData.department_name,
-            fund_details: mgnregaFormData.fund_details,
-            mgnrega_unskilled: parseFloat(mgnregaFormData.mgnrega_unskilled) || 0,
-            mgnrega_skilled: parseFloat(mgnregaFormData.mgnrega_skilled) || 0,
-            mgnrega_total: parseFloat(mgnregaFormData.mgnrega_total) || 0,
-            other_dept_unskilled: parseFloat(mgnregaFormData.other_dept_unskilled) || 0,
-            other_dept_skilled: parseFloat(mgnregaFormData.other_dept_skilled) || 0,
-            other_dept_total: parseFloat(mgnregaFormData.other_dept_total) || 0,
-            recorded_workers: parseInt(mgnregaFormData.recorded_workers) || 0,
-            present_workers: parseInt(mgnregaFormData.present_workers) || 0,
-            shelter: mgnregaFormData.shelter,
-            first_aid: mgnregaFormData.first_aid,
-            drinking_water: mgnregaFormData.drinking_water,
-            child_care: mgnregaFormData.child_care,
-            current_status: mgnregaFormData.current_status,
-            expense_unskilled: parseFloat(mgnregaFormData.expense_unskilled) || 0,
-            expense_skilled: parseFloat(mgnregaFormData.expense_skilled) || 0,
-            expense_total: parseFloat(mgnregaFormData.expense_total) || 0,
-            attendance_close_date: mgnregaFormData.attendance_close_date || new Date().toISOString().split('T')[0],
-            wage_deposited: mgnregaFormData.wage_deposited,
-            delay_compensation: mgnregaFormData.delay_compensation,
-            aadhaar_wage: mgnregaFormData.aadhaar_wage,
-            wage_not_deposited_reasons: mgnregaFormData.wage_not_deposited_reasons,
-            job_card_available: mgnregaFormData.job_card_available,
-            job_card_updated: mgnregaFormData.job_card_updated,
-            work_file_updated: mgnregaFormData.work_file_updated,
-            cib_available: mgnregaFormData.cib_available,
-            measurement_taken: mgnregaFormData.measurement_taken,
-            measurement_book_no: mgnregaFormData.measurement_book_no,
-            all_measurements_recorded: mgnregaFormData.all_measurements_recorded,
-            senior_officer_check: mgnregaFormData.senior_officer_check,
-            measurement_discrepancy: mgnregaFormData.measurement_discrepancy,
-            discrepancy_details: mgnregaFormData.discrepancy_details,
-            geo_tagging: mgnregaFormData.geo_tagging,
-            other_important_matters: mgnregaFormData.other_important_matters,
-            overall_quality: mgnregaFormData.overall_quality,
-        // Create mahatma_gandhi_rastriya_gramin_tapasani_praptra form record
-        const { error: formError } = await supabase
-          .from('mahatma_gandhi_rastriya_gramin_tapasani_praptra')
           .insert({
-            inspection_id: inspectionResult.id,
-            inspection_date: mgnregaFormData.inspection_date || new Date().toISOString().split('T')[0],
-            officer_name: mgnregaFormData.officer_name,
-            work_name: mgnregaFormData.work_name,
-            gram_panchayat: mgnregaFormData.gram_panchayat,
-            village: mgnregaFormData.village,
-            tehsil: mgnregaFormData.tehsil,
-            district: mgnregaFormData.district,
-            work_type: mgnregaFormData.work_type,
-            annual_plan: mgnregaFormData.annual_plan,
-            plan_year: mgnregaFormData.plan_year,
-            implementing_agency: mgnregaFormData.implementing_agency,
-            work_code: mgnregaFormData.work_code,
-            unskilled_amount: parseFloat(mgnregaFormData.unskilled_amount) || 0,
-            skilled_amount: parseFloat(mgnregaFormData.skilled_amount) || 0,
-            total_amount: parseFloat(mgnregaFormData.total_amount) || 0,
-            dsr_department: mgnregaFormData.dsr_department,
-            dsr_year: mgnregaFormData.dsr_year,
-            nrega_records: mgnregaFormData.nrega_records,
-            nrega_form_a: mgnregaFormData.nrega_form_a,
-            nrega_form_b: mgnregaFormData.nrega_form_b,
-            convergence: mgnregaFormData.convergence,
-            department_name: mgnregaFormData.department_name,
-            fund_details: mgnregaFormData.fund_details,
-            mgnrega_unskilled: parseFloat(mgnregaFormData.mgnrega_unskilled) || 0,
-            mgnrega_skilled: parseFloat(mgnregaFormData.mgnrega_skilled) || 0,
-            mgnrega_total: parseFloat(mgnregaFormData.mgnrega_total) || 0,
-            other_dept_unskilled: parseFloat(mgnregaFormData.other_dept_unskilled) || 0,
-            other_dept_skilled: parseFloat(mgnregaFormData.other_dept_skilled) || 0,
-            other_dept_total: parseFloat(mgnregaFormData.other_dept_total) || 0,
-            recorded_workers: parseInt(mgnregaFormData.recorded_workers) || 0,
-            present_workers: parseInt(mgnregaFormData.present_workers) || 0,
-            shelter: mgnregaFormData.shelter,
-            first_aid: mgnregaFormData.first_aid,
-            drinking_water: mgnregaFormData.drinking_water,
-            child_care: mgnregaFormData.child_care,
-            current_status: mgnregaFormData.current_status,
-            expense_unskilled: parseFloat(mgnregaFormData.expense_unskilled) || 0,
-            expense_skilled: parseFloat(mgnregaFormData.expense_skilled) || 0,
-            expense_total: parseFloat(mgnregaFormData.expense_total) || 0,
-            attendance_close_date: mgnregaFormData.attendance_close_date || new Date().toISOString().split('T')[0],
-            wage_deposited: mgnregaFormData.wage_deposited,
-            delay_compensation: mgnregaFormData.delay_compensation,
-            aadhaar_wage: mgnregaFormData.aadhaar_wage,
-            wage_not_deposited_reasons: mgnregaFormData.wage_not_deposited_reasons,
-            job_card_available: mgnregaFormData.job_card_available,
-            job_card_updated: mgnregaFormData.job_card_updated,
-            work_file_updated: mgnregaFormData.work_file_updated,
-            cib_available: mgnregaFormData.cib_available,
-            measurement_taken: mgnregaFormData.measurement_taken,
-            measurement_book_no: mgnregaFormData.measurement_book_no,
-            all_measurements_recorded: mgnregaFormData.all_measurements_recorded,
-            senior_officer_check: mgnregaFormData.senior_officer_check,
-            measurement_discrepancy: mgnregaFormData.measurement_discrepancy,
-            discrepancy_details: mgnregaFormData.discrepancy_details,
-            geo_tagging: mgnregaFormData.geo_tagging,
-            other_important_matters: mgnregaFormData.other_important_matters,
-            overall_quality: mgnregaFormData.overall_quality,
-            utility_feedback: mgnregaFormData.utility_feedback,
-            final_date: mgnregaFormData.final_date || new Date().toISOString().split('T')[0],
-            final_place: mgnregaFormData.final_place,
-            final_officer_name: mgnregaFormData.final_officer_name,
-            final_designation: mgnregaFormData.final_designation,
-            final_office: mgnregaFormData.final_office
+            inspection_id: inspectionId,
+            photo_url: publicUrl,
+            photo_name: file.name,
+            description: `MGNREGA work photo ${i + 1}`
           });
 
         if (dbError) throw dbError;
@@ -529,6 +404,78 @@ export const MahatmaGandhiRojgarHamiForm: React.FC<MahatmaGandhiRojgarHamiFormPr
 
         if (updateError) throw updateError;
         inspectionResult = updateResult;
+
+        // Upsert mahatma_gandhi_rastriya_gramin_tapasani_praptra form record
+        const { error: formError } = await supabase
+          .from('mahatma_gandhi_rastriya_gramin_tapasani_praptra')
+          .upsert({
+            inspection_id: editingInspection.id,
+            inspection_date: mahatmaGandhiFormData.inspection_date || new Date().toISOString().split('T')[0],
+            officer_name: mahatmaGandhiFormData.inspector_name,
+            work_name: mahatmaGandhiFormData.work_name,
+            gram_panchayat: mahatmaGandhiFormData.gram_panchayat,
+            village: mahatmaGandhiFormData.village,
+            tehsil: mahatmaGandhiFormData.tehsil,
+            district: mahatmaGandhiFormData.district,
+            work_type: mahatmaGandhiFormData.work_type,
+            annual_plan: mahatmaGandhiFormData.annual_action_plan_included,
+            plan_year: mahatmaGandhiFormData.annual_action_plan_year,
+            implementing_agency: mahatmaGandhiFormData.implementation_agency,
+            work_code: mahatmaGandhiFormData.work_code,
+            unskilled_amount: parseFloat(mahatmaGandhiFormData.estimated_amount_unskilled) || 0,
+            skilled_amount: parseFloat(mahatmaGandhiFormData.estimated_amount_skilled) || 0,
+            total_amount: parseFloat(mahatmaGandhiFormData.estimated_amount_total) || 0,
+            dsr_department: mahatmaGandhiFormData.dsr_department,
+            dsr_year: mahatmaGandhiFormData.dsr_year,
+            nrega_records: mahatmaGandhiFormData.nrega_soft_records_correct,
+            nrega_form_a: mahatmaGandhiFormData.nrega_soft_form_a,
+            nrega_form_b: mahatmaGandhiFormData.nrega_soft_form_b,
+            convergence: mahatmaGandhiFormData.work_under_convergence,
+            department_name: mahatmaGandhiFormData.convergence_department,
+            fund_details: mahatmaGandhiFormData.convergence_fund_details,
+            mgnrega_unskilled: parseFloat(mahatmaGandhiFormData.mgnrega_unskilled) || 0,
+            mgnrega_skilled: parseFloat(mahatmaGandhiFormData.mgnrega_skilled) || 0,
+            mgnrega_total: parseFloat(mahatmaGandhiFormData.mgnrega_total) || 0,
+            other_dept_unskilled: parseFloat(mahatmaGandhiFormData.other_dept_unskilled) || 0,
+            other_dept_skilled: parseFloat(mahatmaGandhiFormData.other_dept_skilled) || 0,
+            other_dept_total: parseFloat(mahatmaGandhiFormData.other_dept_total) || 0,
+            recorded_workers: parseInt(mahatmaGandhiFormData.attendance_register_workers) || 0,
+            present_workers: parseInt(mahatmaGandhiFormData.actual_workers_present) || 0,
+            shelter: mahatmaGandhiFormData.shelter_for_workers,
+            first_aid: mahatmaGandhiFormData.first_aid_kit,
+            drinking_water: mahatmaGandhiFormData.drinking_water,
+            child_care: mahatmaGandhiFormData.childcare_for_workers_children,
+            current_status: mahatmaGandhiFormData.current_work_status,
+            expense_unskilled: parseFloat(mahatmaGandhiFormData.expenses_unskilled) || 0,
+            expense_skilled: parseFloat(mahatmaGandhiFormData.expenses_skilled) || 0,
+            expense_total: parseFloat(mahatmaGandhiFormData.expenses_total) || 0,
+            attendance_close_date: mahatmaGandhiFormData.previous_attendance_closure_date || new Date().toISOString().split('T')[0],
+            wage_deposited: mahatmaGandhiFormData.wages_deposited_timely,
+            delay_compensation: mahatmaGandhiFormData.delay_compensation_provided,
+            aadhaar_wage: mahatmaGandhiFormData.aadhaar_based_payment,
+            wage_not_deposited_reasons: mahatmaGandhiFormData.payment_failure_reasons,
+            job_card_available: mahatmaGandhiFormData.workers_have_job_cards,
+            job_card_updated: mahatmaGandhiFormData.job_card_records_updated,
+            work_file_updated: mahatmaGandhiFormData.work_file_updated,
+            cib_available: mahatmaGandhiFormData.citizen_information_board,
+            measurement_taken: mahatmaGandhiFormData.work_measurement_done,
+            measurement_book_no: mahatmaGandhiFormData.measurement_book_number,
+            all_measurements_recorded: mahatmaGandhiFormData.all_measurements_recorded,
+            senior_officer_check: mahatmaGandhiFormData.senior_technical_officer_check,
+            measurement_discrepancy: mahatmaGandhiFormData.measurement_discrepancy,
+            discrepancy_details: mahatmaGandhiFormData.discrepancy_details,
+            geo_tagging: mahatmaGandhiFormData.work_geotagged,
+            other_important_matters: mahatmaGandhiFormData.other_important_matters,
+            overall_quality: mahatmaGandhiFormData.overall_work_quality,
+            utility_feedback: mahatmaGandhiFormData.work_utility_feedback,
+            final_date: mahatmaGandhiFormData.inspection_date_final || new Date().toISOString().split('T')[0],
+            final_place: mahatmaGandhiFormData.inspection_location,
+            final_officer_name: mahatmaGandhiFormData.inspector_name_final,
+            final_designation: mahatmaGandhiFormData.inspector_designation_final,
+            final_office: mahatmaGandhiFormData.inspector_office
+          });
+
+        if (formError) throw formError;
       } else {
         // Create new inspection
         const inspectionNumber = generateInspectionNumber();
@@ -554,6 +501,78 @@ export const MahatmaGandhiRojgarHamiForm: React.FC<MahatmaGandhiRojgarHamiFormPr
 
         if (createError) throw createError;
         inspectionResult = createResult;
+
+        // Create mahatma_gandhi_rastriya_gramin_tapasani_praptra form record
+        const { error: formError } = await supabase
+          .from('mahatma_gandhi_rastriya_gramin_tapasani_praptra')
+          .insert({
+            inspection_id: inspectionResult.id,
+            inspection_date: mahatmaGandhiFormData.inspection_date || new Date().toISOString().split('T')[0],
+            officer_name: mahatmaGandhiFormData.inspector_name,
+            work_name: mahatmaGandhiFormData.work_name,
+            gram_panchayat: mahatmaGandhiFormData.gram_panchayat,
+            village: mahatmaGandhiFormData.village,
+            tehsil: mahatmaGandhiFormData.tehsil,
+            district: mahatmaGandhiFormData.district,
+            work_type: mahatmaGandhiFormData.work_type,
+            annual_plan: mahatmaGandhiFormData.annual_action_plan_included,
+            plan_year: mahatmaGandhiFormData.annual_action_plan_year,
+            implementing_agency: mahatmaGandhiFormData.implementation_agency,
+            work_code: mahatmaGandhiFormData.work_code,
+            unskilled_amount: parseFloat(mahatmaGandhiFormData.estimated_amount_unskilled) || 0,
+            skilled_amount: parseFloat(mahatmaGandhiFormData.estimated_amount_skilled) || 0,
+            total_amount: parseFloat(mahatmaGandhiFormData.estimated_amount_total) || 0,
+            dsr_department: mahatmaGandhiFormData.dsr_department,
+            dsr_year: mahatmaGandhiFormData.dsr_year,
+            nrega_records: mahatmaGandhiFormData.nrega_soft_records_correct,
+            nrega_form_a: mahatmaGandhiFormData.nrega_soft_form_a,
+            nrega_form_b: mahatmaGandhiFormData.nrega_soft_form_b,
+            convergence: mahatmaGandhiFormData.work_under_convergence,
+            department_name: mahatmaGandhiFormData.convergence_department,
+            fund_details: mahatmaGandhiFormData.convergence_fund_details,
+            mgnrega_unskilled: parseFloat(mahatmaGandhiFormData.mgnrega_unskilled) || 0,
+            mgnrega_skilled: parseFloat(mahatmaGandhiFormData.mgnrega_skilled) || 0,
+            mgnrega_total: parseFloat(mahatmaGandhiFormData.mgnrega_total) || 0,
+            other_dept_unskilled: parseFloat(mahatmaGandhiFormData.other_dept_unskilled) || 0,
+            other_dept_skilled: parseFloat(mahatmaGandhiFormData.other_dept_skilled) || 0,
+            other_dept_total: parseFloat(mahatmaGandhiFormData.other_dept_total) || 0,
+            recorded_workers: parseInt(mahatmaGandhiFormData.attendance_register_workers) || 0,
+            present_workers: parseInt(mahatmaGandhiFormData.actual_workers_present) || 0,
+            shelter: mahatmaGandhiFormData.shelter_for_workers,
+            first_aid: mahatmaGandhiFormData.first_aid_kit,
+            drinking_water: mahatmaGandhiFormData.drinking_water,
+            child_care: mahatmaGandhiFormData.childcare_for_workers_children,
+            current_status: mahatmaGandhiFormData.current_work_status,
+            expense_unskilled: parseFloat(mahatmaGandhiFormData.expenses_unskilled) || 0,
+            expense_skilled: parseFloat(mahatmaGandhiFormData.expenses_skilled) || 0,
+            expense_total: parseFloat(mahatmaGandhiFormData.expenses_total) || 0,
+            attendance_close_date: mahatmaGandhiFormData.previous_attendance_closure_date || new Date().toISOString().split('T')[0],
+            wage_deposited: mahatmaGandhiFormData.wages_deposited_timely,
+            delay_compensation: mahatmaGandhiFormData.delay_compensation_provided,
+            aadhaar_wage: mahatmaGandhiFormData.aadhaar_based_payment,
+            wage_not_deposited_reasons: mahatmaGandhiFormData.payment_failure_reasons,
+            job_card_available: mahatmaGandhiFormData.workers_have_job_cards,
+            job_card_updated: mahatmaGandhiFormData.job_card_records_updated,
+            work_file_updated: mahatmaGandhiFormData.work_file_updated,
+            cib_available: mahatmaGandhiFormData.citizen_information_board,
+            measurement_taken: mahatmaGandhiFormData.work_measurement_done,
+            measurement_book_no: mahatmaGandhiFormData.measurement_book_number,
+            all_measurements_recorded: mahatmaGandhiFormData.all_measurements_recorded,
+            senior_officer_check: mahatmaGandhiFormData.senior_technical_officer_check,
+            measurement_discrepancy: mahatmaGandhiFormData.measurement_discrepancy,
+            discrepancy_details: mahatmaGandhiFormData.discrepancy_details,
+            geo_tagging: mahatmaGandhiFormData.work_geotagged,
+            other_important_matters: mahatmaGandhiFormData.other_important_matters,
+            overall_quality: mahatmaGandhiFormData.overall_work_quality,
+            utility_feedback: mahatmaGandhiFormData.work_utility_feedback,
+            final_date: mahatmaGandhiFormData.inspection_date_final || new Date().toISOString().split('T')[0],
+            final_place: mahatmaGandhiFormData.inspection_location,
+            final_officer_name: mahatmaGandhiFormData.inspector_name_final,
+            final_designation: mahatmaGandhiFormData.inspector_designation_final,
+            final_office: mahatmaGandhiFormData.inspector_office
+          });
+
+        if (formError) throw formError;
       }
 
       // Upload photos if any
@@ -1958,7 +1977,7 @@ export const MahatmaGandhiRojgarHamiForm: React.FC<MahatmaGandhiRojgarHamiFormPr
             {currentStep === 4 ? (
               <>
                 {!isViewMode && (
-      .from('mahatma_gandhi_rastriya_gramin_tapasani_praptra')
+                <button
                   onClick={() => handleSubmit(true)}
                   disabled={isLoading || isUploading}
                   className="px-3 md:px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors duration-200 flex items-center space-x-2 text-sm md:text-base"
@@ -1981,7 +2000,7 @@ export const MahatmaGandhiRojgarHamiForm: React.FC<MahatmaGandhiRojgarHamiFormPr
             ) : (
               <button
                 onClick={() => setCurrentStep(prev => Math.min(4, prev + 1))}
-      .from('mahatma_gandhi_rastriya_gramin_tapasani_praptra')
+                disabled={!canProceedToNext()}
                 className="px-4 md:px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 text-sm md:text-base"
               >
                 {t('common.next')}
