@@ -30,6 +30,7 @@ import { BandhkamVibhag1Form } from './BandhkamVibhag1Form';
 import { BandhkamVibhag2Form } from './BandhkamVibhag2Form';
 import { ZPDarMahinyalaSadarKaryachePrapatraForm } from './ZPDarMahinyalaSadarKaryachePrapatraForm';
 import { RajyaGunwattaNirikshakTapasaniForm } from './RajyaGunwattaNirikshakTapasaniForm';
+import { MahatmaGandhiRojgarHamiForm } from './MahatmaGandhiRojgarHamiForm';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface FIMSNewInspectionProps {
@@ -164,6 +165,18 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
     if (selectedInspectionType === 'rajya_gunwatta_nirikshak') {
       return (
         <RajyaGunwattaNirikshakTapasaniForm
+          user={user}
+          onBack={handleBackToSelection}
+          categories={categories}
+          onInspectionCreated={onInspectionCreated}
+          editingInspection={editingInspection}
+        />
+      );
+    }
+
+    if (selectedInspectionType === 'mahatma_gandhi_rojgar_hami') {
+      return (
+        <MahatmaGandhiRojgarHamiForm
           user={user}
           onBack={handleBackToSelection}
           categories={categories}
@@ -325,7 +338,7 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
             { key: 'bandhkam_vibhag2', title: 'बांधकाम विभाग प्रपत्र-2', subtitle: 'Construction Department Form-2', color: 'teal', active: true },
             { key: 'zp_dar_mahinyala', title: 'दर महिन्याला सादर करावयाचे प्रपत्र', subtitle: 'ZP Monthly Report Form', color: 'indigo', active: true },
             { key: 'rajya_gunwatta_nirikshak', title: 'राज्य गुणवत्ता निरीक्षक तपासणी', subtitle: 'State Quality Inspector Inspection', color: 'emerald', active: true },
-            { key: 'form_8', title: 'Form 8 Title', subtitle: 'Form 8 Description', color: 'red' },
+            { key: 'mahatma_gandhi_rojgar_hami', title: 'महात्मा गांधी रोजगार हमी योजना', subtitle: 'MGNREGA Work Inspection Form', color: 'green', active: true },
             { key: 'form_9', title: 'Form 9 Title', subtitle: 'Form 9 Description', color: 'yellow' },
             { key: 'form_10', title: 'Form 10 Title', subtitle: 'Form 10 Description', color: 'cyan' },
             { key: 'form_11', title: 'Form 11 Title', subtitle: 'Form 11 Description', color: 'violet' },
@@ -381,6 +394,13 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
                     <p>• कामा तपासणी दिनांक</p>
                     <p>• कामाचे नाव</p>
                     <p>• काम तपासणीवेळी छायाचित्रे</p>
+                  </>
+                ) : form.key === 'mahatma_gandhi_rojgar_hami' ? (
+                  <>
+                    <p>• NREGA Soft नोंदी तपासणी</p>
+                    <p>• मजूर हजेरी आणि सुविधा</p>
+                    <p>• कामाचे मोजमाप आणि गुणवत्ता</p>
+                    <p>• अभिसरण आणि निधी तपशील</p>
                   </>
                 ) : (
                   <>
