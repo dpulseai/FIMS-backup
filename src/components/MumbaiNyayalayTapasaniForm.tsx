@@ -21,7 +21,7 @@ interface FormData {
   vacantNonTeaching: string;
 }
 
-const MumbaiNyayalayForm: React.FC = () => {
+const MumbaiNyayalayTapasaniForm: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
     inspectionDate: '',
     districtName: '',
@@ -397,4 +397,4 @@ const MumbaiNyayalayForm: React.FC = () => {
   );
 };
 
-export default MumbaiNyayalayForm;
+export default MumbaiNyayalayTapasaniForm;
