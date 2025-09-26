@@ -1,24 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { 
-  ArrowLeft,
-  Building2,
-  MapPin,
-  Camera,
-  Save,
-  Send,
-  CheckCircle,
-  AlertCircle,
-  Calendar,
-  User,
-  Users,
-  Heart,
-  BookOpen,
-  Utensils,
-  Scale,
-  Stethoscope,
-  GraduationCap
-} from 'lucide-react';
+import { ArrowLeft, Building2, MapPin, Camera, Save, Send, CircleCheck as CheckCircle, CircleAlert as AlertCircle, Calendar, User, Users, Heart, BookOpen, Utensils, Scale, Stethoscope, GraduationCap } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
