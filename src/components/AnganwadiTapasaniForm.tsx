@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   ArrowLeft,
   Plus,
@@ -28,9 +29,11 @@ import {
   Lightbulb,
   MessageSquare
 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface AnganwadiTapasaniFormProps {
-  user: any;
+  user: SupabaseUser;
   onBack: () => void;
   categories: any[];
   onInspectionCreated: () => void;
@@ -139,6 +142,7 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
   onInspectionCreated,
   editingInspection
 }) => {
+  const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedPhotos, setUploadedPhotos] = useState<File[]>([]);
@@ -364,7 +368,7 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
 
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
-      alert('भूगोलिक स्थान निर्धारण समर्थित नाही');
+      alert(t('categories.geolocationNotSupported'));
       return;
     }
 
@@ -377,21 +381,35 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
         const lng = position.coords.longitude;
         const accuracy = position.coords.accuracy;
         
-        // Get location name using reverse geocoding
+        // Get location name using Google Maps Geocoding API
         try {
-          // You can use Google Maps Geocoding API here with your API key
-          // For now, we'll just set a generic location string
-          const locationName = `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
+          const response = await fetch(
+            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${import.meta.env.VITE_GOOGLE_API_KEY || 'AIzaSyDzOjsiqs6rRjSJWVdXfUBl4ckXayL8AbE'}&language=mr`
+          );
+          const data = await response.json();
           
-          // Update all location data in a single state call
-          setInspectionData(prev => ({
-            ...prev,
-            latitude: lat,
-            longitude: lng,
-            location_accuracy: accuracy,
-            location_detected: locationName,
-            location_name: prev.location_name || locationName // Auto-fill if empty
-          }));
+          if (data.results && data.results.length > 0) {
+            const address = data.results[0].formatted_address;
+            
+            // Update all location data in a single state call
+            setInspectionData(prev => ({
+              ...prev,
+              latitude: lat,
+              longitude: lng,
+              location_accuracy: accuracy,
+              location_detected: address,
+              location_name: prev.location_name || address // Auto-fill if empty
+            }));
+          } else {
+            // No geocoding results, just update coordinates
+            setInspectionData(prev => ({
+              ...prev,
+              latitude: lat,
+              longitude: lng,
+              location_accuracy: accuracy,
+              location_detected: 'Location detected but address not found'
+            }));
+          }
         } catch (error) {
           console.error('Error getting location name:', error);
           // Fallback: just update coordinates without address
@@ -409,7 +427,7 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
        (error) => {
          console.error('Error getting location:', error);
          setIsGettingLocation(false);
-         alert('स्थान मिळवण्यात त्रुटी');
+         alert(t('categories.geolocationError'));
        },
       { 
         enableHighAccuracy: true, 
@@ -422,10 +440,14 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     console.log('Photo upload triggered');
     
+    // Reset the input value immediately to prevent stuck state
     const input = event.target;
-    const files = Array.from(input.files || []);
+    const files = input.files;
     
-    if (files.length === 0) {
+    // Clear input immediately
+    input.value = '';
+    
+    if (!files || files.length === 0) {
       console.log('No files selected');
       return;
     }
@@ -459,27 +481,18 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
         }
 
         newFiles.push(file);
-        
-        // Create preview URL
-        const previewUrl = URL.createObjectURL(file);
-        newPreviewUrls.push(previewUrl);
+        newPreviewUrls.push(URL.createObjectURL(file));
       }
 
       if (newFiles.length > 0) {
         setPhotoFiles(prev => [...prev, ...newFiles]);
         setPhotoPreviews(prev => [...prev, ...newPreviewUrls]);
         console.log('Photos added successfully:', newFiles.length);
-        
-        // Show success message
-        alert(`${newFiles.length} photo(s) added successfully!`);
       }
 
     } catch (error) {
       console.error('Error handling photo upload:', error);
       alert('Error processing photos. Please try again.');
-    } finally {
-      // Clear the input value to allow re-selection of the same files
-      input.value = '';
     }
   };
 
@@ -499,7 +512,7 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
 
   const handleFileUpload = (files: File[]) => {
     if (uploadedPhotos.length + files.length > 5) {
-      alert('Maximum 5 photos allowed');
+      alert(t('fims.maxPhotosAllowed'));
       return;
     }
 
@@ -528,9 +541,7 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
   const removePhoto = async (index: number) => {
     try {
       // Revoke the preview URL to free memory
-      if (photoPreviews[index]) {
-        URL.revokeObjectURL(photoPreviews[index]);
-      }
+      URL.revokeObjectURL(photoPreviews[index]);
       
       // Remove from both arrays
       setPhotoFiles(prev => prev.filter((_, i) => i !== index));
@@ -552,7 +563,7 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
   const uploadPhotosToSupabase = async (inspectionId: string) => {
     if (photoFiles.length === 0) return;
 
-    console.log('Starting photo upload simulation:', photoFiles.length, 'files');
+    console.log('Starting photo upload to Supabase:', photoFiles.length, 'files');
     setIsUploadingPhotos(true);
     setUploadProgress(0);
     
@@ -561,17 +572,50 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
         const file = photoFiles[i];
         console.log(`Uploading photo ${i + 1}/${photoFiles.length}:`, file.name);
         
-        // Simulate upload progress
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${inspectionId}_${Date.now()}_${i}.${fileExt}`;
+
+        // Update progress
         setUploadProgress(Math.round(((i + 0.5) / photoFiles.length) * 100));
-        
-        // Simulate upload delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // Upload to Supabase Storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('field-visit-images')
+          .upload(fileName, file);
+
+        if (uploadError) {
+          console.error('Upload error for file:', file.name, uploadError);
+          throw uploadError;
+        }
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('field-visit-images')
+          .getPublicUrl(fileName);
+
+        console.log('File uploaded successfully:', publicUrl);
+
+        // Save photo record to database
+        const { error: dbError } = await supabase
+          .from('fims_inspection_photos')
+          .insert({
+            inspection_id: inspectionId,
+            photo_url: publicUrl,
+            photo_name: file.name,
+            description: `Anganwadi inspection photo ${i + 1}`,
+            photo_order: i + 1
+          });
+
+        if (dbError) {
+          console.error('Database error for photo record:', dbError);
+          throw dbError;
+        }
         
         // Update progress
         setUploadProgress(Math.round(((i + 1) / photoFiles.length) * 100));
       }
       
-      console.log('All photos uploaded successfully (simulated)');
+      console.log('All photos uploaded successfully');
     } catch (error) {
       console.error('Error uploading photos:', error);
       throw error;
@@ -594,20 +638,93 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
     try {
       setIsLoading(true);
 
-      // Simulate form submission
-      console.log('Submitting form:', { inspectionData, anganwadiFormData, photoFiles });
+      // Convert empty date strings to null for database compatibility
+      const sanitizedInspectionData = {
+        ...inspectionData,
+        planned_date: inspectionData.planned_date || null
+      };
+
+      let inspectionResult;
+
+      if (editingInspection && editingInspection.id) {
+        // Update existing inspection
+        const { data: updateResult, error: updateError } = await supabase
+          .from('fims_inspections')
+          .update({
+            location_name: sanitizedInspectionData.location_name,
+            latitude: sanitizedInspectionData.latitude,
+            longitude: sanitizedInspectionData.longitude,
+            location_accuracy: sanitizedInspectionData.location_accuracy,
+            location_detected: sanitizedInspectionData.location_detected,
+            address: sanitizedInspectionData.address,
+            planned_date: sanitizedInspectionData.planned_date,
+            inspection_date: new Date().toISOString(),
+            status: isDraft ? 'draft' : 'submitted',
+            form_data: anganwadiFormData
+          })
+          .eq('id', editingInspection.id)
+          .select()
+          .single();
+
+        if (updateError) throw updateError;
+        inspectionResult = updateResult;
+
+        // Upsert anganwadi form record
+        const { error: formError } = await supabase
+          .from('fims_anganwadi_forms')
+          .upsert({
+            inspection_id: editingInspection.id,
+            ...anganwadiFormData
+          });
+
+        if (formError) throw formError;
+      } else {
+        // Create new inspection
+        const inspectionNumber = generateInspectionNumber();
+
+        const { data: createResult, error: createError } = await supabase
+          .from('fims_inspections')
+          .insert({
+            inspection_number: inspectionNumber,
+            category_id: sanitizedInspectionData.category_id,
+            inspector_id: user.id,
+            location_name: sanitizedInspectionData.location_name,
+            latitude: sanitizedInspectionData.latitude,
+            longitude: sanitizedInspectionData.longitude,
+            location_accuracy: sanitizedInspectionData.location_accuracy,
+            location_detected: sanitizedInspectionData.location_detected,
+            address: sanitizedInspectionData.address,
+            planned_date: sanitizedInspectionData.planned_date,
+            inspection_date: new Date().toISOString(),
+            status: isDraft ? 'draft' : 'submitted',
+            form_data: anganwadiFormData
+          })
+          .select()
+          .single();
+
+        if (createError) throw createError;
+        inspectionResult = createResult;
+
+        // Create anganwadi form record
+        const { error: formError } = await supabase
+          .from('fims_anganwadi_forms')
+          .insert({
+            inspection_id: inspectionResult.id,
+            ...anganwadiFormData
+          });
+
+        if (formError) throw formError;
+      }
 
       // Upload photos if any
       if (photoFiles.length > 0) {
-        await uploadPhotosToSupabase('simulated-inspection-id');
+        await uploadPhotosToSupabase(inspectionResult.id);
       }
 
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
+      const isUpdate = editingInspection && editingInspection.id;
       const message = isDraft 
-        ? 'तपासणी मसुदा म्हणून जतन केली!'
-        : 'तपासणी यशस्वीरित्या सबमिट केली!';
+        ? (isUpdate ? t('fims.inspectionUpdatedAsDraft') : t('fims.inspectionSavedAsDraft'))
+        : (isUpdate ? t('fims.inspectionUpdatedSuccessfully') : t('fims.inspectionSubmittedSuccessfully'));
       
       alert(message);
       onInspectionCreated();
@@ -615,7 +732,7 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
 
     } catch (error) {
       console.error('Error saving inspection:', error);
-      alert('तपासणी जतन करताना त्रुटी: ' + (error as Error).message);
+      alert('Error saving inspection: ' + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -693,70 +810,70 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                अंगणवाडी नाव *
+                {t('fims.anganwadiName')} *
               </label>
               <input
                 type="text"
                 value={anganwadiFormData.anganwadi_name}
                 onChange={(e) => setAnganwadiFormData(prev => ({...prev, anganwadi_name: e.target.value}))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                placeholder="अंगणवाडीचे नाव प्रविष्ट करा"
+                placeholder={t('fims.enterAnganwadiName')}
                 required
                 disabled={isViewMode}
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                अंगणवाडी क्रमांक
+                {t('fims.anganwadiNumber')}
               </label>
               <input
                 type="text"
                 value={anganwadiFormData.anganwadi_number}
                 onChange={(e) => setAnganwadiFormData(prev => ({...prev, anganwadi_number: e.target.value}))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                placeholder="अंगणवाडी क्रमांक प्रविष्ट करा"
+                placeholder={t('fims.enterAnganwadiNumber')}
                 disabled={isViewMode}
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                सेविकेचे नाव
+                {t('fims.supervisorName')}
               </label>
               <input
                 type="text"
                 value={anganwadiFormData.supervisor_name}
                 onChange={(e) => setAnganwadiFormData(prev => ({...prev, supervisor_name: e.target.value}))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                placeholder="सेविकेचे नाव प्रविष्ट करा"
+                placeholder={t('fims.enterSupervisorName')}
                 disabled={isViewMode}
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                सहायकाचे नाव
+                {t('fims.helperName')}
               </label>
               <input
                 type="text"
                 value={anganwadiFormData.helper_name}
                 onChange={(e) => setAnganwadiFormData(prev => ({...prev, helper_name: e.target.value}))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                placeholder="सहायकाचे नाव प्रविष्ट करा"
+                placeholder={t('fims.enterHelperName')}
                 disabled={isViewMode}
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                गावाचे नाव
+                {t('fims.villageName')}
               </label>
               <input
                 type="text"
                 value={anganwadiFormData.village_name}
                 onChange={(e) => setAnganwadiFormData(prev => ({...prev, village_name: e.target.value}))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                placeholder="गावाचे नाव प्रविष्ट करा"
+                placeholder={t('fims.enterVillageName')}
                 disabled={isViewMode}
               />
             </div>
@@ -776,14 +893,14 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                स्थानाचे नाव *
+                {t('fims.locationName')} *
               </label>
               <input
                 type="text"
                 value={inspectionData.location_name}
                 onChange={(e) => setInspectionData(prev => ({...prev, location_name: e.target.value}))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="स्थानाचे नाव प्रविष्ट करा"
+                placeholder={t('fims.enterLocationName')}
                 required
                 disabled={isViewMode}
               />
@@ -791,7 +908,7 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                नियोजित तारीख
+                {t('fims.plannedDate')}
               </label>
               <input
                 type="date"
@@ -804,7 +921,7 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                GPS स्थान
+                GPS Location
               </label>
               {!isViewMode && (
                 <button
@@ -814,16 +931,16 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
                   className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
                 >
                   <MapPin className="h-4 w-4" />
-                  <span>{isGettingLocation ? 'स्थान मिळवत आहे...' : 'सध्याचे स्थान मिळवा'}</span>
+                  <span>{isGettingLocation ? t('fims.gettingLocation') : t('fims.getCurrentLocation')}</span>
                 </button>
               )}
               {inspectionData.latitude && inspectionData.longitude && (
                 <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-sm text-green-800 font-medium">स्थान कॅप्चर केले</p>
+                  <p className="text-sm text-green-800 font-medium">{t('fims.locationCaptured')}</p>
                   <p className="text-xs text-green-600">
-                    अक्षांश: {inspectionData.latitude.toFixed(6)}<br />
-                    रेखांश: {inspectionData.longitude.toFixed(6)}<br />
-                    अचूकता: {inspectionData.location_accuracy ? Math.round(inspectionData.location_accuracy) + 'm' : 'N/A'}
+                    {t('fims.latitude')}: {inspectionData.latitude.toFixed(6)}<br />
+                    {t('fims.longitude')}: {inspectionData.longitude.toFixed(6)}<br />
+                    {t('fims.accuracy')}: {inspectionData.location_accuracy ? Math.round(inspectionData.location_accuracy) + 'm' : 'N/A'}
                   </p>
                 </div>
               )}
@@ -842,6 +959,19 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
                 readOnly={isViewMode}
               />
             </div>
+            {/* Google Maps Place Picker for manual location selection - only show if location not detected */}
+            {!inspectionData.location_detected && (
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  स्थान शोधा (Search Location)
+                </label>
+                <div style={{ width: '100%', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: '8px' }}>
+                  <gmpx-place-picker 
+                    placeholder="पत्ता किंवा स्थान शोधा"
+                  ></gmpx-place-picker>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -868,7 +998,7 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
                 (केंद्र शासनाचे पत्र क्र. F.No.१६-३/२००४-ME (P+) दि. २२ ऑक्टोबर२०१०.)
               </p>
               {inspectionData.location_detected && (
-                <p className="text-sm text-green-200 mt-1">
+                <p className="text-sm text-green-700 mt-1">
                   <strong>स्थान:</strong> {inspectionData.location_detected}
                 </p>
               )}
@@ -1302,23 +1432,23 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
         <div className="bg-gradient-to-r from-indigo-500 to-purple-600 px-8 py-6">
           <div className="flex items-center text-white">
             <Camera className="w-8 h-8 mr-4" />
-            <h3 className="text-2xl font-bold">फोटो अपलोड करा</h3>
+            <h3 className="text-2xl font-bold">{t('fims.uploadPhotos')}</h3>
           </div>
         </div>
         <div className="p-10">
           <div className="space-y-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              फोटो दस्तऐवजीकरण
+              {t('fims.photoDocumentation')}
             </h3>
             
             {/* Photo Upload Area */}
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-purple-400 transition-colors duration-200">
               <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h4 className="text-lg font-medium text-gray-900 mb-2">अंगणवाडी फोटो अपलोड करा</h4>
+              <h4 className="text-lg font-medium text-gray-900 mb-2">Upload Anganwadi Photos</h4>
               <p className="text-gray-600 mb-4">
                 {photoFiles.length > 0 
-                  ? `${photoFiles.length}/5 फोटो निवडले आहेत` 
-                  : 'फोटो निवडा (जास्तीत जास्त 5)'}
+                  ? `${photoFiles.length}/5 photos selected` 
+                  : 'Select photos to upload (Max 5)'}
               </p>
               
               <input
@@ -1339,7 +1469,7 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
                 }`}
               >
                 <Camera className="h-4 w-4 mr-2" />
-                {photoFiles.length >= 5 ? 'जास्तीत जास्त फोटो पोहोचले' : 'फोटो निवडा'}
+                {photoFiles.length >= 5 ? 'Maximum Photos Reached' : 'Choose Photos'}
               </label>
             </div>
 
@@ -1348,7 +1478,7 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
               <div className="mt-6">
                 <h4 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
                   <Camera className="h-5 w-5 mr-2 text-purple-600" />
-                  निवडलेले फोटो ({photoFiles.length}/5)
+                  Selected Photos ({photoFiles.length}/5)
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {photoFiles.map((file, index) => (
@@ -1380,7 +1510,7 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
             {isUploadingPhotos && (
               <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-blue-800">फोटो अपलोड करत आहे...</span>
+                  <span className="text-sm font-medium text-blue-800">Uploading Photos...</span>
                   <span className="text-sm text-blue-600">{uploadProgress}%</span>
                 </div>
                 <div className="w-full bg-blue-200 rounded-full h-2">
@@ -1396,7 +1526,7 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
             {isViewMode && editingInspection?.fims_inspection_photos && editingInspection.fims_inspection_photos.length > 0 && (
               <div className="mt-6">
                 <h4 className="text-md font-medium text-gray-900 mb-3">
-                  तपासणी फोटो ({editingInspection.fims_inspection_photos.length})
+                  Inspection Photos ({editingInspection.fims_inspection_photos.length})
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {editingInspection.fims_inspection_photos.map((photo: any, index: number) => (
@@ -1426,7 +1556,7 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
             {isViewMode && (!editingInspection?.fims_inspection_photos || editingInspection.fims_inspection_photos.length === 0) && (
               <div className="text-center py-8 text-gray-500">
                 <Camera className="h-12 w-12 text-gray-300 mx-auto mb-2" />
-                <p>कोणतेही फोटो सापडले नाहीत</p>
+                <p>{t('fims.noPhotosFound')}</p>
               </div>
             )}
           </div>
@@ -1444,7 +1574,7 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
             className="px-8 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Save className="h-5 w-5" />
-            <span>{isLoading ? 'सेव्ह करत आहे...' : 'मसुदा म्हणून जतन करा'}</span>
+            <span>{isLoading ? t('common.saving') : t('fims.saveAsDraft')}</span>
           </button>
           <button
             type="button"
@@ -1453,7 +1583,7 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
             className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Send className="h-5 w-5" />
-            <span>{isLoading ? 'सबमिट करत आहे...' : 'तपासणी सबमिट करा'}</span>
+            <span>{isLoading ? t('common.submitting') : t('fims.submitInspection')}</span>
           </button>
         </div>
       )}
@@ -1469,7 +1599,7 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
           className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors"
         >
           <ArrowLeft className="h-5 w-5" />
-          <span>मागे</span>
+          <span>{t('common.back')}</span>
         </button>
       </div>
 
@@ -1488,7 +1618,7 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
           disabled={currentStep === 1}
           className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 transition-colors"
         >
-          मागील
+          {t('common.previous')}
         </button>
         
         {currentStep < 3 && (
@@ -1496,7 +1626,7 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
             onClick={() => setCurrentStep(Math.min(3, currentStep + 1))}
             className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
           >
-            पुढील
+            {t('common.next')}
           </button>
         )}
       </div>
