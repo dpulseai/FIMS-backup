@@ -384,7 +384,7 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
         // Get location name using Google Maps Geocoding API
         try {
           const response = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${import.meta.env.VITE_GOOGLE_API_KEY || 'AIzaSyDzOjsiqs6rRjSJWVdXfUBl4ckXayL8AbE'}&language=mr`
+            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${import.meta.env.VITE_GOOGLE_API_KEY || 'AIzaSyAjFLdphP7tlo99o3L6IgxbeSOHPsla9-Y'}&language=mr`
           );
           const data = await response.json();
           
