@@ -142,7 +142,7 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedPhotos, setUploadedPhotos] = useState<File[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
+const [isUploading, setIsUploading] = useState(false);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
@@ -419,69 +419,16 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
     );
   };
 
-  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('Photo upload triggered');
-    
-    const input = event.target;
-    const files = Array.from(input.files || []);
-    
-    if (files.length === 0) {
-      console.log('No files selected');
-      return;
-    }
+ const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const files = Array.from(event.target.files || []);
+  if (uploadedPhotos.length + files.length > 5) {
+    alert('Maximum 5 photos allowed');
+    return;
+  }
+  setUploadedPhotos(prev => [...prev, ...files]);
+};
 
-    console.log('Files selected:', files.length);
 
-    try {
-      // Check total limit
-      const totalFiles = photoFiles.length + files.length;
-      if (totalFiles > 5) {
-        alert(`Maximum 5 photos allowed. You can add ${5 - photoFiles.length} more photos.`);
-        return;
-      }
-
-      const newFiles: File[] = [];
-      const newPreviewUrls: string[] = [];
-
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        
-        // Validate file type
-        if (!file.type.startsWith('image/')) {
-          alert(`${file.name} is not a valid image file`);
-          continue;
-        }
-
-        // Validate file size (5MB limit)
-        if (file.size > 5 * 1024 * 1024) {
-          alert(`${file.name} is too large. Maximum size is 5MB`);
-          continue;
-        }
-
-        newFiles.push(file);
-        
-        // Create preview URL
-        const previewUrl = URL.createObjectURL(file);
-        newPreviewUrls.push(previewUrl);
-      }
-
-      if (newFiles.length > 0) {
-        setPhotoFiles(prev => [...prev, ...newFiles]);
-        setPhotoPreviews(prev => [...prev, ...newPreviewUrls]);
-        console.log('Photos added successfully:', newFiles.length);
-        
-        // Show success message
-        alert(`${newFiles.length} photo(s) added successfully!`);
-      }
-
-    } catch (error) {
-      console.error('Error handling photo upload:', error);
-      alert('Error processing photos. Please try again.');
-    } finally {
-      // Clear the input value to allow re-selection of the same files
-      input.value = '';
-    }
-  };
 
   const handlePlaceSelect = (event: any) => {
     if (!event.detail) {
@@ -525,22 +472,11 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
     }
   };
 
-  const removePhoto = async (index: number) => {
-    try {
-      // Revoke the preview URL to free memory
-      if (photoPreviews[index]) {
-        URL.revokeObjectURL(photoPreviews[index]);
-      }
-      
-      // Remove from both arrays
-      setPhotoFiles(prev => prev.filter((_, i) => i !== index));
-      setPhotoPreviews(prev => prev.filter((_, i) => i !== index));
-      
-      console.log('Photo removed at index:', index);
-    } catch (error) {
-      console.error('Error removing photo:', error);
-    }
-  };
+const removePhoto = (index: number) => {
+  setUploadedPhotos(prev => prev.filter((_, i) => i !== index));
+};
+
+
 
   // Clean up preview URLs when component unmounts
   useEffect(() => {
@@ -549,37 +485,45 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
     };
   }, []);
 
-  const uploadPhotosToSupabase = async (inspectionId: string) => {
-    if (photoFiles.length === 0) return;
+const uploadPhotosToSupabase = async (inspectionId: string) => {
+  if (uploadedPhotos.length === 0) return;
 
-    console.log('Starting photo upload simulation:', photoFiles.length, 'files');
-    setIsUploadingPhotos(true);
-    setUploadProgress(0);
-    
-    try {
-      for (let i = 0; i < photoFiles.length; i++) {
-        const file = photoFiles[i];
-        console.log(`Uploading photo ${i + 1}/${photoFiles.length}:`, file.name);
-        
-        // Simulate upload progress
-        setUploadProgress(Math.round(((i + 0.5) / photoFiles.length) * 100));
-        
-        // Simulate upload delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Update progress
-        setUploadProgress(Math.round(((i + 1) / photoFiles.length) * 100));
-      }
-      
-      console.log('All photos uploaded successfully (simulated)');
-    } catch (error) {
-      console.error('Error uploading photos:', error);
-      throw error;
-    } finally {
-      setIsUploadingPhotos(false);
-      setUploadProgress(0);
+  setIsUploading(true);
+  try {
+    for (let i = 0; i < uploadedPhotos.length; i++) {
+      const file = uploadedPhotos[i];
+      const fileExt = file.name.split('.').pop();
+      const fileName = `anganwadi_${inspectionId}_${Date.now()}_${i}.${fileExt}`;
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('field-visit-images')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('field-visit-images')
+        .getPublicUrl(fileName);
+
+      const { error: dbError } = await supabase
+        .from('fims_inspection_photos')
+        .insert({
+          inspection_id: inspectionId,
+          photo_url: publicUrl,
+          photo_name: file.name,
+          description: `Anganwadi inspection photo ${i + 1}`,
+          photo_order: i + 1,
+        });
+
+      if (dbError) throw dbError;
     }
-  };
+  } catch (error) {
+    console.error('Error uploading photos:', error);
+    throw error;
+  } finally {
+    setIsUploading(false);
+  }
+};
 
   const generateInspectionNumber = () => {
     const now = new Date();
@@ -1296,169 +1240,174 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
   );
 
   const renderPhotosAndSubmit = () => (
-    <div className="space-y-8">
-      {/* Photo Upload Section */}
-      <section className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
-        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 px-8 py-6">
-          <div className="flex items-center text-white">
-            <Camera className="w-8 h-8 mr-4" />
-            <h3 className="text-2xl font-bold">फोटो अपलोड करा</h3>
-          </div>
+  <div className="space-y-8">
+    {/* Photo Upload Section */}
+    <section className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+      <div className="bg-gradient-to-r from-indigo-500 to-purple-600 px-8 py-6">
+        <div className="flex items-center text-white">
+          <Camera className="w-8 h-8 mr-4" />
+          <h3 className="text-2xl font-bold">फोटो अपलोड करा</h3>
         </div>
-        <div className="p-10">
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              फोटो दस्तऐवजीकरण
-            </h3>
-            
-            {/* Photo Upload Area */}
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-purple-400 transition-colors duration-200">
-              <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h4 className="text-lg font-medium text-gray-900 mb-2">अंगणवाडी फोटो अपलोड करा</h4>
-              <p className="text-gray-600 mb-4">
-                {photoFiles.length > 0 
-                  ? `${photoFiles.length}/5 फोटो निवडले आहेत` 
-                  : 'फोटो निवडा (जास्तीत जास्त 5)'}
-              </p>
-              
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handlePhotoUpload}
-                disabled={isViewMode || photoFiles.length >= 5}
-                id="photo-upload"
-                style={{ display: 'none' }}
-              />
-              <label
-                htmlFor="photo-upload"
-                className={`inline-flex items-center px-4 py-2 rounded-lg cursor-pointer transition-colors duration-200 ${
-                  isViewMode || photoFiles.length >= 5
-                    ? 'bg-gray-400 cursor-not-allowed text-white'
-                    : 'bg-purple-600 hover:bg-purple-700 text-white'
-                }`}
-              >
-                <Camera className="h-4 w-4 mr-2" />
-                {photoFiles.length >= 5 ? 'जास्तीत जास्त फोटो पोहोचले' : 'फोटो निवडा'}
-              </label>
+      </div>
+      <div className="p-10">
+        <div className="space-y-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            फोटो दस्तऐवजीकरण
+          </h3>
+
+          {/* Photo Upload Area */}
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-purple-400 transition-colors duration-200">
+            <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h4 className="text-lg font-medium text-gray-900 mb-2">अंगणवाडी फोटो अपलोड करा</h4>
+            <p className="text-gray-600 mb-4">
+              {uploadedPhotos.length > 0
+                ? `${uploadedPhotos.length}/5 फोटो निवडले आहेत`
+                : 'फोटो निवडा (जास्तीत जास्त 5)'}
+            </p>
+
+            <input
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={handlePhotoUpload}
+              disabled={isViewMode || uploadedPhotos.length >= 5}
+              id="photo-upload"
+              style={{ display: 'none' }}
+            />
+            <label
+              htmlFor="photo-upload"
+              className={`inline-flex items-center px-4 py-2 rounded-lg cursor-pointer transition-colors duration-200 ${
+                isViewMode || uploadedPhotos.length >= 5
+                  ? 'bg-gray-400 cursor-not-allowed text-white'
+                  : 'bg-purple-600 hover:bg-purple-700 text-white'
+              }`}
+            >
+              <Camera className="h-4 w-4 mr-2" />
+              {uploadedPhotos.length >= 5 ? 'जास्तीत जास्त फोटो पोहोचले' : 'फोटो निवडा'}
+            </label>
+          </div>
+
+          {/* Photo Previews */}
+          {uploadedPhotos.length > 0 && (
+            <div className="mt-6">
+              <h4 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                <Camera className="h-5 w-5 mr-2 text-purple-600" />
+                निवडलेले फोटो ({uploadedPhotos.length}/5)
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {uploadedPhotos.map((file, index) => (
+                  <div
+                    key={index}
+                    className="relative bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow duration-200"
+                  >
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt={`Preview ${index + 1}`}
+                      className="w-full h-40 object-cover"
+                    />
+                    {!isViewMode && (
+                      <button
+                        onClick={() => removePhoto(index)}
+                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-lg transition-colors duration-200"
+                      >
+                        <span className="text-sm font-bold">×</span>
+                      </button>
+                    )}
+                    <div className="p-3">
+                      <p className="text-sm font-medium text-gray-800 truncate mb-1">{file.name}</p>
+                      <p className="text-xs text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
+          )}
 
-            {/* Photo Previews */}
-            {photoFiles.length > 0 && (
-              <div className="mt-6">
-                <h4 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                  <Camera className="h-5 w-5 mr-2 text-purple-600" />
-                  निवडलेले फोटो ({photoFiles.length}/5)
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {photoFiles.map((file, index) => (
-                    <div key={index} className="relative bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow duration-200">
-                      <img
-                        src={photoPreviews[index]}
-                        alt={`Preview ${index + 1}`}
-                        className="w-full h-40 object-cover"
-                      />
-                      {!isViewMode && (
-                        <button
-                          onClick={() => removePhoto(index)}
-                          className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-lg transition-colors duration-200"
-                        >
-                          <span className="text-sm font-bold">×</span>
-                        </button>
+          {/* Upload Progress */}
+          {isUploading && (
+            <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-blue-800">फोटो अपलोड करत आहे...</span>
+                {/* Assuming you have uploadProgress state */}
+                <span className="text-sm text-blue-600">{uploadProgress}%</span>
+              </div>
+              <div className="w-full bg-blue-200 rounded-full h-2">
+                <div
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                ></div>
+              </div>
+            </div>
+          )}
+
+          {/* Display existing photos when viewing */}
+          {isViewMode && editingInspection?.fims_inspection_photos && editingInspection.fims_inspection_photos.length > 0 && (
+            <div className="mt-6">
+              <h4 className="text-md font-medium text-gray-900 mb-3">
+                तपासणी फोटो ({editingInspection.fims_inspection_photos.length})
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {editingInspection.fims_inspection_photos.map((photo: any, index: number) => (
+                  <div
+                    key={photo.id}
+                    className="relative bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden"
+                  >
+                    <img
+                      src={photo.photo_url}
+                      alt={photo.description || `Anganwadi photo ${index + 1}`}
+                      className="w-full h-40 object-cover"
+                    />
+                    <div className="p-3">
+                      <p className="text-sm font-medium text-gray-800 truncate mb-1">
+                        {photo.photo_name || `Photo ${index + 1}`}
+                      </p>
+                      {photo.description && (
+                        <p className="text-xs text-gray-500 truncate">{photo.description}</p>
                       )}
-                      <div className="p-3">
-                        <p className="text-sm font-medium text-gray-800 truncate mb-1">{file.name}</p>
-                        <p className="text-xs text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
-                      </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Upload Progress */}
-            {isUploadingPhotos && (
-              <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-blue-800">फोटो अपलोड करत आहे...</span>
-                  <span className="text-sm text-blue-600">{uploadProgress}%</span>
-                </div>
-                <div className="w-full bg-blue-200 rounded-full h-2">
-                  <div 
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${uploadProgress}%` }}
-                  ></div>
-                </div>
-              </div>
-            )}
-
-            {/* Display existing photos when viewing */}
-            {isViewMode && editingInspection?.fims_inspection_photos && editingInspection.fims_inspection_photos.length > 0 && (
-              <div className="mt-6">
-                <h4 className="text-md font-medium text-gray-900 mb-3">
-                  तपासणी फोटो ({editingInspection.fims_inspection_photos.length})
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {editingInspection.fims_inspection_photos.map((photo: any, index: number) => (
-                    <div key={photo.id} className="relative bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
-                      <img
-                        src={photo.photo_url}
-                        alt={photo.description || `Anganwadi photo ${index + 1}`}
-                        className="w-full h-40 object-cover"
-                      />
-                      <div className="p-3">
-                        <p className="text-sm font-medium text-gray-800 truncate mb-1">
-                          {photo.photo_name || `Photo ${index + 1}`}
-                        </p>
-                        {photo.description && (
-                          <p className="text-xs text-gray-500 truncate">
-                            {photo.description}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* No photos message for view mode */}
-            {isViewMode && (!editingInspection?.fims_inspection_photos || editingInspection.fims_inspection_photos.length === 0) && (
-              <div className="text-center py-8 text-gray-500">
-                <Camera className="h-12 w-12 text-gray-300 mx-auto mb-2" />
-                <p>कोणतेही फोटो सापडले नाहीत</p>
-              </div>
-            )}
-          </div>
-
+          {/* No photos message for view mode */}
+          {isViewMode && (!editingInspection?.fims_inspection_photos || editingInspection.fims_inspection_photos.length === 0) && (
+            <div className="text-center py-8 text-gray-500">
+              <Camera className="h-12 w-12 text-gray-300 mx-auto mb-2" />
+              <p>कोणतेही फोटो सापडले नाहीत</p>
+            </div>
+          )}
         </div>
-      </section>
+      </div>
+    </section>
 
-      {/* Submit Buttons */}
-      {!isViewMode && (
-        <div className="flex justify-center space-x-4">
-          <button
-            type="button"
-            onClick={() => handleSubmit(true)}
-            disabled={isLoading || isUploading}
-            className="px-8 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Save className="h-5 w-5" />
-            <span>{isLoading ? 'सेव्ह करत आहे...' : 'मसुदा म्हणून जतन करा'}</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSubmit(false)}
-            disabled={isLoading || isUploading}
-            className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Send className="h-5 w-5" />
-            <span>{isLoading ? 'सबमिट करत आहे...' : 'तपासणी सबमिट करा'}</span>
-          </button>
-        </div>
-      )}
-    </div>
-  );
+    {/* Submit Buttons */}
+    {!isViewMode && (
+      <div className="flex justify-center space-x-4">
+        <button
+          type="button"
+          onClick={() => handleSubmit(true)}
+          disabled={isLoading || isUploading}
+          className="px-8 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Save className="h-5 w-5" />
+          <span>{isLoading ? 'सेव्ह करत आहे...' : 'मसुदा म्हणून जतन करा'}</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => handleSubmit(false)}
+          disabled={isLoading || isUploading}
+          className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Send className="h-5 w-5" />
+          <span>{isLoading ? 'सबमिट करत आहे...' : 'तपासणी सबमिट करा'}</span>
+        </button>
+      </div>
+    )}
+  </div>
+);
+
 
   return (
     <div className="container mx-auto px-4 py-8">
