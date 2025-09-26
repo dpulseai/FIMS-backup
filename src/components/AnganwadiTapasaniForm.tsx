@@ -1698,7 +1698,7 @@ const renderPhotosAndSubmit = () => (
           </div>
 
         </div>
-      </section>
+  );
 
       {/* Submit Buttons */}
       {!isViewMode && (
