@@ -355,12 +355,12 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
             { key: 'rajya_gunwatta_nirikshak', title: 'राज्य गुणवत्ता निरीक्षक तपासणी', subtitle: 'State Quality Inspector Inspection', color: 'emerald', active: true },
             { key: 'mahatma_gandhi_rojgar_hami', title: 'महात्मा गांधी रोजगार हमी योजना', subtitle: 'MGNREGA Work Inspection Form', color: 'green', active: true },
             { key: 'mumbai_nyayalay', title: 'मुंबई न्यायालय तपासणी प्रपत्र', subtitle: 'Mumbai High Court School Inspection Form', color: 'red', active: true },
-            { key: 'form_10', title: 'Form 10 Title', subtitle: 'Form 10 Description', color: 'cyan' },
-            { key: 'form_11', title: 'Form 11 Title', subtitle: 'Form 11 Description', color: 'violet' },
-            { key: 'form_12', title: 'Form 12 Title', subtitle: 'Form 12 Description', color: 'lime' },
-            { key: 'form_13', title: 'Form 13 Title', subtitle: 'Form 13 Description', color: 'amber' },
-            { key: 'form_14', title: 'Form 14 Title', subtitle: 'Form 14 Description', color: 'emerald' },
-            { key: 'form_15', title: 'Form 15 Title', subtitle: 'Form 15 Description', color: 'rose' }
+         //   { key: 'form_10', title: 'Form 10 Title', subtitle: 'Form 10 Description', color: 'cyan' },
+         //   { key: 'form_11', title: 'Form 11 Title', subtitle: 'Form 11 Description', color: 'violet' },
+         //   { key: 'form_12', title: 'Form 12 Title', subtitle: 'Form 12 Description', color: 'lime' },
+         //   { key: 'form_13', title: 'Form 13 Title', subtitle: 'Form 13 Description', color: 'amber' },
+         //   { key: 'form_14', title: 'Form 14 Title', subtitle: 'Form 14 Description', color: 'emerald' },
+         //   { key: 'form_15', title: 'Form 15 Title', subtitle: 'Form 15 Description', color: 'rose' }
           ].map((form, index) => (
             <div 
               key={form.key}
