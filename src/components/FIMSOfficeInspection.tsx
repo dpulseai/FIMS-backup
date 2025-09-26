@@ -1,6 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, FileText, MapPin, Camera, Save, Send, CircleCheck as CheckCircle, CircleAlert as AlertCircle, Calendar, Building, Users, BookOpen, FolderOpen, Search } from 'lucide-react';
+import { 
+  ArrowLeft,
+  FileText,
+  MapPin,
+  Camera,
+  Save,
+  Send,
+  CheckCircle,
+  AlertCircle,
+  Calendar,
+  Building,
+  Users,
+  BookOpen,
+  FolderOpen,
+  Search
+} from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
@@ -226,54 +241,32 @@ export const FIMSOfficeInspection: React.FC<FIMSOfficeInspectionProps> = ({
       return;
     }
 
-    // Clear any cached location data by requesting fresh location
-    // This forces the browser to get a new GPS fix instead of using cached data
     setIsLoading(true);
     navigator.geolocation.getCurrentPosition(
       async (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        const accuracy = position.coords.accuracy;
+        setInspectionData(prev => ({
+          ...prev,
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          location_accuracy: position.coords.accuracy
+        }));
         
-        // Get location name using Google Maps Geocoding API
+        // Get location name using reverse geocoding
         try {
           const response = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${import.meta.env.VITE_GOOGLE_API_KEY || 'AIzaSyDzOjsiqs6rRjSJWVdXfUBl4ckXayL8AbE'}&language=mr`
+            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=${import.meta.env.VITE_GOOGLE_API_KEY}`
           );
           const data = await response.json();
           
           if (data.results && data.results.length > 0) {
-            const address = data.results[0].formatted_address;
-            
-            // Update all location data in a single state call
+            const locationName = data.results[0].formatted_address;
             setInspectionData(prev => ({
               ...prev,
-              latitude: lat,
-              longitude: lng,
-              location_accuracy: accuracy,
-              address: address,
-              location_name: prev.location_name || address // Auto-fill if empty
-            }));
-          } else {
-            // No geocoding results, just update coordinates
-            setInspectionData(prev => ({
-              ...prev,
-              latitude: lat,
-              longitude: lng,
-              location_accuracy: accuracy,
-              address: 'Location detected but address not found'
+              address: locationName
             }));
           }
         } catch (error) {
           console.error('Error getting location name:', error);
-          // Fallback: just update coordinates without address
-          setInspectionData(prev => ({
-            ...prev,
-            latitude: lat,
-            longitude: lng,
-            location_accuracy: accuracy,
-            address: 'Unable to get address'
-          }));
         }
         
         setIsLoading(false);
@@ -283,11 +276,7 @@ export const FIMSOfficeInspection: React.FC<FIMSOfficeInspectionProps> = ({
         alert(t('fims.unableToGetLocation'));
         setIsLoading(false);
       },
-      { 
-        enableHighAccuracy: true, 
-        timeout: 15000, // Increased timeout for better GPS fix
-        maximumAge: 0 // Force fresh location, don't use cached data
-      }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
     );
   };
 
