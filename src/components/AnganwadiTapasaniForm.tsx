@@ -446,64 +446,6 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
   setUploadedPhotos(prev => [...prev, ...files]);
 };
 
-//  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('Photo upload triggered');
-    
-    // Reset the input value immediately to prevent stuck state
-    const input = event.target;
-    const files = input.files;
-    
-    // Clear input immediately
-    input.value = '';
-    
-    if (!files || files.length === 0) {
-      console.log('No files selected');
-      return;
-    }
-
-    console.log('Files selected:', files.length);
-
-    try {
-      // Check total limit
-      const totalFiles = photoFiles.length + files.length;
-      if (totalFiles > 5) {
-        alert(`Maximum 5 photos allowed. You can add ${5 - photoFiles.length} more photos.`);
-        return;
-      }
-
-      const newFiles: File[] = [];
-      const newPreviewUrls: string[] = [];
-
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        
-        // Validate file type
-        if (!file.type.startsWith('image/')) {
-          alert(`${file.name} is not a valid image file`);
-          continue;
-        }
-
-        // Validate file size (5MB limit)
-        if (file.size > 5 * 1024 * 1024) {
-          alert(`${file.name} is too large. Maximum size is 5MB`);
-          continue;
-        }
-
-        newFiles.push(file);
-        newPreviewUrls.push(URL.createObjectURL(file));
-      }
-
-      if (newFiles.length > 0) {
-        setPhotoFiles(prev => [...prev, ...newFiles]);
-        setPhotoPreviews(prev => [...prev, ...newPreviewUrls]);
-        console.log('Photos added successfully:', newFiles.length);
-      }
-
-    } catch (error) {
-      console.error('Error handling photo upload:', error);
-      alert('Error processing photos. Please try again.');
-    }
-  };
 
   const handlePlaceSelect = (event: any) => {
     if (!event.detail) {
@@ -551,20 +493,6 @@ const removePhoto = (index: number) => {
   setUploadedPhotos(prev => prev.filter((_, i) => i !== index));
 };
 
- // const removePhoto = async (index: number) => {
-    try {
-      // Revoke the preview URL to free memory
-      URL.revokeObjectURL(photoPreviews[index]);
-      
-      // Remove from both arrays
-      setPhotoFiles(prev => prev.filter((_, i) => i !== index));
-      setPhotoPreviews(prev => prev.filter((_, i) => i !== index));
-      
-      console.log('Photo removed at index:', index);
-    } catch (error) {
-      console.error('Error removing photo:', error);
-    }
-  };
 
   // Clean up preview URLs when component unmounts
   useEffect(() => {
