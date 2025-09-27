@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { 
+import {
   ArrowLeft,
   MapPin,
   Camera,
@@ -38,7 +38,7 @@ interface PahuvaidhakiyaFormData {
   inspection_purpose: string;
   
   // Technical work overview data (JSON to store table data)
-  technical_work_data: any;
+  technical_work_data: any[];
   
   // Disease information
   village_name: string;
@@ -56,10 +56,10 @@ interface PahuvaidhakiyaFormData {
   team_visit_dates: string;
   
   // Vaccination program data (JSON to store table data)
-  vaccination_program_data: any;
+  vaccination_program_data: any[];
   
-  // Scheme progress
-  scheme_progress: string;
+  // Scheme progress data (updated to match table)
+  scheme_progress_data: any[];
   
   // General technical evaluation
   general_evaluation: string;
@@ -108,7 +108,7 @@ export const PahuvaidhakiyaTapasaniForm: React.FC<PahuvaidhakiyaTapasaniFormProp
     visit_date: '',
     visit_time: '',
     inspection_purpose: '',
-    technical_work_data: {},
+    technical_work_data: [],
     village_name: '',
     disease_name: '',
     outbreak_period: '',
@@ -122,8 +122,8 @@ export const PahuvaidhakiyaTapasaniForm: React.FC<PahuvaidhakiyaTapasaniFormProp
     previous_outbreak_info: '',
     edr_submission_date: '',
     team_visit_dates: '',
-    vaccination_program_data: {},
-    scheme_progress: '',
+    vaccination_program_data: [],
+    scheme_progress_data: [],
     general_evaluation: '',
     instructions_given: ''
   });
@@ -162,8 +162,7 @@ export const PahuvaidhakiyaTapasaniForm: React.FC<PahuvaidhakiyaTapasaniFormProp
         });
       }
     }
-  }, 
-
+  }, [editingInspection]);
 
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
@@ -399,7 +398,7 @@ export const PahuvaidhakiyaTapasaniForm: React.FC<PahuvaidhakiyaTapasaniFormProp
 
     } catch (error) {
       console.error('Error saving inspection:', error);
-      alert('Error saving inspection: ' + error.message);
+      alert('Error saving inspection: ' + (error as Error).message);
     } finally {
       setIsLoading(false);
     }
@@ -672,32 +671,7 @@ export const PahuvaidhakiyaTapasaniForm: React.FC<PahuvaidhakiyaTapasaniFormProp
     </div>
   );
 
-  const renderBasicInfo = () => (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">परिशिष्ठ- अ</h2>
-        <h3 className="text-lg font-semibold text-gray-800 mb-1">
-          पशुवैद्यकीय संस्थांचे तांत्रिक निरीक्षण / तपासणी अहवाल
-        </h3>
-        <h3 className="text-base text-gray-600 mb-4">
-          (Technical inspection Report)
-        </h3>
-        <p className="text-sm text-gray-600 mb-6">
-          (पशुवैद्यकीय दवाखाना श्रेणी-1/पशुवैद्यकीय दवाखाना श्रेणी-2/फिरते पंवैद)
-        </p>
-        
-        {/* Important Tip */}
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 text-left">
-          <p className="text-sm text-yellow-800">
-            <strong>टिप:</strong> परिशिष्ठ-अ मधील तक्त्यांमध्ये माहिती भरताना ती चालू वर्षातील 1 एप्रिल पासून ज्या महिन्यामध्ये तपासणी करण्यात आली आहे 
-            त्याच्या मागील महिन्यापर्यंत नमूद करण्यात यावी. (उदा. 13 ऑक्टोबर ला तपासणी केलेली असल्यास सर्व तक्त्यांमध्ये माहिती ही त्या वर्षामधील 
-            1 एप्रिल ते 30 सप्टेंबर या कालावधी मधील नमूद करावी.)
-          </p>
-        </div>
-      </div>
-
- const renderTechnicalInspection = () => {
+  const renderTechnicalInspection = () => {
     const technicalWorkItems = [
       '1) बाह्यरुग्ण',
       '2) अंतर्गत रुग्ण',
@@ -705,33 +679,34 @@ export const PahuvaidhakiyaTapasaniForm: React.FC<PahuvaidhakiyaTapasaniFormProp
       '4) खर्चीकरण (मुख्यालय)',
       '5) खर्चीकरण (फिरतीवर)',
       '6) मोठ्या शस्त्रक्रिया - मुख्यालय',
-          'मोठ्या शस्त्रक्रिया - फिरती',
-          'मोठ्या शस्त्रक्रिया - एकूण',
+      'मोठ्या शस्त्रक्रिया - फिरती',
+      'मोठ्या शस्त्रक्रिया - एकूण',
       '7) छोट्या शस्त्रक्रिया - मुख्यालय',
-          'छोट्या शस्त्रक्रिया -फिरती',
-          'छोट्या शस्त्रक्रिया -एकूण',
+      'छोट्या शस्त्रक्रिया -फिरती',
+      'छोट्या शस्त्रक्रिया -एकूण',
       '8) कृत्रिम रेतन (प्रथम) -विदेशी',
-          'कृत्रिम रेतन (प्रथम) -संकरीत',
-          'कृत्रिम रेतन (प्रथम) -देशी',
-          'कृत्रिम रेतन (प्रथम) -म्हैस',
-          'कृत्रिम रेतन (प्रथम) -एकूण',
+      'कृत्रिम रेतन (प्रथम) -संकरीत',
+      'कृत्रिम रेतन (प्रथम) -देशी',
+      'कृत्रिम रेतन (प्रथम) -म्हैस',
+      'कृत्रिम रेतन (प्रथम) -एकूण',
       '9) जन्मलेली वासरे - गाय (संकरीत)',
-          'जन्मलेली वासरे - गाय (देशी)',
-          'जन्मलेली वासरे -म्हैस ',
-          'जन्मलेली वासरे - एकूण',
+      'जन्मलेली वासरे - गाय (देशी)',
+      'जन्मलेली वासरे -म्हैस ',
+      'जन्मलेली वासरे - एकूण',
       '10) प्रति वासरू लागलेले गाय (संकरीत)',
-          'कृत्रिम रेतन प्रमाण गाय (देशी)',
-           'म्हैस',
+      'कृत्रिम रेतन प्रमाण गाय (देशी)',
+      'म्हैस',
       '11) गर्भ तपासणी - गाय',
-           'गर्भ तपासणी - म्हैस',
-            'गर्भ तपासणी - एकूण',
+      'गर्भ तपासणी - म्हैस',
+      'गर्भ तपासणी - एकूण',
       '12) वांझ जनावरे तपासणी -गाय ',
-           'वांझ जनावरे तपासणी -म्हैस',
-            'वांझ जनावरे तपासणी - एकूण',
+      'वांझ जनावरे तपासणी -म्हैस',
+      'वांझ जनावरे तपासणी - एकूण',
       '13) ऋणांची रोजची सरासरी हजेरी',
       '14) जमा सेवाशुल्क'
     ];
- const vaccineItems = [
+
+    const vaccineItems = [
       'HS', 'HS+BQ', 'BQ', 'FMD', 'PPR', 'ETV', 'Fowl Pox', 'RD', 'LSD', 'Goat Pox', 'CSF', 'Theileria', 'Other'
     ];
 
@@ -771,40 +746,43 @@ export const PahuvaidhakiyaTapasaniForm: React.FC<PahuvaidhakiyaTapasaniFormProp
                     <td className="border border-gray-300 px-2 py-1">
                       <input
                         type="text"
-                        value={formData.technical_work_data[index]?.target || ''}
+                        value={pahuvaidhakiyaFormData.technical_work_data[index]?.target || ''}
                         onChange={(e) => {
-                          const newData = [...formData.technical_work_data];
+                          const newData = [...pahuvaidhakiyaFormData.technical_work_data];
                           newData[index] = { ...newData[index], target: e.target.value };
-                          setFormData(prev => ({...prev, technical_work_data: newData}));
+                          setPahuvaidhakiyaFormData(prev => ({...prev, technical_work_data: newData}));
                         }}
                         className="w-full px-2 py-1 border border-gray-200 rounded focus:ring-1 focus:ring-cyan-500"
                         placeholder="0"
+                        disabled={isViewMode}
                       />
                     </td>
                     <td className="border border-gray-300 px-2 py-1">
                       <input
                         type="text"
-                        value={formData.technical_work_data[index]?.achieved_current || ''}
+                        value={pahuvaidhakiyaFormData.technical_work_data[index]?.achieved_current || ''}
                         onChange={(e) => {
-                          const newData = [...formData.technical_work_data];
+                          const newData = [...pahuvaidhakiyaFormData.technical_work_data];
                           newData[index] = { ...newData[index], achieved_current: e.target.value };
-                          setFormData(prev => ({...prev, technical_work_data: newData}));
+                          setPahuvaidhakiyaFormData(prev => ({...prev, technical_work_data: newData}));
                         }}
                         className="w-full px-2 py-1 border border-gray-200 rounded focus:ring-1 focus:ring-cyan-500"
                         placeholder="0"
+                        disabled={isViewMode}
                       />
                     </td>
                     <td className="border border-gray-300 px-2 py-1">
                       <input
                         type="text"
-                        value={formData.technical_work_data[index]?.achieved_last || ''}
+                        value={pahuvaidhakiyaFormData.technical_work_data[index]?.achieved_last || ''}
                         onChange={(e) => {
-                          const newData = [...formData.technical_work_data];
+                          const newData = [...pahuvaidhakiyaFormData.technical_work_data];
                           newData[index] = { ...newData[index], achieved_last: e.target.value };
-                          setFormData(prev => ({...prev, technical_work_data: newData}));
+                          setPahuvaidhakiyaFormData(prev => ({...prev, technical_work_data: newData}));
                         }}
                         className="w-full px-2 py-1 border border-gray-200 rounded focus:ring-1 focus:ring-cyan-500"
                         placeholder="0"
+                        disabled={isViewMode}
                       />
                     </td>
                   </tr>
@@ -813,7 +791,8 @@ export const PahuvaidhakiyaTapasaniForm: React.FC<PahuvaidhakiyaTapasaniFormProp
             </table>
           </div>
         </div>
- {/* Disease Information */}
+
+        {/* Disease Information */}
         <div className="bg-white p-6 rounded-lg border border-gray-200">
           <h4 className="text-md font-semibold text-gray-800 mb-4">7. रोग प्रादुर्भाव माहिती :-</h4>
           <div className="space-y-4">
@@ -823,10 +802,11 @@ export const PahuvaidhakiyaTapasaniForm: React.FC<PahuvaidhakiyaTapasaniFormProp
               </label>
               <input
                 type="text"
-                value={formData.village_name}
-                onChange={(e) => setFormData(prev => ({...prev, village_name: e.target.value}))}
+                value={pahuvaidhakiyaFormData.village_name}
+                onChange={(e) => setPahuvaidhakiyaFormData(prev => ({...prev, village_name: e.target.value}))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
                 placeholder="गावाचे नाव प्रविष्ट करा"
+                disabled={isViewMode}
               />
             </div>
             
@@ -836,10 +816,11 @@ export const PahuvaidhakiyaTapasaniForm: React.FC<PahuvaidhakiyaTapasaniFormProp
               </label>
               <input
                 type="text"
-                value={formData.disease_name}
-                onChange={(e) => setFormData(prev => ({...prev, disease_name: e.target.value}))}
+                value={pahuvaidhakiyaFormData.disease_name}
+                onChange={(e) => setPahuvaidhakiyaFormData(prev => ({...prev, disease_name: e.target.value}))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
                 placeholder="रोगाचे नाव प्रविष्ट करा"
+                disabled={isViewMode}
               />
             </div>
             
@@ -849,10 +830,11 @@ export const PahuvaidhakiyaTapasaniForm: React.FC<PahuvaidhakiyaTapasaniFormProp
               </label>
               <input
                 type="text"
-                value={formData.outbreak_period}
-                onChange={(e) => setFormData(prev => ({...prev, outbreak_period: e.target.value}))}
+                value={pahuvaidhakiyaFormData.outbreak_period}
+                onChange={(e) => setPahuvaidhakiyaFormData(prev => ({...prev, outbreak_period: e.target.value}))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
                 placeholder="प्रादुर्भावाचा कालावधी प्रविष्ट करा"
+                disabled={isViewMode}
               />
             </div>
             
@@ -862,10 +844,11 @@ export const PahuvaidhakiyaTapasaniForm: React.FC<PahuvaidhakiyaTapasaniFormProp
               </label>
               <input
                 type="text"
-                value={formData.livestock_count}
-                onChange={(e) => setFormData(prev => ({...prev, livestock_count: e.target.value}))}
+                value={pahuvaidhakiyaFormData.livestock_count}
+                onChange={(e) => setPahuvaidhakiyaFormData(prev => ({...prev, livestock_count: e.target.value}))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
                 placeholder="पशुधन संख्या प्रविष्ट करा"
+                disabled={isViewMode}
               />
             </div>
             
@@ -875,10 +858,11 @@ export const PahuvaidhakiyaTapasaniForm: React.FC<PahuvaidhakiyaTapasaniFormProp
               </label>
               <input
                 type="text"
-                value={formData.infection_count}
-                onChange={(e) => setFormData(prev => ({...prev, infection_count: e.target.value}))}
+                value={pahuvaidhakiyaFormData.infection_count}
+                onChange={(e) => setPahuvaidhakiyaFormData(prev => ({...prev, infection_count: e.target.value}))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
                 placeholder="लागण संख्या प्रविष्ट करा"
+                disabled={isViewMode}
               />
             </div>
             
@@ -888,10 +872,11 @@ export const PahuvaidhakiyaTapasaniForm: React.FC<PahuvaidhakiyaTapasaniFormProp
               </label>
               <input
                 type="text"
-                value={formData.death_count}
-                onChange={(e) => setFormData(prev => ({...prev, death_count: e.target.value}))}
+                value={pahuvaidhakiyaFormData.death_count}
+                onChange={(e) => setPahuvaidhakiyaFormData(prev => ({...prev, death_count: e.target.value}))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
                 placeholder="मृत्यू संख्या प्रविष्ट करा"
+                disabled={isViewMode}
               />
             </div>
             
@@ -901,10 +886,11 @@ export const PahuvaidhakiyaTapasaniForm: React.FC<PahuvaidhakiyaTapasaniFormProp
               </label>
               <input
                 type="text"
-                value={formData.vaccination_done}
-                onChange={(e) => setFormData(prev => ({...prev, vaccination_done: e.target.value}))}
+                value={pahuvaidhakiyaFormData.vaccination_done}
+                onChange={(e) => setPahuvaidhakiyaFormData(prev => ({...prev, vaccination_done: e.target.value}))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
                 placeholder="लसीकरण माहिती प्रविष्ट करा"
+                disabled={isViewMode}
               />
             </div>
             
@@ -913,36 +899,39 @@ export const PahuvaidhakiyaTapasaniForm: React.FC<PahuvaidhakiyaTapasaniFormProp
                 केलेली कार्यवाही
               </label>
               <textarea
-                value={formData.action_taken}
-                onChange={(e) => setFormData(prev => ({...prev, action_taken: e.target.value}))}
+                value={pahuvaidhakiyaFormData.action_taken}
+                onChange={(e) => setPahuvaidhakiyaFormData(prev => ({...prev, action_taken: e.target.value}))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
                 rows={3}
                 placeholder="केलेली कार्यवाही प्रविष्ट करा"
-              />
-            </div>
-            
-<div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                10 किमी परिघातील गावांची संख्या:
-              </label>
-              <input
-                type="text"
-                value={formData.villages_10km_count}
-                onChange={(e) => setFormData(prev => ({...prev, villages_10km_count: e.target.value}))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                disabled={isViewMode}
               />
             </div>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-               10 किमी परिसरातील पशुधन संख्या (गाय/म्हैस वर्गीय, शेळी/मेंढी/इतर)- :
+                10 किमी परिघातील गावांची संख्या:
               </label>
               <input
                 type="text"
-                value={formData.livestock_10km_area}
-                onChange={(e) => setFormData(prev => ({...prev, livestock_10km_area: e.target.value}))}
+                value={pahuvaidhakiyaFormData.villages_10km_count}
+                onChange={(e) => setPahuvaidhakiyaFormData(prev => ({...prev, villages_10km_count: e.target.value}))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                disabled={isViewMode}
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                10 किमी परिसरातील पशुधन संख्या (गाय/म्हैस वर्गीय, शेळी/मेंढी/इतर)-
+              </label>
+              <input
+                type="text"
+                value={pahuvaidhakiyaFormData.livestock_10km_area}
+                onChange={(e) => setPahuvaidhakiyaFormData(prev => ({...prev, livestock_10km_area: e.target.value}))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
                 placeholder="१० किमी परिसरातील पशुधन संख्या प्रविष्ट करा"
+                disabled={isViewMode}
               />
             </div>
             
@@ -951,10 +940,11 @@ export const PahuvaidhakiyaTapasaniForm: React.FC<PahuvaidhakiyaTapasaniFormProp
                 या पूर्वी झालेला रोग प्रादुर्भाव माहिती
               </label>
               <textarea
-                value={formData.previous_outbreak_info}
-                onChange={(e) => setFormData(prev => ({...prev, previous_outbreak_info: e.target.value}))}
+                value={pahuvaidhakiyaFormData.previous_outbreak_info}
+                onChange={(e) => setPahuvaidhakiyaFormData(prev => ({...prev, previous_outbreak_info: e.target.value}))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
                 rows={3}
+                disabled={isViewMode}
               />
             </div>
            
@@ -964,15 +954,16 @@ export const PahuvaidhakiyaTapasaniForm: React.FC<PahuvaidhakiyaTapasaniFormProp
               </label>
               <input
                 type="date"
-                value={formData.edr_submission_date}
-                onChange={(e) => setFormData(prev => ({...prev, edr_submission_date: e.target.value}))}
+                value={pahuvaidhakiyaFormData.edr_submission_date}
+                onChange={(e) => setPahuvaidhakiyaFormData(prev => ({...prev, edr_submission_date: e.target.value}))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                disabled={isViewMode}
               />
             </div>
           </div>
         </div>
 
- {/* Vaccination Program */}
+        {/* Vaccination Program */}
         <div className="bg-white p-6 rounded-lg border border-gray-200">
           <h4 className="text-md font-semibold text-gray-800 mb-4">8. लसीकरण कार्यक्रम :-</h4>
           <div className="overflow-x-auto">
@@ -994,23 +985,126 @@ export const PahuvaidhakiyaTapasaniForm: React.FC<PahuvaidhakiyaTapasaniFormProp
                 {vaccineItems.map((vaccine, index) => (
                   <tr key={index}>
                     <td className="border border-gray-300 px-2 py-2 font-medium">{vaccine}</td>
-                    {Array(8).fill(null).map((_, colIndex) => (
-                      <td key={colIndex} className="border border-gray-300 px-1 py-1">
-                        <input
-                          type="text"
-                          className="w-full px-1 py-1 border border-gray-200 rounded text-xs focus:ring-1 focus:ring-cyan-500"
-                          placeholder="-"
-                        />
-                      </td>
-                    ))}
+                    <td className="border border-gray-300 px-1 py-1">
+                      <input
+                        type="text"
+                        value={pahuvaidhakiyaFormData.vaccination_program_data[index]?.eligible_livestock || ''}
+                        onChange={(e) => {
+                          const newData = [...pahuvaidhakiyaFormData.vaccination_program_data];
+                          newData[index] = { ...newData[index], eligible_livestock: e.target.value };
+                          setPahuvaidhakiyaFormData(prev => ({...prev, vaccination_program_data: newData}));
+                        }}
+                        className="w-full px-1 py-1 border border-gray-200 rounded text-xs focus:ring-1 focus:ring-cyan-500"
+                        placeholder="-"
+                        disabled={isViewMode}
+                      />
+                    </td>
+                    <td className="border border-gray-300 px-1 py-1">
+                      <input
+                        type="text"
+                        value={pahuvaidhakiyaFormData.vaccination_program_data[index]?.demand_date || ''}
+                        onChange={(e) => {
+                          const newData = [...pahuvaidhakiyaFormData.vaccination_program_data];
+                          newData[index] = { ...newData[index], demand_date: e.target.value };
+                          setPahuvaidhakiyaFormData(prev => ({...prev, vaccination_program_data: newData}));
+                        }}
+                        className="w-full px-1 py-1 border border-gray-200 rounded text-xs focus:ring-1 focus:ring-cyan-500"
+                        placeholder="-"
+                        disabled={isViewMode}
+                      />
+                    </td>
+                    <td className="border border-gray-300 px-1 py-1">
+                      <input
+                        type="text"
+                        value={pahuvaidhakiyaFormData.vaccination_program_data[index]?.received_doses || ''}
+                        onChange={(e) => {
+                          const newData = [...pahuvaidhakiyaFormData.vaccination_program_data];
+                          newData[index] = { ...newData[index], received_doses: e.target.value };
+                          setPahuvaidhakiyaFormData(prev => ({...prev, vaccination_program_data: newData}));
+                        }}
+                        className="w-full px-1 py-1 border border-gray-200 rounded text-xs focus:ring-1 focus:ring-cyan-500"
+                        placeholder="-"
+                        disabled={isViewMode}
+                      />
+                    </td>
+                    <td className="border border-gray-300 px-1 py-1">
+                      <input
+                        type="text"
+                        value={pahuvaidhakiyaFormData.vaccination_program_data[index]?.previous_balance || ''}
+                        onChange={(e) => {
+                          const newData = [...pahuvaidhakiyaFormData.vaccination_program_data];
+                          newData[index] = { ...newData[index], previous_balance: e.target.value };
+                          setPahuvaidhakiyaFormData(prev => ({...prev, vaccination_program_data: newData}));
+                        }}
+                        className="w-full px-1 py-1 border border-gray-200 rounded text-xs focus:ring-1 focus:ring-cyan-500"
+                        placeholder="-"
+                        disabled={isViewMode}
+                      />
+                    </td>
+                    <td className="border border-gray-300 px-1 py-1">
+                      <input
+                        type="text"
+                        value={pahuvaidhakiyaFormData.vaccination_program_data[index]?.total_doses || ''}
+                        onChange={(e) => {
+                          const newData = [...pahuvaidhakiyaFormData.vaccination_program_data];
+                          newData[index] = { ...newData[index], total_doses: e.target.value };
+                          setPahuvaidhakiyaFormData(prev => ({...prev, vaccination_program_data: newData}));
+                        }}
+                        className="w-full px-1 py-1 border border-gray-200 rounded text-xs focus:ring-1 focus:ring-cyan-500"
+                        placeholder="-"
+                        disabled={isViewMode}
+                      />
+                    </td>
+                    <td className="border border-gray-300 px-1 py-1">
+                      <input
+                        type="text"
+                        value={pahuvaidhakiyaFormData.vaccination_program_data[index]?.vaccination_date || ''}
+                        onChange={(e) => {
+                          const newData = [...pahuvaidhakiyaFormData.vaccination_program_data];
+                          newData[index] = { ...newData[index], vaccination_date: e.target.value };
+                          setPahuvaidhakiyaFormData(prev => ({...prev, vaccination_program_data: newData}));
+                        }}
+                        className="w-full px-1 py-1 border border-gray-200 rounded text-xs focus:ring-1 focus:ring-cyan-500"
+                        placeholder="-"
+                        disabled={isViewMode}
+                      />
+                    </td>
+                    <td className="border border-gray-300 px-1 py-1">
+                      <input
+                        type="text"
+                        value={pahuvaidhakiyaFormData.vaccination_program_data[index]?.vaccinations_since_april || ''}
+                        onChange={(e) => {
+                          const newData = [...pahuvaidhakiyaFormData.vaccination_program_data];
+                          newData[index] = { ...newData[index], vaccinations_since_april: e.target.value };
+                          setPahuvaidhakiyaFormData(prev => ({...prev, vaccination_program_data: newData}));
+                        }}
+                        className="w-full px-1 py-1 border border-gray-200 rounded text-xs focus:ring-1 focus:ring-cyan-500"
+                        placeholder="-"
+                        disabled={isViewMode}
+                      />
+                    </td>
+                    <td className="border border-gray-300 px-1 py-1">
+                      <input
+                        type="text"
+                        value={pahuvaidhakiyaFormData.vaccination_program_data[index]?.reason_if_delayed || ''}
+                        onChange={(e) => {
+                          const newData = [...pahuvaidhakiyaFormData.vaccination_program_data];
+                          newData[index] = { ...newData[index], reason_if_delayed: e.target.value };
+                          setPahuvaidhakiyaFormData(prev => ({...prev, vaccination_program_data: newData}));
+                        }}
+                        className="w-full px-1 py-1 border border-gray-200 rounded text-xs focus:ring-1 focus:ring-cyan-500"
+                        placeholder="-"
+                        disabled={isViewMode}
+                      />
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         </div>
-      
-{/* Scheme Progress */}
+
+        {/* Scheme Progress */}
         <div className="bg-white p-6 rounded-lg border border-gray-200">
           <h4 className="text-md font-semibold text-gray-800 mb-4">9. योजना प्रगती :-</h4>
           <div className="overflow-x-auto">
@@ -1028,21 +1122,62 @@ export const PahuvaidhakiyaTapasaniForm: React.FC<PahuvaidhakiyaTapasaniFormProp
                 {schemeItems.map((item, index) => (
                   <tr key={index}>
                     <td className="border border-gray-300 px-3 py-2 font-medium">{item}</td>
-                    {['target', 'achieved_current', 'achieved_last', 'feedback'].map((field, colIndex) => (
-                      <td key={colIndex} className="border border-gray-300 px-2 py-1">
-                        <input
-                          type="text"
-                          value={formData.scheme_progress_data[index]?.[field] || ''}
-                          onChange={(e) => {
-                            const newData = [...formData.scheme_progress_data];
-                            newData[index] = { ...newData[index], [field]: e.target.value };
-                            setFormData(prev => ({...prev, scheme_progress_data: newData}));
-                          }}
-                          className="w-full px-2 py-1 border border-gray-200 rounded focus:ring-1 focus:ring-cyan-500"
-                          placeholder="-"
-                        />
-                      </td>
-                    ))}
+                    <td className="border border-gray-300 px-2 py-1">
+                      <input
+                        type="text"
+                        value={pahuvaidhakiyaFormData.scheme_progress_data[index]?.target || ''}
+                        onChange={(e) => {
+                          const newData = [...pahuvaidhakiyaFormData.scheme_progress_data];
+                          newData[index] = { ...newData[index], target: e.target.value };
+                          setPahuvaidhakiyaFormData(prev => ({...prev, scheme_progress_data: newData}));
+                        }}
+                        className="w-full px-2 py-1 border border-gray-200 rounded focus:ring-1 focus:ring-cyan-500"
+                        placeholder="-"
+                        disabled={isViewMode}
+                      />
+                    </td>
+                    <td className="border border-gray-300 px-2 py-1">
+                      <input
+                        type="text"
+                        value={pahuvaidhakiyaFormData.scheme_progress_data[index]?.achieved_current || ''}
+                        onChange={(e) => {
+                          const newData = [...pahuvaidhakiyaFormData.scheme_progress_data];
+                          newData[index] = { ...newData[index], achieved_current: e.target.value };
+                          setPahuvaidhakiyaFormData(prev => ({...prev, scheme_progress_data: newData}));
+                        }}
+                        className="w-full px-2 py-1 border border-gray-200 rounded focus:ring-1 focus:ring-cyan-500"
+                        placeholder="-"
+                        disabled={isViewMode}
+                      />
+                    </td>
+                    <td className="border border-gray-300 px-2 py-1">
+                      <input
+                        type="text"
+                        value={pahuvaidhakiyaFormData.scheme_progress_data[index]?.achieved_last || ''}
+                        onChange={(e) => {
+                          const newData = [...pahuvaidhakiyaFormData.scheme_progress_data];
+                          newData[index] = { ...newData[index], achieved_last: e.target.value };
+                          setPahuvaidhakiyaFormData(prev => ({...prev, scheme_progress_data: newData}));
+                        }}
+                        className="w-full px-2 py-1 border border-gray-200 rounded focus:ring-1 focus:ring-cyan-500"
+                        placeholder="-"
+                        disabled={isViewMode}
+                      />
+                    </td>
+                    <td className="border border-gray-300 px-2 py-1">
+                      <input
+                        type="text"
+                        value={pahuvaidhakiyaFormData.scheme_progress_data[index]?.feedback || ''}
+                        onChange={(e) => {
+                          const newData = [...pahuvaidhakiyaFormData.scheme_progress_data];
+                          newData[index] = { ...newData[index], feedback: e.target.value };
+                          setPahuvaidhakiyaFormData(prev => ({...prev, scheme_progress_data: newData}));
+                        }}
+                        className="w-full px-2 py-1 border border-gray-200 rounded focus:ring-1 focus:ring-cyan-500"
+                        placeholder="-"
+                        disabled={isViewMode}
+                      />
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -1050,15 +1185,16 @@ export const PahuvaidhakiyaTapasaniForm: React.FC<PahuvaidhakiyaTapasaniFormProp
           </div>
         </div>
       
- {/* General Evaluation */}
+        {/* General Evaluation */}
         <div className="bg-white p-6 rounded-lg border border-gray-200">
           <h4 className="text-md font-semibold text-gray-800 mb-4">10. सर्वसाधारण तांत्रिक मुल्यमापन :</h4>
           <textarea
-            value={formData.general_evaluation}
-            onChange={(e) => setFormData(prev => ({...prev, general_evaluation: e.target.value}))}
+            value={pahuvaidhakiyaFormData.general_evaluation}
+            onChange={(e) => setPahuvaidhakiyaFormData(prev => ({...prev, general_evaluation: e.target.value}))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
             rows={4}
             placeholder="सर्वसाधारण तांत्रिक मुल्यमापन प्रविष्ट करा"
+            disabled={isViewMode}
           />
         </div>
 
@@ -1066,15 +1202,17 @@ export const PahuvaidhakiyaTapasaniForm: React.FC<PahuvaidhakiyaTapasaniFormProp
         <div className="bg-white p-6 rounded-lg border border-gray-200">
           <h4 className="text-md font-semibold text-gray-800 mb-4">11. दिलेल्या सूचना :</h4>
           <textarea
-            value={formData.instructions_given}
-            onChange={(e) => setFormData(prev => ({...prev, instructions_given: e.target.value}))}
+            value={pahuvaidhakiyaFormData.instructions_given}
+            onChange={(e) => setPahuvaidhakiyaFormData(prev => ({...prev, instructions_given: e.target.value}))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
             rows={4}
             placeholder="दिलेल्या सूचना प्रविष्ट करा"
+            disabled={isViewMode}
           />
         </div>
       </div>
     );
+  };
 
   const renderPhotoUpload = () => (
     <div className="space-y-6">
@@ -1198,7 +1336,7 @@ export const PahuvaidhakiyaTapasaniForm: React.FC<PahuvaidhakiyaTapasaniFormProp
       case 2:
         return renderLocationDetails();
       case 3:
-        return renderPahuvaidhakiyaForm();
+        return renderTechnicalInspection();
       case 4:
         return renderPhotoUpload();
       default:
@@ -1287,24 +1425,24 @@ export const PahuvaidhakiyaTapasaniForm: React.FC<PahuvaidhakiyaTapasaniFormProp
             {currentStep === 4 ? (
               <>
                 {!isViewMode && (
-                <button
-                  onClick={() => handleSubmit(true)}
-                  disabled={isLoading || isUploading}
-                  className="px-3 md:px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors duration-200 flex items-center space-x-2 text-sm md:text-base"
-                >
-                  <Save className="h-4 w-4" />
-                  <span>{t('fims.saveAsDraft')}</span>
-                </button>
+                  <button
+                    onClick={() => handleSubmit(true)}
+                    disabled={isLoading || isUploading}
+                    className="px-3 md:px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors duration-200 flex items-center space-x-2 text-sm md:text-base"
+                  >
+                    <Save className="h-4 w-4" />
+                    <span>{t('fims.saveAsDraft')}</span>
+                  </button>
                 )}
                 {!isViewMode && (
-                <button
-                  onClick={() => handleSubmit(false)}
-                  disabled={isLoading || isUploading}
-                  className="px-3 md:px-6 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg disabled:opacity-50 transition-colors duration-200 flex items-center space-x-2 text-sm md:text-base"
-                >
-                  <Send className="h-4 w-4" />
-                  <span>{isEditMode ? t('fims.updateInspection') : t('fims.submitInspection')}</span>
-                </button>
+                  <button
+                    onClick={() => handleSubmit(false)}
+                    disabled={isLoading || isUploading}
+                    className="px-3 md:px-6 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg disabled:opacity-50 transition-colors duration-200 flex items-center space-x-2 text-sm md:text-base"
+                  >
+                    <Send className="h-4 w-4" />
+                    <span>{isEditMode ? t('fims.updateInspection') : t('fims.submitInspection')}</span>
+                  </button>
                 )}
               </>
             ) : (
