@@ -28,8 +28,8 @@ import {
   Lightbulb,
   MessageSquare
 } from 'lucide-react';
-import type { User, Category, AnganwadiFormData, InspectionData } from '../types';
-import { t } from '../utils/mockTranslations';
+//import type { User, Category, AnganwadiFormData, InspectionData } from '../types';
+//import { t } from '../utils/mockTranslations';
 
 interface AnganwadiTapasaniFormProps {
   user: User;
