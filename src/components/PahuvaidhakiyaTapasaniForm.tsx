@@ -129,7 +129,7 @@ export const PahuvaidhakiyaTapasaniForm: React.FC<PahuvaidhakiyaTapasaniFormProp
   });
 
   // Get pahuvaidhakiya category
-  const pahuvaidhakiyaCategory = categories.find(cat => cat.form_type === 'form_10');
+  const pahuvaidhakiyaCategory = categories.find(cat => cat.form_type === 'pashutapasani');
 
   useEffect(() => {
     if (pahuvaidhakiyaCategory) {
