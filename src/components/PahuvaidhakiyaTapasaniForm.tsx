@@ -162,22 +162,8 @@ export const PahuvaidhakiyaTapasaniForm: React.FC<PahuvaidhakiyaTapasaniFormProp
         });
       }
     }
-  }, [editingInspection]);
+  }, 
 
-  const vaccines = [
-    "HS", "HS+BQ", "BQ", "FMD", "PPR", "ETV",
-    "Fowl Pox", "RD", "LSD", "Goat Pox", "CSF", "Theileria", "Other"
-  ];
-
-  const technicalWorkTypes = [
-    "बाह्यरुग्ण", "आंतररुग्ण", "फिरते रुग्ण", "खच्चीकरण (मुख्यालय)", "खच्चीकरण (फिरतीवर)",
-    "मोठया शस्त्रक्रिया", "छोट्या शस्त्रक्रिया", "कृत्रिम रेतन (प्रथम)", "विदेशी", "संकरीत", "देशी", "म्हैस", "एकूण",
-    "जन्मलेली वासरे", "गाय (संकरीत)", "गाय (देशी)", "म्हैस", "एकूण",
-    "प्रति वासरू लागलेले कृत्रिम रेतन प्रमाण", "गाय (संकरीत)", "गाय (देशी)", "म्हैस", "एकूण",
-    "गर्भ तपासणी", "गाय", "म्हैस", "एकूण",
-    "वांझ जनावरे तपासणी", "गाय", "म्हैस", "एकूण",
-    "रुग्णांची रोजची सरासरी हजेरी", "जमा सेवाशुल्क"
-  ];
 
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
@@ -686,226 +672,409 @@ export const PahuvaidhakiyaTapasaniForm: React.FC<PahuvaidhakiyaTapasaniFormProp
     </div>
   );
 
-  const renderPahuvaidhakiyaForm = () => (
-    <div className="p-6 bg-white rounded-lg shadow-md space-y-6 text-sm">
-      <h2 className="text-xl font-bold text-center mb-4">परिशिष्ट- अ</h2>
-      <h3 className="text-lg font-semibold text-center mb-4">
-        पशुवैद्यकीय संस्थांचे तांत्रिक निरीक्षण / तपासणी अहवाल (Technical Inspection Report)
-      </h3>
+  const renderBasicInfo = () => (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="text-center mb-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">परिशिष्ठ- अ</h2>
+        <h3 className="text-lg font-semibold text-gray-800 mb-1">
+          पशुवैद्यकीय संस्थांचे तांत्रिक निरीक्षण / तपासणी अहवाल
+        </h3>
+        <h3 className="text-base text-gray-600 mb-4">
+          (Technical inspection Report)
+        </h3>
+        <p className="text-sm text-gray-600 mb-6">
+          (पशुवैद्यकीय दवाखाना श्रेणी-1/पशुवैद्यकीय दवाखाना श्रेणी-2/फिरते पंवैद)
+        </p>
+        
+        {/* Important Tip */}
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 text-left">
+          <p className="text-sm text-yellow-800">
+            <strong>टिप:</strong> परिशिष्ठ-अ मधील तक्त्यांमध्ये माहिती भरताना ती चालू वर्षातील 1 एप्रिल पासून ज्या महिन्यामध्ये तपासणी करण्यात आली आहे 
+            त्याच्या मागील महिन्यापर्यंत नमूद करण्यात यावी. (उदा. 13 ऑक्टोबर ला तपासणी केलेली असल्यास सर्व तक्त्यांमध्ये माहिती ही त्या वर्षामधील 
+            1 एप्रिल ते 30 सप्टेंबर या कालावधी मधील नमूद करावी.)
+          </p>
+        </div>
+      </div>
 
-      <p>(पशुवैद्यकीय दवाखाना श्रेणी-1/पशुवैद्यकीय दवाखाना श्रेणी-2/फिरते पवैद्य)</p>
-      <p>
-        टिप: परिशिष्ट-अ मधील तक्त्यांमध्ये माहिती भरताना ती चालू वर्षातील 1 एप्रिल पासून ज्या महिन्यामध्ये तपासणी करण्यात आली आहे त्याच्या मागील महिन्यापर्यंत नमूद करण्यात यावी. (उदा. 13 ऑक्टोबर ला तपासणी केलेली असल्यास सर्व तक्त्यांमध्ये माहिती ही त्या वर्षामधील 1 एप्रिल ते 30 सप्टेंबर या कालावधी मधील नमूद करावी.)
-      </p>
+ const renderTechnicalInspection = () => {
+    const technicalWorkItems = [
+      '1) बाह्यरुग्ण',
+      '2) अंतर्गत रुग्ण',
+      '3) फिरते रुग्ण',
+      '4) खर्चीकरण (मुख्यालय)',
+      '5) खर्चीकरण (फिरतीवर)',
+      '6) मोठ्या शस्त्रक्रिया - मुख्यालय',
+          'मोठ्या शस्त्रक्रिया - फिरती',
+          'मोठ्या शस्त्रक्रिया - एकूण',
+      '7) छोट्या शस्त्रक्रिया - मुख्यालय',
+          'छोट्या शस्त्रक्रिया -फिरती',
+          'छोट्या शस्त्रक्रिया -एकूण',
+      '8) कृत्रिम रेतन (प्रथम) -विदेशी',
+          'कृत्रिम रेतन (प्रथम) -संकरीत',
+          'कृत्रिम रेतन (प्रथम) -देशी',
+          'कृत्रिम रेतन (प्रथम) -म्हैस',
+          'कृत्रिम रेतन (प्रथम) -एकूण',
+      '9) जन्मलेली वासरे - गाय (संकरीत)',
+          'जन्मलेली वासरे - गाय (देशी)',
+          'जन्मलेली वासरे -म्हैस ',
+          'जन्मलेली वासरे - एकूण',
+      '10) प्रति वासरू लागलेले गाय (संकरीत)',
+          'कृत्रिम रेतन प्रमाण गाय (देशी)',
+           'म्हैस',
+      '11) गर्भ तपासणी - गाय',
+           'गर्भ तपासणी - म्हैस',
+            'गर्भ तपासणी - एकूण',
+      '12) वांझ जनावरे तपासणी -गाय ',
+           'वांझ जनावरे तपासणी -म्हैस',
+            'वांझ जनावरे तपासणी - एकूण',
+      '13) ऋणांची रोजची सरासरी हजेरी',
+      '14) जमा सेवाशुल्क'
+    ];
+ const vaccineItems = [
+      'HS', 'HS+BQ', 'BQ', 'FMD', 'PPR', 'ETV', 'Fowl Pox', 'RD', 'LSD', 'Goat Pox', 'CSF', 'Theileria', 'Other'
+    ];
 
-      <section className="space-y-2">
-        <p>1. संस्थेचे नांव व पत्ता :</p>
-        <p className="pl-4"> </p>
-        <p className="pl-4">श्रेणी-1 / श्रेणी-2</p>
+    const schemeItems = [
+      'दुधाळ जनावरांचे गट वाटप',
+      'शेळी/मेंढी गट वाटप',
+      'कुक्कुट शेड बांधकाम',
+      'तलंगा गट वाटप',
+      'एक दिवसीय पिलांचे वाटप',
+      'उबवणीची अंडी वाटप'
+    ];
 
-        <p>2. संस्था प्रमुखांचे नाव व संपर्क क्रमांक :</p>
-        <p className="pl-4"> </p>
+    return (
+      <div className="space-y-8">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+          <FileText className="h-5 w-5 mr-2 text-cyan-600" />
+          A. तांत्रिक माहिती (Technical Information)
+        </h3>
 
-        <p>3. तपासणी करणाऱ्या अधिकाऱ्याचे नाव व हुद्दा :</p>
-        <p className="pl-4"> </p>
-
-        <p>4. भेटीचा दिनांक व वेळ :</p>
-        <p className="pl-4"> </p>
-
-        <p>5. तपासणीचा उद्देश :</p>
-        <ul className="pl-6 list-disc">
-          <li>नियमित</li>
-          <li>विशिष्ठ कारणासाठी</li>
-          <li>आकस्मिक</li>
-          <li>तक्रार कारण नमूद करावे</li>
-        </ul>
-      </section>
-
-      <section>
-        <h4 className="font-semibold mt-6 mb-2">6. तांत्रिक कामाचा आढावा :</h4>
-        <div className="overflow-x-auto">
-          <table className="w-full border border-gray-400 table-auto text-xs">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border px-2 py-1" rowSpan={2}>कामाचे स्वरूप</th>
-                <th className="border px-2 py-1" colSpan={3}>लक्ष्य (चालू वर्षी)</th>
-                <th className="border px-2 py-1" colSpan={3}>साध्य (महिना अखेर)</th>
-                <th className="border px-2 py-1" colSpan={3}>साध्य (मागील वर्षी)त्याच महिन्याचा अखेर</th>
-              </tr>
-              <tr className="bg-gray-50">
-                {["मुख्यालय", "फिरती", "एकूण"].map((t, i) => (
-                  <th className="border px-2 py-1" key={`t1-${i}`}>{t}</th>
-                ))}
-                {["मुख्यालय", "फिरती", "एकूण"].map((t, i) => (
-                  <th className="border px-2 py-1" key={`t2-${i}`}>{t}</th>
-                ))}
-                {["मुख्यालय", "फिरती", "एकूण"].map((t, i) => (
-                  <th className="border px-2 py-1" key={`t3-${i}`}>{t}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {technicalWorkTypes.map((label, idx) => (
-                <tr key={idx}>
-                  <td className="border px-2 py-1">{label}</td>
-                  {[...Array(9)].map((_, i) => (
-                    <td key={i} className="border px-2 py-1"> </td>
-                  ))}
+        {/* Technical Work Overview */}
+        <div className="bg-white p-6 rounded-lg border border-gray-200">
+          <h4 className="text-md font-semibold text-gray-800 mb-4">6. तांत्रिक कामाचा आढावा :-</h4>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse border border-gray-300 text-sm">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-gray-300 px-3 py-2 text-left">कामाचे स्वरूप</th>
+                  <th className="border border-gray-300 px-3 py-2 text-center">लक्ष्य (चालू वर्षी)</th>
+                  <th className="border border-gray-300 px-3 py-2 text-center">साध्य (महिना अखेर)</th>
+                  <th className="border border-gray-300 px-3 py-2 text-center">साध्य (मागील वर्ष) त्याच महिनाचा अखेर</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section>
-        <h4 className="font-semibold mt-6">7. साथीच्या रोगाबाबतची माहिती व आढावा :</h4>
-        <div className="space-y-4 pl-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              गावाचे नाव, रोगाचे नांव, प्रादुर्भावाचा कालावधी, पशुधन संख्या, लागण, मृत्यू, लसीकरण, केलेली कार्यवाही
-            </label>
-            <textarea
-              value={pahuvaidhakiyaFormData.village_name}
-              onChange={(e) => setPahuvaidhakiyaFormData(prev => ({...prev, village_name: e.target.value}))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-              rows={3}
-              placeholder="तपशील प्रविष्ट करा"
-              disabled={isViewMode}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              १० किमी परिघातील गावांची संख्या
-            </label>
-            <input
-              type="text"
-              value={pahuvaidhakiyaFormData.villages_10km_count}
-              onChange={(e) => setPahuvaidhakiyaFormData(prev => ({...prev, villages_10km_count: e.target.value}))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-              placeholder="गावांची संख्या प्रविष्ट करा"
-              disabled={isViewMode}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              १० किमी परिसरातील पशुधन संख्या (गाय/म्हैस वर्गीय, शेळी/मेंढी/इतर)
-            </label>
-            <input
-              type="text"
-              value={pahuvaidhakiyaFormData.livestock_10km_area}
-              onChange={(e) => setPahuvaidhakiyaFormData(prev => ({...prev, livestock_10km_area: e.target.value}))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-              placeholder="पशुधन संख्या प्रविष्ट करा"
-              disabled={isViewMode}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              या पूर्वी झालेला रोग प्रादुर्भाव माहिती
-            </label>
-            <textarea
-              value={pahuvaidhakiyaFormData.previous_outbreak_info}
-              onChange={(e) => setPahuvaidhakiyaFormData(prev => ({...prev, previous_outbreak_info: e.target.value}))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-              rows={3}
-              placeholder="पूर्वीच्या रोग प्रादुर्भावाची माहिती प्रविष्ट करा"
-              disabled={isViewMode}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              EDR (Endemic disease report) सादर दिनांक, DVP/TMVP/RDIL/DIS team visit date
-            </label>
-            <input
-              type="text"
-              value={pahuvaidhakiyaFormData.edr_submission_date}
-              onChange={(e) => setPahuvaidhakiyaFormData(prev => ({...prev, edr_submission_date: e.target.value}))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-              placeholder="EDR दिनांक व टीम भेट दिनांक प्रविष्ट करा"
-              disabled={isViewMode}
-            />
+              </thead>
+              <tbody>
+                {technicalWorkItems.map((item, index) => (
+                  <tr key={index}>
+                    <td className="border border-gray-300 px-3 py-2 font-medium">{item}</td>
+                    <td className="border border-gray-300 px-2 py-1">
+                      <input
+                        type="text"
+                        value={formData.technical_work_data[index]?.target || ''}
+                        onChange={(e) => {
+                          const newData = [...formData.technical_work_data];
+                          newData[index] = { ...newData[index], target: e.target.value };
+                          setFormData(prev => ({...prev, technical_work_data: newData}));
+                        }}
+                        className="w-full px-2 py-1 border border-gray-200 rounded focus:ring-1 focus:ring-cyan-500"
+                        placeholder="0"
+                      />
+                    </td>
+                    <td className="border border-gray-300 px-2 py-1">
+                      <input
+                        type="text"
+                        value={formData.technical_work_data[index]?.achieved_current || ''}
+                        onChange={(e) => {
+                          const newData = [...formData.technical_work_data];
+                          newData[index] = { ...newData[index], achieved_current: e.target.value };
+                          setFormData(prev => ({...prev, technical_work_data: newData}));
+                        }}
+                        className="w-full px-2 py-1 border border-gray-200 rounded focus:ring-1 focus:ring-cyan-500"
+                        placeholder="0"
+                      />
+                    </td>
+                    <td className="border border-gray-300 px-2 py-1">
+                      <input
+                        type="text"
+                        value={formData.technical_work_data[index]?.achieved_last || ''}
+                        onChange={(e) => {
+                          const newData = [...formData.technical_work_data];
+                          newData[index] = { ...newData[index], achieved_last: e.target.value };
+                          setFormData(prev => ({...prev, technical_work_data: newData}));
+                        }}
+                        className="w-full px-2 py-1 border border-gray-200 rounded focus:ring-1 focus:ring-cyan-500"
+                        placeholder="0"
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
-      </section>
+ {/* Disease Information */}
+        <div className="bg-white p-6 rounded-lg border border-gray-200">
+          <h4 className="text-md font-semibold text-gray-800 mb-4">7. रोग प्रादुर्भाव माहिती :-</h4>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                गावाचे नाव
+              </label>
+              <input
+                type="text"
+                value={formData.village_name}
+                onChange={(e) => setFormData(prev => ({...prev, village_name: e.target.value}))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                placeholder="गावाचे नाव प्रविष्ट करा"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                रोगाचे नाव
+              </label>
+              <input
+                type="text"
+                value={formData.disease_name}
+                onChange={(e) => setFormData(prev => ({...prev, disease_name: e.target.value}))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                placeholder="रोगाचे नाव प्रविष्ट करा"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                प्रादुर्भावाचा कालावधी
+              </label>
+              <input
+                type="text"
+                value={formData.outbreak_period}
+                onChange={(e) => setFormData(prev => ({...prev, outbreak_period: e.target.value}))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                placeholder="प्रादुर्भावाचा कालावधी प्रविष्ट करा"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                पशुधन संख्या
+              </label>
+              <input
+                type="text"
+                value={formData.livestock_count}
+                onChange={(e) => setFormData(prev => ({...prev, livestock_count: e.target.value}))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                placeholder="पशुधन संख्या प्रविष्ट करा"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                लागण
+              </label>
+              <input
+                type="text"
+                value={formData.infection_count}
+                onChange={(e) => setFormData(prev => ({...prev, infection_count: e.target.value}))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                placeholder="लागण संख्या प्रविष्ट करा"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                मृत्यू
+              </label>
+              <input
+                type="text"
+                value={formData.death_count}
+                onChange={(e) => setFormData(prev => ({...prev, death_count: e.target.value}))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                placeholder="मृत्यू संख्या प्रविष्ट करा"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                लसीकरण
+              </label>
+              <input
+                type="text"
+                value={formData.vaccination_done}
+                onChange={(e) => setFormData(prev => ({...prev, vaccination_done: e.target.value}))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                placeholder="लसीकरण माहिती प्रविष्ट करा"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                केलेली कार्यवाही
+              </label>
+              <textarea
+                value={formData.action_taken}
+                onChange={(e) => setFormData(prev => ({...prev, action_taken: e.target.value}))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                rows={3}
+                placeholder="केलेली कार्यवाही प्रविष्ट करा"
+              />
+            </div>
+            
+<div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                10 किमी परिघातील गावांची संख्या:
+              </label>
+              <input
+                type="text"
+                value={formData.villages_10km_count}
+                onChange={(e) => setFormData(prev => ({...prev, villages_10km_count: e.target.value}))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+               10 किमी परिसरातील पशुधन संख्या (गाय/म्हैस वर्गीय, शेळी/मेंढी/इतर)- :
+              </label>
+              <input
+                type="text"
+                value={formData.livestock_10km_area}
+                onChange={(e) => setFormData(prev => ({...prev, livestock_10km_area: e.target.value}))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                placeholder="१० किमी परिसरातील पशुधन संख्या प्रविष्ट करा"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                या पूर्वी झालेला रोग प्रादुर्भाव माहिती
+              </label>
+              <textarea
+                value={formData.previous_outbreak_info}
+                onChange={(e) => setFormData(prev => ({...prev, previous_outbreak_info: e.target.value}))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                rows={3}
+              />
+            </div>
+           
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                EDR (Endemic disease report) सादर दिनांक, DVP/TMVP/RDIL/DIS team visit date :
+              </label>
+              <input
+                type="date"
+                value={formData.edr_submission_date}
+                onChange={(e) => setFormData(prev => ({...prev, edr_submission_date: e.target.value}))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+              />
+            </div>
+          </div>
+        </div>
 
-      <section>
-        <h4 className="font-semibold mt-6 mb-2">8. लसीकरण कार्यक्रम :</h4>
-        <div className="overflow-x-auto">
-          <table className="table-auto border border-gray-400 w-full text-xs">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border px-2 py-1" rowSpan={2}>लसीचे नाव</th>
-                <th className="border px-2 py-1" rowSpan={2}>कार्यक्षेत्रातील पात्र पशुधनाची संख्या</th>
-                <th className="border px-2 py-1" rowSpan={2}>लसमागणी / लस प्राप्त झाल्याचा दिनांक</th>
-                <th className="border px-2 py-1" rowSpan={2}>प्राप्त लस मात्रा</th>
-                <th className="border px-2 py-1" rowSpan={2}>मागील शिल्लक लस मात्रा</th>
-                <th className="border px-2 py-1" rowSpan={2}>एकूण लस मात्रा</th>
-                <th className="border px-2 py-1" rowSpan={2}>लसीकरणाचा दिनांक</th>
-                <th className="border px-2 py-1" rowSpan={2}>१ एप्रिल पासून झालेल्या लसीकरण</th>
-                <th className="border px-2 py-1" rowSpan={2}>लसीकरण वेळेत झाले नसल्यास त्याची कारणे</th>
-              </tr>
-            </thead>
-            <tbody>
-              {vaccines.map((vaccine, index) => (
-                <tr key={index}>
-                  <td className="border px-2 py-1">{vaccine}</td>
-                  {[...Array(8)].map((_, i) => (
-                    <td key={i} className="border px-2 py-1"> </td>
-                  ))}
+ {/* Vaccination Program */}
+        <div className="bg-white p-6 rounded-lg border border-gray-200">
+          <h4 className="text-md font-semibold text-gray-800 mb-4">8. लसीकरण कार्यक्रम :-</h4>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse border border-gray-300 text-xs">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-gray-300 px-2 py-2">लसीचे नाव</th>
+                  <th className="border border-gray-300 px-2 py-2">कार्यक्षेत्रातील पात्र पशुधनाची संख्या</th>
+                  <th className="border border-gray-300 px-2 py-2">लसमागणी / लस प्राप्त झाल्याचा दिनांक</th>
+                  <th className="border border-gray-300 px-2 py-2">प्राप्त लसमात्रा</th>
+                  <th className="border border-gray-300 px-2 py-2">मागील शिल्लक लसमात्रा</th>
+                  <th className="border border-gray-300 px-2 py-2">एकूण लसमात्रा</th>
+                  <th className="border border-gray-300 px-2 py-2">लसीकरणाचा दिनांक</th>
+                  <th className="border border-gray-300 px-2 py-2">1 एप्रिल पासून झालेली लसीकरण</th>
+                  <th className="border border-gray-300 px-2 py-2">लसीकरण वेळेत झाले नसल्यास त्याची कारणे</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {vaccineItems.map((vaccine, index) => (
+                  <tr key={index}>
+                    <td className="border border-gray-300 px-2 py-2 font-medium">{vaccine}</td>
+                    {Array(8).fill(null).map((_, colIndex) => (
+                      <td key={colIndex} className="border border-gray-300 px-1 py-1">
+                        <input
+                          type="text"
+                          className="w-full px-1 py-1 border border-gray-200 rounded text-xs focus:ring-1 focus:ring-cyan-500"
+                          placeholder="-"
+                        />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </section>
-
-      <section className="space-y-4">
-        <h4 className="font-semibold mt-6">9. योजना प्रगती :</h4>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            दुधाळ जनावरांचे गट वाटप, शेळी/मेंढी गट वाटप, कुक्कुट शेड बांधकाम, तलंगा गट वाटप, एक दिवसिय पिलांचे वाटप, उबवनीची अंडी वाटप
-          </label>
-          <textarea
-            value={pahuvaidhakiyaFormData.scheme_progress}
-            onChange={(e) => setPahuvaidhakiyaFormData(prev => ({...prev, scheme_progress: e.target.value}))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-            rows={4}
-            placeholder="योजना प्रगती तपशील प्रविष्ट करा"
-            disabled={isViewMode}
-          />
+      
+{/* Scheme Progress */}
+        <div className="bg-white p-6 rounded-lg border border-gray-200">
+          <h4 className="text-md font-semibold text-gray-800 mb-4">9. योजना प्रगती :-</h4>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse border border-gray-300 text-sm">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-gray-300 px-3 py-2 text-left">स्वरूप</th>
+                  <th className="border border-gray-300 px-3 py-2">लक्ष्य (चालू वर्षी)</th>
+                  <th className="border border-gray-300 px-3 py-2">साध्य (चालू वर्षी)</th>
+                  <th className="border border-gray-300 px-3 py-2">साध्य (मागील वर्षी)</th>
+                  <th className="border border-gray-300 px-3 py-2">अभिप्राय</th>
+                </tr>
+              </thead>
+              <tbody>
+                {schemeItems.map((item, index) => (
+                  <tr key={index}>
+                    <td className="border border-gray-300 px-3 py-2 font-medium">{item}</td>
+                    {['target', 'achieved_current', 'achieved_last', 'feedback'].map((field, colIndex) => (
+                      <td key={colIndex} className="border border-gray-300 px-2 py-1">
+                        <input
+                          type="text"
+                          value={formData.scheme_progress_data[index]?.[field] || ''}
+                          onChange={(e) => {
+                            const newData = [...formData.scheme_progress_data];
+                            newData[index] = { ...newData[index], [field]: e.target.value };
+                            setFormData(prev => ({...prev, scheme_progress_data: newData}));
+                          }}
+                          className="w-full px-2 py-1 border border-gray-200 rounded focus:ring-1 focus:ring-cyan-500"
+                          placeholder="-"
+                        />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-
-        <h4 className="font-semibold mt-6">10. सर्वसाधारण तांत्रिक मुल्यमापन :</h4>
-        <div>
+      
+ {/* General Evaluation */}
+        <div className="bg-white p-6 rounded-lg border border-gray-200">
+          <h4 className="text-md font-semibold text-gray-800 mb-4">10. सर्वसाधारण तांत्रिक मुल्यमापन :</h4>
           <textarea
-            value={pahuvaidhakiyaFormData.general_evaluation}
-            onChange={(e) => setPahuvaidhakiyaFormData(prev => ({...prev, general_evaluation: e.target.value}))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+            value={formData.general_evaluation}
+            onChange={(e) => setFormData(prev => ({...prev, general_evaluation: e.target.value}))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
             rows={4}
             placeholder="सर्वसाधारण तांत्रिक मुल्यमापन प्रविष्ट करा"
-            disabled={isViewMode}
           />
         </div>
 
-        <h4 className="font-semibold mt-6">11. दिलेल्या सूचना :</h4>
-        <div>
+        {/* Instructions Given */}
+        <div className="bg-white p-6 rounded-lg border border-gray-200">
+          <h4 className="text-md font-semibold text-gray-800 mb-4">11. दिलेल्या सूचना :</h4>
           <textarea
-            value={pahuvaidhakiyaFormData.instructions_given}
-            onChange={(e) => setPahuvaidhakiyaFormData(prev => ({...prev, instructions_given: e.target.value}))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+            value={formData.instructions_given}
+            onChange={(e) => setFormData(prev => ({...prev, instructions_given: e.target.value}))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
             rows={4}
             placeholder="दिलेल्या सूचना प्रविष्ट करा"
-            disabled={isViewMode}
           />
         </div>
-      </section>
-    </div>
-  );
+      </div>
+    );
 
   const renderPhotoUpload = () => (
     <div className="space-y-6">
