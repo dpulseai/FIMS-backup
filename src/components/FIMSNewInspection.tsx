@@ -367,7 +367,7 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
             { key: 'rajya_gunwatta_nirikshak', title: 'राज्य गुणवत्ता निरीक्षक तपासणी', subtitle: 'State Quality Inspector Inspection', color: 'emerald', active: true },
             { key: 'mahatma_gandhi_rojgar_hami', title: 'महात्मा गांधी रोजगार हमी योजना', subtitle: 'MGNREGA Work Inspection Form', color: 'green', active: true },
             { key: 'mumbai_nyayalay', title: 'मुंबई न्यायालय तपासणी प्रपत्र', subtitle: 'Mumbai High Court School Inspection Form', color: 'red', active: true },
-            { key: 'pashu_tapasani', title: 'पशुवैद्यकीय तपासणी', subtitle: 'Pashu Vaidyakiy Tapasani Inspection Form', color: 'red', active: true },
+            { key: 'pashutapasani', title: 'पशुवैद्यकीय तपासणी', subtitle: 'Pashu Vaidyakiy Tapasani Inspection Form', color: 'red', active: true },
          //   { key: 'form_10', title: 'Form 10 Title', subtitle: 'Form 10 Description', color: 'cyan' },
          //   { key: 'form_11', title: 'Form 11 Title', subtitle: 'Form 11 Description', color: 'violet' },
          //   { key: 'form_12', title: 'Form 12 Title', subtitle: 'Form 12 Description', color: 'lime' },
@@ -437,12 +437,12 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
                     <p>• भौतिक सुविधा मूल्यांकन</p>
                     <p>• स्वच्छता आणि सुरक्षा तपासणी</p>
                   </>
-                ) : (
+                ) : form.key === 'pashutapasani' ?(
                   <>
-                    <p>• Feature 1</p>
-                    <p>• Feature 2</p>
-                    <p>• Feature 3</p>
-                    <p>• Feature 4</p>
+                    <p>• तपासणीचा उद्देश</p>
+                    <p>• पशुधन संख्या</p>
+                    <p>• लसीकरण माहिती</p>
+                    <p>• पशुवैद्यकीय तपासणी</p>
                   </>
                 )}
               </div>
