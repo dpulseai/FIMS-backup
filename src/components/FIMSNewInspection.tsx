@@ -442,7 +442,9 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
                     <p>• तपासणीचा उद्देश</p>
                     <p>• पशुधन संख्या</p>
                     <p>• लसीकरण माहिती</p>
-                  </>
+                    </>
+                ) : (
+                  <></>
                 )}
               </div>
               
