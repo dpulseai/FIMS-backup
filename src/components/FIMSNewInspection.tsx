@@ -367,7 +367,7 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
             { key: 'rajya_gunwatta_nirikshak', title: 'राज्य गुणवत्ता निरीक्षक तपासणी', subtitle: 'State Quality Inspector Inspection', color: 'emerald', active: true },
             { key: 'mahatma_gandhi_rojgar_hami', title: 'महात्मा गांधी रोजगार हमी योजना', subtitle: 'MGNREGA Work Inspection Form', color: 'green', active: true },
             { key: 'mumbai_nyayalay', title: 'मुंबई न्यायालय तपासणी प्रपत्र', subtitle: 'Mumbai High Court School Inspection Form', color: 'red', active: true },
-            { key: 'pashutapasani', title: 'पशुवैद्यकीय तपासणी', subtitle: 'Pashu Vaidyakiy Tapasani Inspection Form', color: 'red', active: true },
+            { key: 'pashutapasani', title: 'पशुवैद्यकीय संस्थांचे तांत्रिक निरीक्षण', subtitle: 'Veterinary Institution Technical Inspection Form', color: 'red', active: true },
          //   { key: 'form_10', title: 'Form 10 Title', subtitle: 'Form 10 Description', color: 'cyan' },
          //   { key: 'form_11', title: 'Form 11 Title', subtitle: 'Form 11 Description', color: 'violet' },
          //   { key: 'form_12', title: 'Form 12 Title', subtitle: 'Form 12 Description', color: 'lime' },
@@ -439,9 +439,11 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
                   </>
                 ) : form.key === 'pashutapasani' ? (
                   <>
-                    <p>• तपासणीचा उद्देश</p>
-                    <p>• पशुधन संख्या</p>
-                    <p>• लसीकरण माहिती</p>
+                    <p>• संस्थेची मूलभूत माहिती व तांत्रिक आढावा</p>
+                    <p>• रुग्ण आकडेवारी व शस्त्रक्रिया तपशील</p>
+                    <p>• कृत्रिम रेतन व गर्भधारणा तपासणी</p>
+                    <p>• रोग माहिती व लसीकरण कार्यक्रम</p>
+                    <p>• योजना प्रगती व तांत्रिक मूल्यांकन</p>
                     </>
                 ) : (
                   <></>
