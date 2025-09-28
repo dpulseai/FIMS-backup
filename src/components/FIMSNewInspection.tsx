@@ -437,7 +437,7 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
                     <p>• भौतिक सुविधा मूल्यांकन</p>
                     <p>• स्वच्छता आणि सुरक्षा तपासणी</p>
                   </>
-                ) : form.key === 'pashutapasani' ?(
+                ) : form.key === 'pashutapasani' ? (
                   <>
                     <p>• तपासणीचा उद्देश</p>
                     <p>• पशुधन संख्या</p>
