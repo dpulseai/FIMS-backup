@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import {  
+import { 
   ArrowLeft,
   Plus,
   FileText,
@@ -381,10 +381,10 @@ export const AnganwadiTapasaniForm: React.FC<AnganwadiTapasaniFormProps> = ({
         const lng = position.coords.longitude;
         const accuracy = position.coords.accuracy;
         
-        // Get location name using reverse geocoding
+        // Get location name using Google Maps Geocoding API
         try {
           const response = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=${import.meta.env.VITE_GOOGLE_API_KEY}`
+            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${import.meta.env.VITE_GOOGLE_API_KEY || 'AIzaSyAjFLdphP7tlo99o3L6IgxbeSOHPsla9-Y'}&language=mr`
           );
           const data = await response.json();
           
@@ -999,7 +999,8 @@ const uploadPhotosToSupabase = async (inspectionId: string) => {
           </div>
         </div>
       </section>
-{/* Section 2 - Weighing Scales */}
+
+      {/* Section 2 - Weighing Scales */}
       <section className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden transform hover:scale-[1.01] transition-transform duration-300">
         <div className="bg-gradient-to-r from-purple-500 to-pink-600 px-8 py-6">
           <div className="flex items-center text-white">
@@ -1028,7 +1029,8 @@ const uploadPhotosToSupabase = async (inspectionId: string) => {
           </div>
         </div>
       </section>
-{/* Section 3 - Materials */}
+
+      {/* Section 3 - Materials */}
       <section className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden transform hover:scale-[1.01] transition-transform duration-300">
         <div className="bg-gradient-to-r from-orange-500 to-red-600 px-8 py-6">
           <div className="flex items-center text-white">
@@ -1043,7 +1045,7 @@ const uploadPhotosToSupabase = async (inspectionId: string) => {
               { key: 'water_storage_containers', label: 'पिण्याचे पाणी ठेवण्यासाठी भांडी' },
               { key: 'medicine_kits', label: 'मेडिसिन किट्स' },
               { key: 'pre_school_kit', label: 'पूर्व शाले संच' },
-              { key: 'all_registers', label: 'विहित नमुन्यातील रजिस्टर (सर्व)' },
+              { key: 'all_registers', label: 'विविध नमुन्यातील रजिस्टर (सर्व)' },
               { key: 'monthly_progress_reports', label: 'छापील मासिक प्रगती अहवाल' },
             ].map(({ key, label }) => (
               <label key={key} className="flex items-center p-6 bg-gradient-to-r from-gray-50 to-orange-50 rounded-2xl hover:from-orange-50 hover:to-orange-100 transition-all duration-300 cursor-pointer group border border-gray-200 hover:border-orange-300 shadow-sm hover:shadow-md">
@@ -1060,7 +1062,8 @@ const uploadPhotosToSupabase = async (inspectionId: string) => {
           </div>
         </div>
       </section>
-{/* Section 4 - Schedule */}
+
+      {/* Section 4 - Schedule */}
       <section className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden transform hover:scale-[1.01] transition-transform duration-300">
         <div className="bg-gradient-to-r from-indigo-500 to-blue-600 px-8 py-6">
           <div className="flex items-center text-white">
@@ -1080,7 +1083,7 @@ const uploadPhotosToSupabase = async (inspectionId: string) => {
               name="timetable_followed"
               value={anganwadiFormData.timetable_followed ? 'होय' : anganwadiFormData.timetable_followed === false ? 'नाही' : ''}
               onChange={(value) => setAnganwadiFormData(prev => ({...prev, timetable_followed: value === 'होय'}))}
-              question="२] नियमितपणे पाळले जाते काय?"
+              question="२] वेळापत्रक पाळले जाते काय?"
             />
             <YesNoRadio
               name="supervisor_regular_attendance"
@@ -1092,7 +1095,7 @@ const uploadPhotosToSupabase = async (inspectionId: string) => {
         </div>
       </section>
 
-{/* Section 5 - Food */}
+      {/* Section 5 - Food */}
       <section className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden transform hover:scale-[1.01] transition-transform duration-300">
         <div className="bg-gradient-to-r from-green-500 to-emerald-600 px-8 py-6">
           <div className="flex items-center text-white">
@@ -1118,7 +1121,7 @@ const uploadPhotosToSupabase = async (inspectionId: string) => {
         </div>
       </section>
 
-{/* Section 6 - Self-help Groups */}
+      {/* Section 6 - Self-help Groups */}
       <section className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden transform hover:scale-[1.01] transition-transform duration-300">
         <div className="bg-gradient-to-r from-teal-500 to-cyan-600 px-8 py-6">
           <div className="flex items-center text-white">
@@ -1157,12 +1160,13 @@ const uploadPhotosToSupabase = async (inspectionId: string) => {
           </div>
         </div>
       </section>
-{/* Section 7 - Children's Food Preference */}
+
+      {/* Section 7 - Children's Food Preference */}
       <section className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden transform hover:scale-[1.01] transition-transform duration-300">
         <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-8 py-6">
           <div className="flex items-center text-white">
             <MapPin className="w-8 h-8 mr-4" />
-            <h3 className="text-2xl font-bold">७. मुलांना आहाराची चव व दर्जा आवडतो की कसे?:</h3>
+            <h3 className="text-2xl font-bold">७. मुलांच्या आहाराची आवड:</h3>
           </div>
         </div>
         <div className="p-10">
@@ -1179,7 +1183,8 @@ const uploadPhotosToSupabase = async (inspectionId: string) => {
           </div>
         </div>
       </section>
-{/* Section 8 - Food Quality */}
+
+      {/* Section 8 - Food Quality */}
       <section className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden transform hover:scale-[1.01] transition-transform duration-300">
         <div className="bg-gradient-to-r from-amber-500 to-yellow-600 px-8 py-6">
           <div className="flex items-center text-white">
@@ -1215,7 +1220,7 @@ const uploadPhotosToSupabase = async (inspectionId: string) => {
         </div>
       </section>
 
-{/* Section 9 - Health Services */}
+      {/* Section 9 - Health Services */}
       <section className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden transform hover:scale-[1.01] transition-transform duration-300">
         <div className="bg-gradient-to-r from-red-500 to-pink-600 px-8 py-6">
           <div className="flex items-center text-white">
@@ -1229,31 +1234,31 @@ const uploadPhotosToSupabase = async (inspectionId: string) => {
               name="regular_weighing"
               value={anganwadiFormData.regular_weighing ? 'होय' : anganwadiFormData.regular_weighing === false ? 'नाही' : ''}
               onChange={(value) => setAnganwadiFormData(prev => ({...prev, regular_weighing: value === 'होय'}))}
-              question="१]  बालकांचे वजने नियमित वजने घेतली जातात किंवा कसे?"
+              question="१] मुलांचे नियमित वजन केले जाते काय?"
             />
             <YesNoRadio
               name="growth_chart_accuracy"
               value={anganwadiFormData.growth_chart_accuracy ? 'होय' : anganwadiFormData.growth_chart_accuracy === false ? 'नाही' : ''}
               onChange={(value) => setAnganwadiFormData(prev => ({...prev, growth_chart_accuracy: value === 'होय'}))}
-              question="२] (वृद्धिपत्रक तपासून) वय व वजन यांची नोंद तपासून पोषण श्रेणी योग्य प्रमाणे दर्शविलेली आहे काय? काही मुलांची प्रत्यक्ष वजने घेऊन तपासणी व खात्री करावी. तसेच वृद्धिपत्रकातील नोंद तपासावी."
+              question="२] वाढीचा तक्ता अचूकपणे भरला जातो काय?"
             />
             <YesNoRadio
               name="vaccination_health_checkup_regular"
               value={anganwadiFormData.vaccination_health_checkup_regular ? 'होय' : anganwadiFormData.vaccination_health_checkup_regular === false ? 'नाही' : ''}
               onChange={(value) => setAnganwadiFormData(prev => ({...prev, vaccination_health_checkup_regular: value === 'होय'}))}
-              question="३] लसीकरण व आरोग्य तपासणी नियमितपणे होते काय? (मागील दोन महिन्याचे रेकॉर्ड तपासावे.)"
+              question="३] लसीकरण व आरोग्य तपासणी नियमितपणे केली जाते काय?"
             />
             <YesNoRadio
               name="vaccination_schedule_awareness"
               value={anganwadiFormData.vaccination_schedule_awareness ? 'होय' : anganwadiFormData.vaccination_schedule_awareness === false ? 'नाही' : ''}
               onChange={(value) => setAnganwadiFormData(prev => ({...prev, vaccination_schedule_awareness: value === 'होय'}))}
-              question="४] लसीकरण दिवसाची माहिती लाभार्थी पालकांना आहे काय? (एक-दोन घरी जाऊन तपासावे)"
+              question="४] लसीकरणाचे वेळापत्रक माहित आहे काय?"
             />
           </div>
         </div>
       </section>
 
-{/* Section 10 - Community Participation */}
+      {/* Section 10 - Community Participation */}
       <section className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden transform hover:scale-[1.01] transition-transform duration-300">
         <div className="bg-gradient-to-r from-violet-500 to-purple-600 px-8 py-6">
           <div className="flex items-center text-white">
@@ -1287,133 +1292,7 @@ const uploadPhotosToSupabase = async (inspectionId: string) => {
         </div>
       </section>
 
-{/* Additional Sections */}
-      <section className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
-        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 px-8 py-6">
-          <div className="flex items-center text-white">
-            <Users className="w-8 h-8 mr-4" />
-            <h3 className="text-2xl font-bold">अतिरिक्त तपशील:</h3>
-          </div>
-        </div>
-        <div className="p-10">
-          <div className="space-y-8">
-            <div>
-              <YesNoRadio
-                name="village_health_nutrition_micro_planning"
-                value={anganwadiFormData.village_health_nutrition_micro_planning}
-                onChange={(value) => setAnganwadiFormData(prev => ({...prev, village_health_nutrition_micro_planning: value}))}
-                question="११. ग्राम आरोग्य व पोषण दिवसाचे गावनिहाय सूक्ष्म नियोजन केले आहे काय?"
-              />
-            </div>
-        
-            <div>
-              <h4 className="font-semibold mb-4 text-lg text-gray-700">१२. भेटीच्या दिवशी प्रत्यक्ष उपस्थित असलेली बालके व नोंदविलेल्या बालकांपैकी त्या दिवशी प्रत्यक्ष हजर असलेली बालके. (मागील आठवड्यातील सरासरी आकडेवारीची ही संख्या पडताळून पहावी.):</h4>
-              <input
-                type="text"
-                className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300"
-                disabled={isViewMode}
-              />
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-4 text-lg text-gray-700">१३. पूर्व शालेय शिक्षण:</h4>
-              <div className="space-y-4 pl-6">
-                <div>
-                  <label className="block mb-2 font-medium">१] पूर्वशालेय शिक्षणासाठी नोंदवलेली बालके</label>
-                  <input
-                    type="number"
-                    value={anganwadiFormData.preschool_education_registered}
-                    onChange={(e) => setAnganwadiFormData(prev => ({...prev, preschool_education_registered: parseInt(e.target.value) || 0}))}
-                    className="w-full p-3 border-2 border-gray-200 rounded-lg"
-                    disabled={isViewMode}
-                  />
-                </div>
-                <div>
-                  <label className="block mb-2 font-medium">२] भेटीची वेळी प्रत्यक्ष हजर बालके</label>
-                  <input
-                    type="number"
-                    value={anganwadiFormData.preschool_education_present}
-                    onChange={(e) => setAnganwadiFormData(prev => ({...prev, preschool_education_present: parseInt(e.target.value) || 0}))}
-                    className="w-full p-3 border-2 border-gray-200 rounded-lg"
-                    disabled={isViewMode}
-                  />
-                </div>
-                <div>
-                  <label className="block mb-2 font-medium">३] भेटीचे दिवशी कोणकोणते कार्यक्रम घेतले</label>
-                  <input
-                    type="text"
-                    value={anganwadiFormData.preschool_programs_conducted}
-                    onChange={(e) => setAnganwadiFormData(prev => ({...prev, preschool_programs_conducted: e.target.value}))}
-                    className="w-full p-3 border-2 border-gray-200 rounded-lg"
-                    disabled={isViewMode}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <section className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
-              <div className="bg-gradient-to-r from-indigo-500 to-purple-600 px-8 py-6">
-                <div className="flex items-center text-white">
-                  <Users className="w-8 h-8 mr-4" />
-                  <h3 className="text-2xl font-bold">१४. लोकसहभाग:</h3>
-                </div>
-              </div>
-              <div className="p-10">
-                <div className="space-y-8">
-                  <div>
-                    <YesNoRadio
-                      name="village_health_nutrition_micro_planning"
-                      value={anganwadiFormData.village_health_nutrition_micro_planning}
-                      onChange={(value) => setAnganwadiFormData(prev => ({...prev, village_health_nutrition_micro_planning: value}))}
-                      question="१] अंगणवाडी केंद्राला गावातील लोकांचे सहकार्य मिळते काय? मिळत नसेल तर का?(याबाबत ग्राम समिती अथवा ग्राम पंचायत सदस्य यांचेशी चर्चा करावी.)"
-                    />
-                  </div>
-                  <div>
-                    <label className="block mb-2 font-medium">२] यामध्ये ग्राम समिती सदस्य/ ग्राम पंचायत सदस्य/ आरोग्य सेविका/ इतर उपस्थिती कशी होती?</label>
-                    <textarea
-                      value={anganwadiFormData.committee_member_participation}
-                      onChange={(e) => setAnganwadiFormData(prev => ({...prev, committee_member_participation: e.target.value}))}
-                      className="w-full p-3 border-2 border-gray-200 rounded-lg"
-                      rows={3}
-                      disabled={isViewMode}
-                    />
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <YesNoRadio
-              name="home_visits_guidance"
-              value={anganwadiFormData.home_visits_guidance}
-              onChange={(value) => setAnganwadiFormData(prev => ({...prev, home_visits_guidance: value}))}
-              question="१५. गरोदर महिला, आजारी असलेली बालके यांचे घरी अंगणवाडी सेविका नियमित भेट देऊन त्यांना मार्गदर्शन व सल्ला देण्याचे काम करते किंवा कसे? (काही घरी भेट देऊन याबाबत पडताळणी करावी.)"
-            />
-
-            <YesNoRadio
-              name="public_opinion_improvement"
-              value={anganwadiFormData.public_opinion_improvement}
-              onChange={(value) => setAnganwadiFormData(prev => ({...prev, public_opinion_improvement: value}))}
-              question="१६. अंगणवाडी क्षेत्रातील लोकांचे अंगणवाडीचे कामकाजाबाबत सर्वसाधारण मत कसे आहे? तसेच मागील २–३ वर्षाचे कालावधीत काही सुधारणा झालेल्या आहेत काय?"
-            />
-
-            
-
-            <div>
-              <h4 className="font-semibold mb-4 text-lg text-gray-700">१७. काही सूचना असल्यास-</h4>
-              <textarea
-                value={anganwadiFormData.suggestions}
-                onChange={(e) => setAnganwadiFormData(prev => ({...prev, suggestions: e.target.value}))}
-                className="w-full p-3 border-2 border-gray-200 rounded-lg"
-                rows={3}
-                disabled={isViewMode}
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-
-{/* Final Section - Inspector Details */}
+      {/* Final Section - Inspector Details */}
       <section className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden transform hover:scale-[1.01] transition-transform duration-300">
         <div className="bg-gradient-to-r from-gray-600 to-gray-800 px-8 py-6">
           <div className="flex items-center text-white">
@@ -1426,15 +1305,12 @@ const uploadPhotosToSupabase = async (inspectionId: string) => {
             <div>
               <label className="block mb-4 text-lg font-bold text-gray-700">भेटीची तारीख</label>
               <input
-  type="date"
-  value={anganwadiFormData.visit_date}
-  onChange={(e) =>
-    setAnganwadiFormData((prev) => ({ ...prev, visit_date: e.target.value }))
-  }
-  className="w-full p-5 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-gray-500/20 focus:border-gray-500 transition-all duration-300 bg-gray-50 hover:bg-white text-lg shadow-sm"
-  disabled={isViewMode}
-/>
-
+                type="text"
+                value={anganwadiFormData.visit_date}
+                onChange={(e) => setAnganwadiFormData(prev => ({...prev, visit_date: e.target.value}))}
+                className="w-full p-5 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-gray-500/20 focus:border-gray-500 transition-all duration-300 bg-gray-50 hover:bg-white text-lg shadow-sm"
+                disabled={isViewMode}
+              />
             </div>
             <div>
               <label className="block mb-4 text-lg font-bold text-gray-700">तपासणी अधिकारीचे नाव</label>
