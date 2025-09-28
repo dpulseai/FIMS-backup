@@ -22,7 +22,7 @@
 */
 
 -- Create the pahuvaidhakiya_tapasani table
-CREATE TABLE IF NOT EXISTS pahuvaidhakiya_tapasani (
+CREATE TABLE IF NOT EXISTS pahuvaidhakiya_tap (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   inspection_id uuid REFERENCES fims_inspections(id) ON DELETE CASCADE,
   

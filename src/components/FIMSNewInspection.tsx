@@ -1,27 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { 
-  ArrowLeft,
-  Plus,
-  FileText,
-  Camera,
-  MapPin,
-  Building2,
-  School,
-  Users,
-  BookOpen,
-  GraduationCap,
-  Building,
-  UserCheck,
-  ClipboardList,
-  Award,
-  Target,
-  CheckSquare,
-  FileCheck,
-  UserPlus,
-  Settings,
-  Activity
-} from 'lucide-react';
+import { ArrowLeft, Plus, FileText, Camera, MapPin, Building2, School, Users, BookOpen, GraduationCap, Building, UserCheck, ClipboardList, Award, Target, SquareCheck as CheckSquare, FileCheck, UserPlus, Settings, Activity } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { AnganwadiTapasaniForm } from './AnganwadiTapasaniForm';
 import { FIMSOfficeInspection } from './FIMSOfficeInspection';
@@ -32,7 +11,7 @@ import { ZPDarMahinyalaSadarKaryachePrapatraForm } from './ZPDarMahinyalaSadarKa
 import { RajyaGunwattaNirikshakTapasaniForm } from './RajyaGunwattaNirikshakTapasaniForm';
 import { MahatmaGandhiRojgarHamiForm } from './MahatmaGandhiRojgarHamiForm';
 import { MumbaiNyayalayTapasaniForm } from './MumbaiNyayalayTapasaniForm';
-//import { MumbaiNyayalayForm } from './MumbaiNyayalayTapasaniForm';
+import { PahuvaidhakiyaTapasaniForm } from './PahuvaidhakiyaTapasaniForm.tsx';
 
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
@@ -201,6 +180,18 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
       );
     }
 
+    if (selectedInspectionType === 'pashutapasani') {
+      return (
+        <PahuvaidhakiyaTapasaniForm
+          user={user}
+          onBack={handleBackToSelection}
+          categories={categories}
+          onInspectionCreated={onInspectionCreated}
+          editingInspection={editingInspection}
+        />
+      );
+    }
+
     return null;
   };
 
@@ -355,6 +346,7 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
             { key: 'rajya_gunwatta_nirikshak', title: 'राज्य गुणवत्ता निरीक्षक तपासणी', subtitle: 'State Quality Inspector Inspection', color: 'emerald', active: true },
             { key: 'mahatma_gandhi_rojgar_hami', title: 'महात्मा गांधी रोजगार हमी योजना', subtitle: 'MGNREGA Work Inspection Form', color: 'green', active: true },
             { key: 'mumbai_nyayalay', title: 'मुंबई न्यायालय तपासणी प्रपत्र', subtitle: 'Mumbai High Court School Inspection Form', color: 'red', active: true },
+            { key: 'pashutapasani', title: 'पशुवैद्यकीय संस्थांचे तांत्रिक निरीक्षण', subtitle: 'Veterinary Institution Technical Inspection Form', color: 'red', active: true },
          //   { key: 'form_10', title: 'Form 10 Title', subtitle: 'Form 10 Description', color: 'cyan' },
          //   { key: 'form_11', title: 'Form 11 Title', subtitle: 'Form 11 Description', color: 'violet' },
          //   { key: 'form_12', title: 'Form 12 Title', subtitle: 'Form 12 Description', color: 'lime' },
@@ -424,13 +416,16 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
                     <p>• भौतिक सुविधा मूल्यांकन</p>
                     <p>• स्वच्छता आणि सुरक्षा तपासणी</p>
                   </>
-                ) : (
+                ) : form.key === 'pashutapasani' ? (
                   <>
-                    <p>• Feature 1</p>
-                    <p>• Feature 2</p>
-                    <p>• Feature 3</p>
-                    <p>• Feature 4</p>
-                  </>
+                    <p>• संस्थेची मूलभूत माहिती व तांत्रिक आढावा</p>
+                    <p>• रुग्ण आकडेवारी व शस्त्रक्रिया तपशील</p>
+                    <p>• कृत्रिम रेतन व गर्भधारणा तपासणी</p>
+                    <p>• रोग माहिती व लसीकरण कार्यक्रम</p>
+                    <p>• योजना प्रगती व तांत्रिक मूल्यांकन</p>
+                    </>
+                ) : (
+                  <></>
                 )}
               </div>
               
