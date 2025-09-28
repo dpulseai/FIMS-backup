@@ -201,7 +201,7 @@ export const FIMSNewInspection: React.FC<FIMSNewInspectionProps> = ({
       );
     }
 
-    if (selectedInspectionType === 'pashu_tapasani') {
+    if (selectedInspectionType === 'pashutapasani') {
       return (
         <PahuvaidhakiyaTapasaniForm
           user={user}
