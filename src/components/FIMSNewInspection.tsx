@@ -1,27 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { 
-  ArrowLeft,
-  Plus,
-  FileText,
-  Camera,
-  MapPin,
-  Building2,
-  School,
-  Users,
-  BookOpen,
-  GraduationCap,
-  Building,
-  UserCheck,
-  ClipboardList,
-  Award,
-  Target,
-  CheckSquare,
-  FileCheck,
-  UserPlus,
-  Settings,
-  Activity
-} from 'lucide-react';
+import { ArrowLeft, Plus, FileText, Camera, MapPin, Building2, School, Users, BookOpen, GraduationCap, Building, UserCheck, ClipboardList, Award, Target, SquareCheck as CheckSquare, FileCheck, UserPlus, Settings, Activity } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { AnganwadiTapasaniForm } from './AnganwadiTapasaniForm';
 import { FIMSOfficeInspection } from './FIMSOfficeInspection';
