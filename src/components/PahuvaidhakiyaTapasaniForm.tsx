@@ -258,7 +258,7 @@ export const PahuvaidhakiyaTapasaniForm: React.FC<PahuvaidhakiyaTapasaniFormProp
       for (let i = 0; i < uploadedPhotos.length; i++) {
         const file = uploadedPhotos[i];
         const fileExt = file.name.split('.').pop();
-        const fileName = `pahuvaidhakiya_${inspectionId}_${Date.now()}_${i}.${fileExt}`;
+        const fileName = `pashu_vaidyakiy_tapasani_${inspectionId}_${Date.now()}_${i}.${fileExt}`;
 
         // Upload to Supabase Storage
         const { data: uploadData, error: uploadError } = await supabase.storage
