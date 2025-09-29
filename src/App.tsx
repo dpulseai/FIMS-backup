@@ -33,7 +33,7 @@ function App() {
       return false;
     };
 
-    const isRecovery = checkForRecovery();
+    checkForRecovery();
 
     // Check if user is already signed in
     const checkUser = async () => {
@@ -67,7 +67,7 @@ function App() {
         console.log('Auth event:', event, 'Session:', session);  // Debug log
         setUser(session?.user ?? null);
 
-        if (event === 'PASSWORD_RECOVERY' || isRecovery) {
+        if (event === 'PASSWORD_RECOVERY') {
           setIsRecoveryMode(true);
           // Sign out temporary session to prevent dashboard rendering
           if (session) {
@@ -145,7 +145,7 @@ function App() {
     );
   }
 
-  // If in recovery mode, show the sign-in page with reset form (overrides user check)
+  // If in recovery mode or not signed in, show the sign-in page (with reset form forced if recovery)
   if (isRecoveryMode || !user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50 flex items-center justify-center p-4">
@@ -169,8 +169,8 @@ function App() {
               </p>
             </div>
 
-            {/* Sign In Form (will handle reset mode internally) */}
-            <SignInForm onSignInSuccess={handleSignInSuccess} />
+            {/* Sign In Form (force reset mode if in recovery) */}
+            <SignInForm onSignInSuccess={handleSignInSuccess} forceResetMode={isRecoveryMode} />
 
             {/* Footer */}
             <div className="mt-8 text-center">
