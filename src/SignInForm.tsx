@@ -31,13 +31,6 @@ export const SignInForm: React.FC<SignInFormProps> = ({ onSignInSuccess, forceRe
     // Force reset mode if prop is true (from parent detection)
     if (forceResetMode) {
       setResetMode(true);
-      // Parse and verify token immediately
-      const params = new URLSearchParams(window.location.search);
-      const hashParams = new URLSearchParams(window.location.hash.substring(1));
-      const token = params.get('access_token') || hashParams.get('access_token') || params.get('token_hash') || hashParams.get('token_hash');
-      if (token) {
-        handleRecoveryToken(token);
-      }
     }
 
     // Listen for auth state changes
@@ -48,29 +41,44 @@ export const SignInForm: React.FC<SignInFormProps> = ({ onSignInSuccess, forceRe
       }
     });
 
-    // Manual fallback: Parse URL for recovery token/code
-    const url = new URL(window.location.href);
-    const type = url.searchParams.get('type') || url.hash.split('&').find(p => p.startsWith('type='))?.split('=')[1];
-    const token = url.searchParams.get('access_token') || url.hash.split('&').find(p => p.startsWith('access_token='))?.split('=')[1];
-    const code = url.searchParams.get('code');
+    // Parse URL hash for recovery tokens and set session
+    const hash = window.location.hash.substring(1);
+    const hashParams = new URLSearchParams(hash);
+    const type = hashParams.get('type');
+    const accessToken = hashParams.get('access_token');
+    const refreshToken = hashParams.get('refresh_token');
 
-    if (type === 'recovery' && (token || code)) {
-      console.log('Detected recovery URL:', { type, token, code });  // Debug log
-      handleRecoveryToken(token || code);
+    if (type === 'recovery' && accessToken && refreshToken) {
+      console.log('Detected recovery tokens:', { type, accessToken, refreshToken });  // Debug log
+      handleRecoveryTokens(accessToken, refreshToken);
+    } else {
+      console.log('No recovery tokens detected in URL hash');  // Debug if not found
+    }
+
+    // Clean up URL after processing
+    if (window.history.replaceState) {
+      window.history.replaceState(null, '', window.location.pathname);
     }
 
     return () => subscription.unsubscribe();
   }, [forceResetMode]);
 
-  const handleRecoveryToken = async (token: string) => {
+  const handleRecoveryTokens = async (accessToken: string, refreshToken: string) => {
+    setIsLoading(true);
     try {
-      // Verify the OTP/token to establish session
-      const { error } = await supabase.auth.verifyOtp({ token_hash: token, type: 'recovery' });
+      // Set the recovery session using tokens from URL
+      const { data, error } = await supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      });
       if (error) throw error;
+      console.log('Recovery session established:', data);  // Debug log
       setResetMode(true);
     } catch (err) {
       setError('Invalid or expired reset link. Please request a new one.');
-      console.error('Recovery token error:', err);
+      console.error('Recovery session error:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
