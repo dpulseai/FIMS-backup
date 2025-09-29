@@ -10,7 +10,8 @@ function App() {
   const { t } = useTranslation();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isRecoveryMode, setIsRecoveryMode] = useState(false);  // State for recovery detection
+  const [isRecoveryMode, setIsRecoveryMode] = useState(false);
+  const [recoveryTokens, setRecoveryTokens] = useState<{ accessToken: string | null; refreshToken: string | null }>({ accessToken: null, refreshToken: null });
 
   useEffect(() => {
     // Immediately check URL for recovery params (before any auth calls)
@@ -19,11 +20,13 @@ function App() {
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
 
       const type = params.get('type') || hashParams.get('type');
-      const token = params.get('access_token') || hashParams.get('access_token') || params.get('token_hash') || hashParams.get('token_hash');
+      const accessToken = params.get('access_token') || hashParams.get('access_token');
+      const refreshToken = params.get('refresh_token') || hashParams.get('refresh_token');
 
-      if (type === 'recovery' && token) {
-        console.log('Recovery URL detected:', { type, token });  // Debug log
+      if (type === 'recovery' && accessToken && refreshToken) {
+        console.log('Recovery URL detected:', { type, accessToken, refreshToken });  // Debug log
         setIsRecoveryMode(true);
+        setRecoveryTokens({ accessToken, refreshToken });
         // Clean URL to prevent re-triggering
         if (window.history.replaceState) {
           window.history.replaceState(null, '', window.location.pathname);
@@ -164,8 +167,13 @@ function App() {
               </p>
             </div>
 
-            {/* Sign In Form (force reset mode if in recovery) */}
-            <SignInForm onSignInSuccess={handleSignInSuccess} forceResetMode={isRecoveryMode} />
+            {/* Sign In Form (force reset mode if in recovery, pass tokens) */}
+            <SignInForm 
+              onSignInSuccess={handleSignInSuccess} 
+              forceResetMode={isRecoveryMode}
+              accessToken={recoveryTokens.accessToken}
+              refreshToken={recoveryTokens.refreshToken}
+            />
 
             {/* Footer */}
             <div className="mt-8 text-center">
