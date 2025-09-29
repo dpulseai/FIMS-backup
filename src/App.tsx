@@ -10,12 +10,33 @@ function App() {
   const { t } = useTranslation();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isRecoveryMode, setIsRecoveryMode] = useState(false);  // New state for recovery detection
+  const [isRecoveryMode, setIsRecoveryMode] = useState(false);  // State for recovery detection
 
   useEffect(() => {
+    // Immediately check URL for recovery params (before any auth calls)
+    const checkForRecovery = () => {
+      const params = new URLSearchParams(window.location.search);
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+
+      const type = params.get('type') || hashParams.get('type');
+      const token = params.get('access_token') || hashParams.get('access_token') || params.get('token_hash') || hashParams.get('token_hash');
+
+      if (type === 'recovery' && token) {
+        console.log('Recovery URL detected:', { type, token });  // Debug log
+        setIsRecoveryMode(true);
+        // Clean URL to prevent re-triggering
+        if (window.history.replaceState) {
+          window.history.replaceState(null, '', window.location.pathname);
+        }
+        return true;
+      }
+      return false;
+    };
+
+    const isRecovery = checkForRecovery();
+
     // Check if user is already signed in
     const checkUser = async () => {
-      // Don't attempt any Supabase operations if not configured
       if (!isSupabaseConfigured || !supabase) {
         setIsLoading(false);
         return;
@@ -26,16 +47,10 @@ function App() {
         setUser(user);
       } catch (error) {
         console.error('Error checking user:', error);
-        // Handle invalid refresh token by clearing stale auth data
         if (error instanceof Error && error.message.includes('Invalid Refresh Token')) {
-          try {
-            // Clear any stale authentication tokens from local storage
-            localStorage.removeItem('supabase.auth.token');
-            sessionStorage.removeItem('supabase.auth.token');
-            await supabase.auth.signOut();
-          } catch (signOutError) {
-            console.error('Error signing out:', signOutError);
-          }
+          localStorage.removeItem('supabase.auth.token');
+          sessionStorage.removeItem('supabase.auth.token');
+          await supabase.auth.signOut();
         }
         setUser(null);
       } finally {
@@ -45,19 +60,23 @@ function App() {
 
     checkUser();
 
-    // Only set up auth listener if Supabase is properly configured
+    // Set up auth listener
     let subscription: any = null;
     if (isSupabaseConfigured && supabase) {
-      const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
         console.log('Auth event:', event, 'Session:', session);  // Debug log
         setUser(session?.user ?? null);
-        setIsRecoveryMode(event === 'PASSWORD_RECOVERY');  // Detect recovery mode
-        setIsLoading(false);
 
-        // Optional: Sign out existing session when entering recovery for a clean state
-        // if (event === 'PASSWORD_RECOVERY' && session) {
-        //   supabase.auth.signOut();
-        // }
+        if (event === 'PASSWORD_RECOVERY' || isRecovery) {
+          setIsRecoveryMode(true);
+          // Sign out temporary session to prevent dashboard rendering
+          if (session) {
+            await supabase.auth.signOut();
+            console.log('Signed out temporary recovery session');
+          }
+        }
+
+        setIsLoading(false);
       });
       subscription = authSubscription;
     }
