@@ -5,9 +5,10 @@ import { supabase } from './lib/supabase';  // Assuming this is your updated imp
 
 interface SignInFormProps {
   onSignInSuccess: () => void;
+  forceResetMode?: boolean;  // New prop to force reset mode from parent
 }
 
-export const SignInForm: React.FC<SignInFormProps> = ({ onSignInSuccess }) => {
+export const SignInForm: React.FC<SignInFormProps> = ({ onSignInSuccess, forceResetMode = false }) => {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,50 +28,49 @@ export const SignInForm: React.FC<SignInFormProps> = ({ onSignInSuccess }) => {
   };
 
   useEffect(() => {
+    // Force reset mode if prop is true (from parent detection)
+    if (forceResetMode) {
+      setResetMode(true);
+      // Parse and verify token immediately
+      const params = new URLSearchParams(window.location.search);
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const token = params.get('access_token') || hashParams.get('access_token') || params.get('token_hash') || hashParams.get('token_hash');
+      if (token) {
+        handleRecoveryToken(token);
+      }
+    }
+
     // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth event:', event, 'Session:', session);  // Enhanced debug log
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      console.log('Auth event:', event);  // Debug log
       if (event === 'PASSWORD_RECOVERY') {
         setResetMode(true);
       }
     });
 
-    // Manual fallback: Parse both query params and hash for recovery details
-    const params = new URLSearchParams(window.location.search);
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));  // Parse hash as params
+    // Manual fallback: Parse URL for recovery token/code
+    const url = new URL(window.location.href);
+    const type = url.searchParams.get('type') || url.hash.split('&').find(p => p.startsWith('type='))?.split('=')[1];
+    const token = url.searchParams.get('access_token') || url.hash.split('&').find(p => p.startsWith('access_token='))?.split('=')[1];
+    const code = url.searchParams.get('code');
 
-    const type = params.get('type') || hashParams.get('type');
-    const token = params.get('access_token') || hashParams.get('access_token') || params.get('token_hash') || hashParams.get('token_hash');
-    const code = params.get('code') || hashParams.get('code');
-
-    if (type === 'recovery' && token) {
-      console.log('Detected recovery params:', { type, token, code });  // Debug log
-      handleRecoveryToken(token);
-    } else {
-      console.log('No recovery params detected in URL');  // Debug if not found
-    }
-
-    // Clean up URL after processing to prevent re-triggering
-    if (window.history.replaceState) {
-      window.history.replaceState(null, '', window.location.pathname);
+    if (type === 'recovery' && (token || code)) {
+      console.log('Detected recovery URL:', { type, token, code });  // Debug log
+      handleRecoveryToken(token || code);
     }
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [forceResetMode]);
 
   const handleRecoveryToken = async (token: string) => {
-    setIsLoading(true);
     try {
-      // Verify the token and establish session
-      const { data, error } = await supabase.auth.verifyOtp({ token_hash: token, type: 'recovery' });
+      // Verify the OTP/token to establish session
+      const { error } = await supabase.auth.verifyOtp({ token_hash: token, type: 'recovery' });
       if (error) throw error;
-      console.log('Recovery session established:', data);  // Debug log
       setResetMode(true);
     } catch (err) {
       setError('Invalid or expired reset link. Please request a new one.');
-      console.error('Recovery error:', err);
-    } finally {
-      setIsLoading(false);
+      console.error('Recovery token error:', err);
     }
   };
 
@@ -185,8 +185,8 @@ export const SignInForm: React.FC<SignInFormProps> = ({ onSignInSuccess }) => {
       if (updateError) {
         setError(updateError.message);
       } else {
-        // Password updated successfully - optionally sign out to force re-login
-        // await supabase.auth.signOut();
+        // Password updated successfully - sign out to force re-login
+        await supabase.auth.signOut();
         onSignInSuccess();
         // Redirect after success (change to your desired path)
         window.location.href = '/sign-in';
