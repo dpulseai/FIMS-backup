@@ -5,10 +5,17 @@ import { supabase } from './lib/supabase';  // Assuming this is your updated imp
 
 interface SignInFormProps {
   onSignInSuccess: () => void;
-  forceResetMode?: boolean;  // New prop to force reset mode from parent
+  forceResetMode?: boolean;
+  accessToken?: string | null;
+  refreshToken?: string | null;
 }
 
-export const SignInForm: React.FC<SignInFormProps> = ({ onSignInSuccess, forceResetMode = false }) => {
+export const SignInForm: React.FC<SignInFormProps> = ({ 
+  onSignInSuccess, 
+  forceResetMode = false,
+  accessToken = null,
+  refreshToken = null 
+}) => {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -29,8 +36,8 @@ export const SignInForm: React.FC<SignInFormProps> = ({ onSignInSuccess, forceRe
 
   useEffect(() => {
     // Force reset mode if prop is true (from parent detection)
-    if (forceResetMode) {
-      setResetMode(true);
+    if (forceResetMode && accessToken && refreshToken) {
+      handleRecoveryTokens(accessToken, refreshToken);
     }
 
     // Listen for auth state changes
@@ -41,27 +48,8 @@ export const SignInForm: React.FC<SignInFormProps> = ({ onSignInSuccess, forceRe
       }
     });
 
-    // Parse URL hash for recovery tokens and set session
-    const hash = window.location.hash.substring(1);
-    const hashParams = new URLSearchParams(hash);
-    const type = hashParams.get('type');
-    const accessToken = hashParams.get('access_token');
-    const refreshToken = hashParams.get('refresh_token');
-
-    if (type === 'recovery' && accessToken && refreshToken) {
-      console.log('Detected recovery tokens:', { type, accessToken, refreshToken });  // Debug log
-      handleRecoveryTokens(accessToken, refreshToken);
-    } else {
-      console.log('No recovery tokens detected in URL hash');  // Debug if not found
-    }
-
-    // Clean up URL after processing
-    if (window.history.replaceState) {
-      window.history.replaceState(null, '', window.location.pathname);
-    }
-
     return () => subscription.unsubscribe();
-  }, [forceResetMode]);
+  }, [forceResetMode, accessToken, refreshToken]);
 
   const handleRecoveryTokens = async (accessToken: string, refreshToken: string) => {
     setIsLoading(true);
