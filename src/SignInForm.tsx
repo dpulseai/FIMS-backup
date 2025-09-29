@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
-import { supabase } from './lib/supabase';
+import { supabase } from './lib/supabase';  // Assuming this is your updated import path
 
 interface SignInFormProps {
   onSignInSuccess: () => void;
@@ -27,14 +27,52 @@ export const SignInForm: React.FC<SignInFormProps> = ({ onSignInSuccess }) => {
   };
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth event:', event, 'Session:', session);  // Enhanced debug log
       if (event === 'PASSWORD_RECOVERY') {
         setResetMode(true);
       }
     });
 
+    // Manual fallback: Parse both query params and hash for recovery details
+    const params = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));  // Parse hash as params
+
+    const type = params.get('type') || hashParams.get('type');
+    const token = params.get('access_token') || hashParams.get('access_token') || params.get('token_hash') || hashParams.get('token_hash');
+    const code = params.get('code') || hashParams.get('code');
+
+    if (type === 'recovery' && token) {
+      console.log('Detected recovery params:', { type, token, code });  // Debug log
+      handleRecoveryToken(token);
+    } else {
+      console.log('No recovery params detected in URL');  // Debug if not found
+    }
+
+    // Clean up URL after processing to prevent re-triggering
+    if (window.history.replaceState) {
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+
     return () => subscription.unsubscribe();
   }, []);
+
+  const handleRecoveryToken = async (token: string) => {
+    setIsLoading(true);
+    try {
+      // Verify the token and establish session
+      const { data, error } = await supabase.auth.verifyOtp({ token_hash: token, type: 'recovery' });
+      if (error) throw error;
+      console.log('Recovery session established:', data);  // Debug log
+      setResetMode(true);
+    } catch (err) {
+      setError('Invalid or expired reset link. Please request a new one.');
+      console.error('Recovery error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,7 +137,7 @@ export const SignInForm: React.FC<SignInFormProps> = ({ onSignInSuccess }) => {
     // Use root URL for redirectTo (no separate route needed). Adjust for production domain via env vars.
     const redirectUrl = process.env.NODE_ENV === 'development'
       ? `${window.location.origin}/`
-      : 'http://localhost:3000/#access_token=eyJhbGciOiJIUzI1NiIsImtpZCI6IjBNTC8wRDdLZ0tvYW1LTWIiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3R2bXFrb25kaWhzb21sZWJpempqLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiJkMWE3MDQ2MS01Mzk1LTRkODktODMzMS0wZGNiNWJmMGQ5NDYiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzU5MTMwODk5LCJpYXQiOjE3NTkxMjcyOTksImVtYWlsIjoiZGV2LnpwY2hhbmRyYXB1ckBnbWFpbC5jb20iLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsX3ZlcmlmaWVkIjp0cnVlfSwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJhYWwiOiJhYWwxIiwiYW1yIjpbeyJtZXRob2QiOiJvdHAiLCJ0aW1lc3RhbXAiOjE3NTkxMjcyOTl9XSwic2Vzc2lvbl9pZCI6IjkwYTFkNmFhLTU5YzktNGRlNy1iYTk3LTdjZjc0YTE1MmUyYyIsImlzX2Fub255bW91cyI6ZmFsc2V9.8H2I1liWWcrQB52RaXh5UHGjqTZMvNX_flu1Nl_RRCs&expires_at=1759130899&expires_in=3600&refresh_token=rggdy6klikv7&token_type=bearer&type=recovery';  // Replace with your actual production domain (or use process.env.REACT_APP_BASE_URL)
+      : 'https://your-app-domain.com/';  // Replace with your actual production domain (or use process.env.REACT_APP_BASE_URL)
 
     try {
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
@@ -147,7 +185,11 @@ export const SignInForm: React.FC<SignInFormProps> = ({ onSignInSuccess }) => {
       if (updateError) {
         setError(updateError.message);
       } else {
+        // Password updated successfully - optionally sign out to force re-login
+        // await supabase.auth.signOut();
         onSignInSuccess();
+        // Redirect after success (change to your desired path)
+        window.location.href = '/sign-in';
       }
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');
