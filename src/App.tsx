@@ -10,6 +10,7 @@ function App() {
   const { t } = useTranslation();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRecoveryMode, setIsRecoveryMode] = useState(false);  // New state for recovery detection
 
   useEffect(() => {
     // Check if user is already signed in
@@ -48,8 +49,15 @@ function App() {
     let subscription: any = null;
     if (isSupabaseConfigured && supabase) {
       const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        console.log('Auth event:', event, 'Session:', session);  // Debug log
         setUser(session?.user ?? null);
+        setIsRecoveryMode(event === 'PASSWORD_RECOVERY');  // Detect recovery mode
         setIsLoading(false);
+
+        // Optional: Sign out existing session when entering recovery for a clean state
+        // if (event === 'PASSWORD_RECOVERY' && session) {
+        //   supabase.auth.signOut();
+        // }
       });
       subscription = authSubscription;
     }
@@ -67,6 +75,7 @@ function App() {
 
   const handleSignOut = () => {
     setUser(null);
+    setIsRecoveryMode(false);  // Reset recovery mode on sign out
   };
 
   if (isLoading) {
@@ -117,47 +126,47 @@ function App() {
     );
   }
 
-  // If user is authenticated, show FIMS Dashboard directly
-  if (user) {
-    return <FIMSDashboard user={user} onSignOut={handleSignOut} />;
-  }
-
-  // Show FIMS-specific sign-in page
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          {/* FIMS Header */}
-          <div className="text-center mb-8">
-            <div className="flex justify-center mb-4">
-              <div className="bg-gradient-to-r from-blue-600 to-blue-400 p-3 rounded-full shadow-lg">
-                <Camera className="h-8 w-8 text-white" />
+  // If in recovery mode, show the sign-in page with reset form (overrides user check)
+  if (isRecoveryMode || !user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="bg-white rounded-2xl shadow-xl p-8">
+            {/* FIMS Header */}
+            <div className="text-center mb-8">
+              <div className="flex justify-center mb-4">
+                <div className="bg-gradient-to-r from-blue-600 to-blue-400 p-3 rounded-full shadow-lg">
+                  <Camera className="h-8 w-8 text-white" />
+                </div>
               </div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent mb-2">
+                FIMS
+              </h1>
+              <p className="text-gray-600 text-sm mb-2">
+                {t('systems.fims.fullName')}
+              </p>
+              <p className="text-gray-500 text-xs">
+                {t('systems.fims.description')}
+              </p>
             </div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent mb-2">
-              FIMS
-            </h1>
-            <p className="text-gray-600 text-sm mb-2">
-              {t('systems.fims.fullName')}
-            </p>
-            <p className="text-gray-500 text-xs">
-              {t('systems.fims.description')}
-            </p>
-          </div>
 
-          {/* Sign In Form */}
-          <SignInForm onSignInSuccess={handleSignInSuccess} />
+            {/* Sign In Form (will handle reset mode internally) */}
+            <SignInForm onSignInSuccess={handleSignInSuccess} />
 
-          {/* Footer */}
-          <div className="mt-8 text-center">
-            <p className="text-xs text-gray-500">
-              {t('auth.secureAccess', 'Secure access to field inspection management system')}
-            </p>
+            {/* Footer */}
+            <div className="mt-8 text-center">
+              <p className="text-xs text-gray-500">
+                {t('auth.secureAccess', 'Secure access to field inspection management system')}
+              </p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  }
+
+  // If user is authenticated and not in recovery, show FIMS Dashboard
+  return <FIMSDashboard user={user} onSignOut={handleSignOut} />;
 }
 
 export default App;
