@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { supabase } from './lib/supabase';
 
 interface SignInFormProps {
   onSignInSuccess: () => void;
