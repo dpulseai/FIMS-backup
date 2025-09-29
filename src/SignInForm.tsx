@@ -99,7 +99,7 @@ export const SignInForm: React.FC<SignInFormProps> = ({ onSignInSuccess }) => {
     // Use root URL for redirectTo (no separate route needed). Adjust for production domain via env vars.
     const redirectUrl = process.env.NODE_ENV === 'development'
       ? `${window.location.origin}/`
-      : 'https://your-app-domain.com/';  // Replace with your actual production domain (or use process.env.REACT_APP_BASE_URL)
+      : 'http://localhost:3000';  // Replace with your actual production domain (or use process.env.REACT_APP_BASE_URL)
 
     try {
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
