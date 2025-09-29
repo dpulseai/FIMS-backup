@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Camera } from 'lucide-react';
-import { SignInForm } from 'SignInForm';
+import { SignInForm } from './SignInForm';
 import { FIMSDashboard } from './components/FIMSDashboard';
 import { supabase, isSupabaseConfigured, supabaseConfigErrors } from './lib/supabase';
 import type { User } from '@supabase/supabase-js';
