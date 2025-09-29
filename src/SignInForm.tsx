@@ -99,7 +99,7 @@ export const SignInForm: React.FC<SignInFormProps> = ({ onSignInSuccess }) => {
     // Use root URL for redirectTo (no separate route needed). Adjust for production domain via env vars.
     const redirectUrl = process.env.NODE_ENV === 'development'
       ? `${window.location.origin}/`
-      : 'http://localhost:3000';  // Replace with your actual production domain (or use process.env.REACT_APP_BASE_URL)
+      : 'http://localhost:3000/#access_token=eyJhbGciOiJIUzI1NiIsImtpZCI6IjBNTC8wRDdLZ0tvYW1LTWIiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3R2bXFrb25kaWhzb21sZWJpempqLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiJkMWE3MDQ2MS01Mzk1LTRkODktODMzMS0wZGNiNWJmMGQ5NDYiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzU5MTMwODk5LCJpYXQiOjE3NTkxMjcyOTksImVtYWlsIjoiZGV2LnpwY2hhbmRyYXB1ckBnbWFpbC5jb20iLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsX3ZlcmlmaWVkIjp0cnVlfSwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJhYWwiOiJhYWwxIiwiYW1yIjpbeyJtZXRob2QiOiJvdHAiLCJ0aW1lc3RhbXAiOjE3NTkxMjcyOTl9XSwic2Vzc2lvbl9pZCI6IjkwYTFkNmFhLTU5YzktNGRlNy1iYTk3LTdjZjc0YTE1MmUyYyIsImlzX2Fub255bW91cyI6ZmFsc2V9.8H2I1liWWcrQB52RaXh5UHGjqTZMvNX_flu1Nl_RRCs&expires_at=1759130899&expires_in=3600&refresh_token=rggdy6klikv7&token_type=bearer&type=recovery';  // Replace with your actual production domain (or use process.env.REACT_APP_BASE_URL)
 
     try {
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
