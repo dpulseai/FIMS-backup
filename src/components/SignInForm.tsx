@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -15,12 +15,26 @@ export const SignInForm: React.FC<SignInFormProps> = ({ onSignInSuccess }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [resetEmailSent, setResetEmailSent] = useState(false);
-
+  const [resetMode, setResetMode] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setResetMode(true);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,6 +113,44 @@ export const SignInForm: React.FC<SignInFormProps> = ({ onSignInSuccess }) => {
     }
   };
 
+  const handleResetSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (!newPassword || !confirmPassword) {
+      setError(t('auth.fillAllFields'));
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setError(t('auth.passwordTooShort'));
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError(t('auth.passwordsDontMatch'));
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (updateError) {
+        setError(updateError.message);
+      } else {
+        onSignInSuccess();
+      }
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (resetEmailSent) {
     return (
       <div className="text-center">
@@ -122,86 +174,166 @@ export const SignInForm: React.FC<SignInFormProps> = ({ onSignInSuccess }) => {
     );
   }
 
+  if (resetMode) {
+    return (
+      <div>
+        <form onSubmit={handleResetSubmit} className="space-y-6">
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+              {error}
+            </div>
+          )}
+
+          <div>
+            <label htmlFor="new-password" className="block text-sm font-medium text-gray-700 mb-2">
+              {t('auth.newPassword')}
+            </label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <input
+                id="new-password"
+                type={showNewPassword ? 'text' : 'password'}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                placeholder={t('auth.enterNewPassword')}
+                disabled={isLoading}
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                disabled={isLoading}
+              >
+                {showNewPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-2">
+              {t('auth.confirmPassword')}
+            </label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <input
+                id="confirm-password"
+                type={showConfirmPassword ? 'text' : 'password'}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                placeholder={t('auth.confirmNewPassword')}
+                disabled={isLoading}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                disabled={isLoading}
+              >
+                {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2"
+          >
+            {isLoading ? (
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+            ) : (
+              <>
+                <LogIn className="h-5 w-5" />
+                <span>{t('auth.resetPassword')}</span>
+              </>
+            )}
+          </button>
+        </form>
+      </div>
+    );
+  }
+
   return (
     <div>
+      <form onSubmit={handleSignIn} className="space-y-6">
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            {error}
+          </div>
+        )}
 
-    <form onSubmit={handleSignIn} className="space-y-6">
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-          {error}
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+            {t('auth.email')}
+          </label>
+          <div className="relative">
+            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              placeholder={t('auth.enterEmail')}
+              disabled={isLoading}
+            />
+          </div>
         </div>
-      )}
 
-      <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-          {t('auth.email')}
-        </label>
-        <div className="relative">
-          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-            placeholder={t('auth.enterEmail')}
-            disabled={isLoading}
-          />
+        <div>
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+            {t('auth.password')}
+          </label>
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              placeholder={t('auth.enterPassword')}
+              disabled={isLoading}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              disabled={isLoading}
+            >
+              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-          {t('auth.password')}
-        </label>
-        <div className="relative">
-          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-          <input
-            id="password"
-            type={showPassword ? 'text' : 'password'}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-            placeholder={t('auth.enterPassword')}
-            disabled={isLoading}
-          />
+        <div className="flex items-center justify-between">
           <button
             type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            onClick={handlePasswordReset}
+            className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
             disabled={isLoading}
           >
-            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            {t('auth.forgotPassword')}
           </button>
         </div>
-      </div>
 
-      <div className="flex items-center justify-between">
         <button
-          type="button"
-          onClick={handlePasswordReset}
-          className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+          type="submit"
           disabled={isLoading}
+          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2"
         >
-          {t('auth.forgotPassword')}
+          {isLoading ? (
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+          ) : (
+            <>
+              <LogIn className="h-5 w-5" />
+              <span>{t('auth.signIn')}</span>
+            </>
+          )}
         </button>
-      </div>
-
-      <button
-        type="submit"
-        disabled={isLoading}
-        className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2"
-      >
-        {isLoading ? (
-          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-        ) : (
-          <>
-            <LogIn className="h-5 w-5" />
-            <span>{t('auth.signIn')}</span>
-          </>
-        )}
-      </button>
-    </form>
+      </form>
     </div>
   );
 };
