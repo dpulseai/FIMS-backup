@@ -63,17 +63,12 @@ function App() {
     // Set up auth listener
     let subscription: any = null;
     if (isSupabaseConfigured && supabase) {
-      const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange((event, session) => {
         console.log('Auth event:', event, 'Session:', session);  // Debug log
         setUser(session?.user ?? null);
 
         if (event === 'PASSWORD_RECOVERY') {
           setIsRecoveryMode(true);
-          // Sign out temporary session to prevent dashboard rendering
-          if (session) {
-            await supabase.auth.signOut();
-            console.log('Signed out temporary recovery session');
-          }
         }
 
         setIsLoading(false);
