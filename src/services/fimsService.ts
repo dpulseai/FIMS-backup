@@ -1,6 +1,31 @@
 import { supabase } from '../lib/supabase';
 import { isSupabaseConfigured } from '../lib/supabase';
 
+export type InspectionData = Inspection;
+export type CategoryData = {
+  id: string;
+  name: string;
+  name_marathi: string;
+  description: string;
+  form_type: string;
+  is_active: boolean;
+};
+export type InspectorData = {
+  user_id: string;
+  name: string;
+  phone_number?: string;
+  roles?: {
+    id: string;
+    name: string;
+  };
+};
+export type InspectionStats = {
+  total: number;
+  pending: number;
+  completed: number;
+  submitted: number;
+};
+
 export interface Inspection {
   id: string;
   inspection_number: string;
@@ -790,6 +815,61 @@ export const getVeterinaryInspectionForm = async (inspectionId: string): Promise
     return data;
   } catch (error) {
     console.error('Error fetching veterinary inspection form:', error);
+    throw error;
+  }
+};
+
+export const fetchInspectionStats = async (userId?: string): Promise<InspectionStats> => {
+  const inspections = await getInspections(userId);
+
+  return {
+    total: inspections.length,
+    pending: inspections.filter(i => ['planned', 'in_progress', 'draft'].includes(i.status)).length,
+    completed: inspections.filter(i => i.status === 'approved').length,
+    submitted: inspections.filter(i => i.status === 'submitted').length,
+  };
+};
+
+export const updateInspectionStatus = async (id: string, status: string): Promise<Inspection> => {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error('Supabase client not initialized');
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('fims_inspections')
+      .update({
+        status,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select(`
+        *,
+        fims_categories (
+          id,
+          name,
+          name_marathi,
+          form_type
+        ),
+        fims_inspection_photos (
+          id,
+          photo_url,
+          photo_name,
+          description,
+          photo_order
+        ),
+        fims_anganwadi_forms (*),
+        fims_office_inspection_forms (*)
+      `)
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error updating inspection status:', error);
     throw error;
   }
 };

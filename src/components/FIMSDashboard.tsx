@@ -166,86 +166,6 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
     }
   };
 
-  const fetchInspectionsData = async () => {
-    try {
-      console.log('🔍 Fetching inspections...');
-      
-      const { supabase } = await import('../lib/supabase');
-      if (!supabase) {
-        throw new Error('Supabase client not initialized');
-      }
-
-      const { data, error } = await supabase
-        .from('fims_inspections')
-        .select(`
-          *,
-          fims_categories(name, name_marathi),
-          fims_anganwadi_forms(*),
-          fims_office_inspection_forms(*),
-          fims_inspection_photos(*)
-        `)
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error('Database error:', error);
-        throw new Error(`Database error: ${error.message}`);
-      }
-      
-      console.log('✅ Inspections fetched successfully:', data?.length || 0);
-      setInspections(data || []);
-    } catch (error) {
-      console.error('❌ Error in fetchInspections:', error);
-      
-      // Provide user-friendly error message
-      if (error.message.includes('Failed to fetch')) {
-        alert('Network connection error. Please check your internet connection and try again.');
-      } else if (error.message.includes('JWT')) {
-        alert('Session expired. Please sign in again.');
-      } else {
-        alert(`Error loading inspections: ${error.message}`);
-      }
-    }
-  };
-
-  const fetchCategoriesData = async () => {
-    try {
-      const { supabase } = await import('../lib/supabase');
-      if (!supabase) return;
-
-      const { data, error } = await supabase
-        .from('fims_categories')
-        .select('*')
-        .eq('is_active', true)
-        .order('name');
-      
-      if (error) throw error;
-      setCategories(data || []);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-    }
-  };
-
-  const fetchAvailableInspectors = async () => {
-    try {
-      const { supabase } = await import('../lib/supabase');
-      if (!supabase) return;
-
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select(`
-          user_id,
-          name,
-          roles!inner(name)
-        `)
-        .in('roles.name', ['inspector', 'officer', 'admin'])
-        .not('name', 'is', null);
-      
-      if (error) throw error;
-      setAvailableInspectors(data || []);
-    } catch (error) {
-      console.error('Error fetching inspectors:', error);
-    }
-  };
 
   const handleSignOut = async () => {
     try {
@@ -262,11 +182,11 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
 
     try {
       setIsLoading(true);
-      
+
       await deleteInspection(inspectionId);
       alert(t('fims.inspectionDeletedSuccessfully') || 'Inspection deleted successfully');
-      await fetchInspectionsData();
-      
+      await fetchAllData();
+
     } catch (error) {
       console.error('Error deleting inspection:', error);
       alert(t('fims.errorDeletingInspection') || 'Error deleting inspection: ' + (error as Error).message);
@@ -284,10 +204,10 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
         .from('fims_inspections')
         .update({ status: 'approved' })
         .eq('id', inspectionId);
-      
+
       if (error) throw error;
-      
-      await fetchInspectionsData();
+
+      await fetchAllData();
       alert('Inspection marked as completed');
     } catch (error) {
       console.error('Error completing inspection:', error);
@@ -1204,14 +1124,14 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
           {activeTab === 'dashboard' && renderDashboard()}
           {activeTab === 'inspections' && renderInspections()}
           {activeTab === 'newInspection' && (
-            <FIMSNewInspection 
-              user={user} 
+            <FIMSNewInspection
+              user={user}
               onBack={() => {
                 setEditingInspection(null);
                 setActiveTab('dashboard');
               }}
               categories={categories}
-              onInspectionCreated={fetchInspectionsData}
+              onInspectionCreated={fetchAllData}
               editingInspection={editingInspection}
             />
           )}

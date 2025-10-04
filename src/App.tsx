@@ -14,102 +14,71 @@ function App() {
   const [recoveryTokens, setRecoveryTokens] = useState<{ accessToken: string | null; refreshToken: string | null }>({ accessToken: null, refreshToken: null });
 
   useEffect(() => {
-  checkForRecovery(); // Keep this separate, as it's URL-based
+    // Immediately check URL for recovery params (before any auth calls)
+    const checkForRecovery = () => {
+      const params = new URLSearchParams(window.location.search);
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
 
-  if (!isSupabaseConfigured || !supabase) {
-    setIsLoading(false);
-    return;
-  }
+      const type = params.get('type') || hashParams.get('type');
+      const accessToken = params.get('access_token') || hashParams.get('access_token');
+      const refreshToken = params.get('refresh_token') || hashParams.get('refresh_token');
 
-  let mounted = true; // Prevent state updates after unmount
-
-  // No getUser() call here—let listener handle initial session
-  const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-    if (!mounted) return;
-    console.log('Auth event:', event, 'Session:', session); // Remove in prod
-    setUser(session?.user ?? null);
-    setIsLoading(false);
-
-    if (event === 'PASSWORD_RECOVERY') {
-      setIsRecoveryMode(true);
-    }
-
-    // Handle invalid token errors here if needed
-    if (event === 'TOKEN_REFRESHED' && !session) {
-      // Session expired—clear storage
-      localStorage.removeItem('supabase.auth.token');
-      sessionStorage.removeItem('supabase.auth.token');
-      setUser(null);
-    }
-  });
-
-  // Fallback: If no initial event fires quickly, check once
-  const timeoutId = setTimeout(async () => {
-    if (mounted && !user && isLoading) {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setUser(session?.user ?? null);
-      } catch (error) {
-        console.error('Fallback session check failed:', error);
-        setUser(null);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  }, 1000); // 1s delay to let listener fire first
-
-  return () => {
-    mounted = false;
-    subscription.unsubscribe();
-    clearTimeout(timeoutId);
-  };
-}, []);
-
-    // Check if user is already signed in
-    const checkUser = async () => {
-      if (!isSupabaseConfigured || !supabase) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        setUser(user);
-      } catch (error) {
-        console.error('Error checking user:', error);
-        if (error instanceof Error && error.message.includes('Invalid Refresh Token')) {
-          localStorage.removeItem('supabase.auth.token');
-          sessionStorage.removeItem('supabase.auth.token');
-          await supabase.auth.signOut();
+      if (type === 'recovery' && accessToken && refreshToken) {
+        console.log('Recovery URL detected:', { type, accessToken, refreshToken });
+        setIsRecoveryMode(true);
+        setRecoveryTokens({ accessToken, refreshToken });
+        if (window.history.replaceState) {
+          window.history.replaceState(null, '', window.location.pathname);
         }
-        setUser(null);
-      } finally {
-        setIsLoading(false);
+        return true;
       }
+      return false;
     };
 
-    checkUser();
+    checkForRecovery();
 
-    // Set up auth listener
-    let subscription: any = null;
-    if (isSupabaseConfigured && supabase) {
-      const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange((event, session) => {
-        console.log('Auth event:', event, 'Session:', session);  // Debug log
-        setUser(session?.user ?? null);
-
-        if (event === 'PASSWORD_RECOVERY') {
-          setIsRecoveryMode(true);
-        }
-
-        setIsLoading(false);
-      });
-      subscription = authSubscription;
+    if (!isSupabaseConfigured || !supabase) {
+      setIsLoading(false);
+      return;
     }
 
-    return () => {
-      if (subscription) {
-        subscription.unsubscribe();
+    let mounted = true;
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!mounted) return;
+      console.log('Auth event:', event, 'Session:', session);
+      setUser(session?.user ?? null);
+      setIsLoading(false);
+
+      if (event === 'PASSWORD_RECOVERY') {
+        setIsRecoveryMode(true);
       }
+
+      if (event === 'TOKEN_REFRESHED' && !session) {
+        localStorage.removeItem('supabase.auth.token');
+        sessionStorage.removeItem('supabase.auth.token');
+        setUser(null);
+      }
+    });
+
+    const timeoutId = setTimeout(async () => {
+      if (mounted && !user && isLoading) {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          setUser(session?.user ?? null);
+        } catch (error) {
+          console.error('Fallback session check failed:', error);
+          setUser(null);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    }, 1000);
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+      clearTimeout(timeoutId);
     };
   }, []);
 
