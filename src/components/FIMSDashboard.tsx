@@ -1,36 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from './LanguageSwitcher';
-import {
-  ArrowLeft,
-  Camera,
-  BarChart3,
-  FileText,
-  Plus,
-  Search,
-  Filter,
-  Download,
-  RefreshCw,
-  Eye,
-  Edit,
-  Trash2,
-  MapPin,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  TrendingUp,
-  Target,
-  X,
-  User,
-  ChevronDown,
-  Settings,
-  LogOut,
-  Menu,
-  Home,
-  PieChart,
-  Globe,
-  Check
-} from 'lucide-react';
+import { ArrowLeft, Camera, BarChart3, FileText, Plus, Search, Filter, Download, RefreshCw, Eye, CreditCard as Edit, Trash2, MapPin, CircleCheck as CheckCircle, Clock, CircleAlert as AlertCircle, TrendingUp, Target, X, User, ChevronDown, Settings, LogOut, Menu, Chrome as Home, PieChart, Globe, Check } from 'lucide-react';
 import {
   fetchInspectionStats,
   getInspections,
