@@ -14,29 +14,56 @@ function App() {
   const [recoveryTokens, setRecoveryTokens] = useState<{ accessToken: string | null; refreshToken: string | null }>({ accessToken: null, refreshToken: null });
 
   useEffect(() => {
-    // Immediately check URL for recovery params (before any auth calls)
-    const checkForRecovery = () => {
-      const params = new URLSearchParams(window.location.search);
-      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+  checkForRecovery(); // Keep this separate, as it's URL-based
 
-      const type = params.get('type') || hashParams.get('type');
-      const accessToken = params.get('access_token') || hashParams.get('access_token');
-      const refreshToken = params.get('refresh_token') || hashParams.get('refresh_token');
+  if (!isSupabaseConfigured || !supabase) {
+    setIsLoading(false);
+    return;
+  }
 
-      if (type === 'recovery' && accessToken && refreshToken) {
-        console.log('Recovery URL detected:', { type, accessToken, refreshToken });  // Debug log
-        setIsRecoveryMode(true);
-        setRecoveryTokens({ accessToken, refreshToken });
-        // Clean URL to prevent re-triggering
-        if (window.history.replaceState) {
-          window.history.replaceState(null, '', window.location.pathname);
-        }
-        return true;
+  let mounted = true; // Prevent state updates after unmount
+
+  // No getUser() call here—let listener handle initial session
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    if (!mounted) return;
+    console.log('Auth event:', event, 'Session:', session); // Remove in prod
+    setUser(session?.user ?? null);
+    setIsLoading(false);
+
+    if (event === 'PASSWORD_RECOVERY') {
+      setIsRecoveryMode(true);
+    }
+
+    // Handle invalid token errors here if needed
+    if (event === 'TOKEN_REFRESHED' && !session) {
+      // Session expired—clear storage
+      localStorage.removeItem('supabase.auth.token');
+      sessionStorage.removeItem('supabase.auth.token');
+      setUser(null);
+    }
+  });
+
+  // Fallback: If no initial event fires quickly, check once
+  const timeoutId = setTimeout(async () => {
+    if (mounted && !user && isLoading) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setUser(session?.user ?? null);
+      } catch (error) {
+        console.error('Fallback session check failed:', error);
+        setUser(null);
+      } finally {
+        setIsLoading(false);
       }
-      return false;
-    };
+    }
+  }, 1000); // 1s delay to let listener fire first
 
-    checkForRecovery();
+  return () => {
+    mounted = false;
+    subscription.unsubscribe();
+    clearTimeout(timeoutId);
+  };
+}, []);
 
     // Check if user is already signed in
     const checkUser = async () => {
