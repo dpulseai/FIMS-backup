@@ -36,7 +36,6 @@ import {
   getInspections,
   fetchCategories,
   fetchInspectors,
-  deleteInspection,
   reassignInspection,
   updateInspectionStatus,
   type InspectionStats,
@@ -48,17 +47,6 @@ import { usePermissions } from '../hooks/usePermissions';
 import { FIMSAnalytics } from './FIMSAnalytics';
 import { FIMSNewInspection } from './FIMSNewInspection';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
-
-// Mobile detection utility
-const isMobile = () => {
-  if (typeof window === 'undefined') return false;
-  return window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-};
-
-interface FIMSDashboardProps {
-  user: SupabaseUser;
-  onSignOut: () => void;
-}
 
 interface Inspection {
   id: string;
@@ -79,7 +67,7 @@ interface Inspection {
   created_at: string;
   updated_at: string;
   anganwadi_forms?: any;
-  photos?: InspectionPhoto[];
+  photos?: any[];
 }
 
 interface Category {
@@ -100,33 +88,27 @@ interface InspectionPhoto {
   uploaded_at: string;
 }
 
-export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut }) => {
-  const { t, i18n } = useTranslation();
+export const FIMSDashboard: React.FC<{ user: SupabaseUser; onSignOut: () => void }> = ({ user, onSignOut }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('dashboard');
-  
-  // Get translation function
-  
   const [isLoading, setIsLoading] = useState(false);
-  const [inspections, setInspections] = useState<InspectionData[]>([]);
-  const [categories, setCategories] = useState<CategoryData[]>([]);
-  const [inspectors, setInspectors] = useState<InspectorData[]>([]);
+  const [inspections, setInspections] = useState<Inspection[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [availableInspectors, setAvailableInspectors] = useState<InspectorData[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
-  
-  const [searchTerm, setSearchTerm] = useState('');
+  const [editingInspection, setEditingInspection] = useState<Inspection | null>(null);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
-  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   const [viewingPhotos, setViewingPhotos] = useState<InspectionPhoto[]>([]);
-  const [editingInspection, setEditingInspection] = useState<InspectionData | null>(null);
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   const [showRevisitModal, setShowRevisitModal] = useState(false);
-  const [revisitInspectionId, setRevisitInspectionId] = useState<string>('');
-  const [availableInspectors, setAvailableInspectors] = useState<any[]>([]);
+  const [revisitInspectionId, setRevisitInspectionId] = useState('');
   const [selectedInspector, setSelectedInspector] = useState('');
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Check if device is mobile
   useEffect(() => {
     const checkMobile = () => {
       const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
@@ -134,7 +116,6 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
       const isMobileDevice = mobileRegex.test(userAgent.toLowerCase()) || window.innerWidth <= 768;
       setIsMobile(isMobileDevice);
     };
-
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
@@ -144,18 +125,14 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
     fetchAllData();
   }, []);
 
-  const viewingInspection = editingInspection?.mode === 'view';
-
   const fetchAllData = async () => {
     setIsLoading(true);
     try {
-      // Fetch all data using service functions
       const [inspectionsData, categoriesData, inspectorsData] = await Promise.all([
         getInspections(user.id),
         fetchCategories(),
         fetchInspectors()
       ]);
-
       setInspections(inspectionsData);
       setCategories(categoriesData);
       setAvailableInspectors(inspectorsData);
@@ -168,8 +145,6 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
 
   const fetchInspectionsData = async () => {
     try {
-      console.log('🔍 Fetching inspections...');
-      
       const { supabase } = await import('../lib/supabase');
       if (!supabase) {
         throw new Error('Supabase client not initialized');
@@ -185,18 +160,17 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
           fims_inspection_photos(*)
         `)
         .order('created_at', { ascending: false });
-      
+
       if (error) {
         console.error('Database error:', error);
         throw new Error(`Database error: ${error.message}`);
       }
-      
+
       console.log('✅ Inspections fetched successfully:', data?.length || 0);
       setInspections(data || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Error in fetchInspections:', error);
-      
-      // Provide user-friendly error message
+
       if (error.message.includes('Failed to fetch')) {
         alert('Network connection error. Please check your internet connection and try again.');
       } else if (error.message.includes('JWT')) {
@@ -217,7 +191,7 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
         .select('*')
         .eq('is_active', true)
         .order('name');
-      
+
       if (error) throw error;
       setCategories(data || []);
     } catch (error) {
@@ -239,7 +213,7 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
         `)
         .in('roles.name', ['inspector', 'officer', 'admin'])
         .not('name', 'is', null);
-      
+
       if (error) throw error;
       setAvailableInspectors(data || []);
     } catch (error) {
@@ -258,18 +232,52 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
   };
 
   const handleDeleteInspection = async (inspectionId: string) => {
-    if (!confirm(t('fims.confirmDeleteInspection') || 'Are you sure you want to delete this inspection?')) return;
+    if (!confirm(t('fims.confirmDeleteInspection') || 'Are you sure you want to delete this inspection? This will also delete all associated photos and forms.')) return;
 
     try {
       setIsLoading(true);
-      
-      await deleteInspection(inspectionId);
-      alert(t('fims.inspectionDeletedSuccessfully') || 'Inspection deleted successfully');
+      const { supabase } = await import('../lib/supabase');
+      if (!supabase) throw new Error('Supabase client not initialized');
+
+      // Step 1: Delete related photos
+      const { error: photoError } = await supabase
+        .from('fims_inspection_photos')
+        .delete()
+        .eq('inspection_id', inspectionId);
+      if (photoError) {
+        console.warn('Warning: Could not delete all photos:', photoError.message);
+      }
+
+      // Step 2: Delete related anganwadi forms
+      const { error: anganwadiError } = await supabase
+        .from('fims_anganwadi_forms')
+        .delete()
+        .eq('inspection_id', inspectionId);
+      if (anganwadiError) {
+        console.warn('Warning: Could not delete all anganwadi forms:', anganwadiError.message);
+      }
+
+      // Step 3: Delete related office inspection forms
+      const { error: officeError } = await supabase
+        .from('fims_office_inspection_forms')
+        .delete()
+        .eq('inspection_id', inspectionId);
+      if (officeError) {
+        console.warn('Warning: Could not delete all office forms:', officeError.message);
+      }
+
+      // Step 4: Delete the main inspection record
+      const { error: inspectionError } = await supabase
+        .from('fims_inspections')
+        .delete()
+        .eq('id', inspectionId);
+      if (inspectionError) throw inspectionError;
+
+      alert(t('fims.inspectionDeletedSuccessfully') || 'Inspection and all related data deleted successfully.');
       await fetchInspectionsData();
-      
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting inspection:', error);
-      alert(t('fims.errorDeletingInspection') || 'Error deleting inspection: ' + (error as Error).message);
+      alert(`${t('fims.errorDeletingInspection') || 'Error deleting inspection'}: ${error.message || error}`);
     } finally {
       setIsLoading(false);
     }
@@ -284,12 +292,12 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
         .from('fims_inspections')
         .update({ status: 'approved' })
         .eq('id', inspectionId);
-      
+
       if (error) throw error;
-      
+
       await fetchInspectionsData();
       alert('Inspection marked as completed');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error completing inspection:', error);
       alert('Error completing inspection: ' + error.message);
     }
@@ -309,12 +317,12 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
 
     try {
       setIsLoading(true);
-      
+
       await reassignInspection(revisitInspectionId, selectedInspector);
       alert('Inspection assigned for revisit successfully');
       setShowRevisitModal(false);
       fetchAllData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending for revisit:', error);
       alert('Error sending for revisit: ' + error.message);
     } finally {
@@ -334,16 +342,16 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
         .order('photo_order');
 
       if (error) throw error;
-      
+
       if (!data || data.length === 0) {
         alert(t('fims.noPhotosFound', 'No photos found for this inspection'));
         return;
       }
-      
+
       setViewingPhotos(data || []);
       setSelectedPhotoIndex(0);
       setShowPhotoModal(true);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading photos:', error);
       alert('Error loading photos: ' + error.message);
     }
@@ -351,10 +359,10 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
 
   const getFilteredInspections = () => {
     return inspections.filter(inspection => {
-      const matchesSearch = searchTerm === '' || 
+      const matchesSearch = searchTerm === '' ||
         inspection.location_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         inspection.inspection_number?.toLowerCase().includes(searchTerm.toLowerCase());
-      
+
       const matchesCategory = selectedCategory === '' || inspection.category_id === selectedCategory;
       const matchesStatus = selectedStatus === '' || inspection.status === selectedStatus;
 
@@ -367,7 +375,7 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
     const pending = inspections.filter(i => ['planned', 'in_progress', 'draft'].includes(i.status)).length;
     const completed = inspections.filter(i => i.status === 'approved').length;
     const submitted = inspections.filter(i => i.status === 'submitted').length;
-    
+
     return { total, pending, completed, submitted };
   };
 
@@ -377,53 +385,15 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
     return Math.round((completed / total) * 100);
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'approved':
-      case 'completed':
-        return 'bg-gradient-to-r from-green-100 to-green-200 text-green-800 border border-green-300';
-      case 'submitted':
-      case 'under_review':
-        return 'bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 border border-yellow-300';
-      case 'draft':
-      case 'pending':
-        return 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 border border-gray-300';
-      case 'rejected':
-        return 'bg-gradient-to-r from-red-100 to-red-200 text-red-800 border border-red-300';
-      case 'reassigned':
-        return 'bg-gradient-to-r from-purple-100 to-purple-200 text-purple-800 border border-purple-300';
-      default:
-        return 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 border border-gray-300';
-    }
-  };
-
   const getStatusText = (status: string) => {
     return t(`statuses.${status}`, status.toUpperCase());
   };
 
-  // Mobile navigation items (only essential features)
+  // Mobile navigation items
   const mobileNavItems = [
-    {
-      id: 'dashboard',
-      icon: Home,
-      title: t('fims.dashboard'),
-      description: t('dashboard.overview'),
-      color: 'bg-purple-500'
-    },
-    {
-      id: 'inspections',
-      icon: FileText,
-      title: t('fims.inspections'),
-      description: t('fims.viewAndManageInspections'),
-      color: 'bg-blue-500'
-    },
-    {
-      id: 'newInspection',
-      icon: Plus,
-      title: t('fims.newInspection'),
-      description: t('fims.createNewInspection'),
-      color: 'bg-green-500'
-    }
+    { id: 'dashboard', icon: Home, title: t('fims.dashboard'), description: t('dashboard.overview'), color: 'bg-purple-500' },
+    { id: 'inspections', icon: FileText, title: t('fims.inspections'), description: t('fims.viewAndManageInspections'), color: 'bg-blue-500' },
+    { id: 'newInspection', icon: Plus, title: t('fims.newInspection'), description: t('fims.createNewInspection'), color: 'bg-green-500' }
   ];
 
   const renderMobileNavigation = () => (
@@ -437,9 +407,7 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
               setIsMobileMenuOpen(false);
             }}
             className={`flex flex-col items-center space-y-1 p-2 rounded-lg transition-all duration-200 ${
-              activeTab === item.id
-                ? 'text-purple-600 bg-purple-50'
-                : 'text-gray-600 hover:text-purple-600 hover:bg-gray-50'
+              activeTab === item.id ? 'text-purple-600 bg-purple-50' : 'text-gray-600 hover:text-purple-600 hover:bg-gray-50'
             }`}
           >
             <item.icon className="h-5 w-5" />
@@ -462,8 +430,7 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
             <p className="text-xs text-gray-500">Field Inspection</p>
           </div>
         </div>
-        
-        {/* Mobile Profile */}
+
         <div className="relative">
           <button
             onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -482,12 +449,8 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
                     <User className="h-4 w-4 text-purple-600" />
                   </div>
                   <div>
-                    <div className="font-medium text-gray-900 text-sm">
-                      {user.email?.split('@')[0]}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      Field Inspector
-                    </div>
+                    <div className="font-medium text-gray-900 text-sm">{user.email?.split('@')[0]}</div>
+                    <div className="text-xs text-gray-500">Field Inspector</div>
                   </div>
                 </div>
               </div>
@@ -518,10 +481,20 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
   );
 
   if (activeTab === 'analytics') {
+    return <FIMSAnalytics user={user} onBack={() => setActiveTab('dashboard')} />;
+  }
+
+  if (activeTab === 'newInspection') {
     return (
-      <FIMSAnalytics
+      <FIMSNewInspection
         user={user}
-        onBack={() => setActiveTab('dashboard')}
+        onBack={() => {
+          setEditingInspection(null);
+          setActiveTab('dashboard');
+        }}
+        categories={categories}
+        onInspectionCreated={fetchInspectionsData}
+        editingInspection={editingInspection}
       />
     );
   }
@@ -593,7 +566,7 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
             <Plus className="h-5 w-5" />
             <span className="font-medium">{t('fims.newInspection')}</span>
           </button>
-          
+
           <button
             onClick={() => setActiveTab('inspections')}
             className="bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white p-4 rounded-lg transition-all duration-200 flex items-center space-x-3 hover:shadow-lg hover:scale-105"
@@ -601,7 +574,7 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
             <FileText className="h-5 w-5" />
             <span className="font-medium">{t('fims.inspections')}</span>
           </button>
-          
+
           <button
             onClick={() => setActiveTab('analytics')}
             className="bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white p-4 rounded-lg transition-all duration-200 flex items-center space-x-3 hover:shadow-lg hover:scale-105"
@@ -612,7 +585,7 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
         </div>
       </div>
 
-      {/* Recent Inspections */}
+      {/* Recent Inspections Table */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         <div className="px-4 md:px-6 py-3 md:py-4 border-b border-gray-200">
           <h3 className="text-base md:text-lg font-semibold text-gray-900">{t('fims.recentInspections')}</h3>
@@ -633,52 +606,52 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
               {inspections.slice(0, 5).map((inspection) => {
                 const category = categories.find(c => c.id === inspection.category_id);
                 return (
-                <tr key={inspection.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {inspection.inspection_number}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {inspection.location_name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {category ? t(`categories.${category.form_type}`, category.name) : '-'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      inspection.status === 'approved' ? 'bg-green-100 text-green-800' :
-                      inspection.status === 'submitted' ? 'bg-blue-100 text-blue-800' :
-                      inspection.status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
-                      inspection.status === 'in_progress' ? 'bg-orange-100 text-orange-800' :
-                      inspection.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                      inspection.status === 'reassigned' ? 'bg-purple-100 text-purple-800' :
-                      inspection.status === 'under_review' ? 'bg-indigo-100 text-indigo-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
-                      {getStatusText(inspection.status)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {inspection.inspection_date ? new Date(inspection.inspection_date).toLocaleDateString() : '-'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button
-                      onClick={() => {
-                        setEditingInspection({...inspection, mode: 'view'});
-                        setActiveTab('newInspection');
-                      }}
-                      className="text-blue-600 hover:text-blue-900 p-1 rounded"
-                      title="View Inspection"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </button>
-                  </td>
-                </tr>
+                  <tr key={inspection.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {inspection.inspection_number}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {inspection.location_name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {category ? t(`categories.${category.form_type}`, category.name) : '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        inspection.status === 'approved' ? 'bg-green-100 text-green-800' :
+                        inspection.status === 'submitted' ? 'bg-blue-100 text-blue-800' :
+                        inspection.status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
+                        inspection.status === 'in_progress' ? 'bg-orange-100 text-orange-800' :
+                        inspection.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                        inspection.status === 'reassigned' ? 'bg-purple-100 text-purple-800' :
+                        inspection.status === 'under_review' ? 'bg-indigo-100 text-indigo-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {getStatusText(inspection.status)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {inspection.inspection_date ? new Date(inspection.inspection_date).toLocaleDateString() : '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button
+                        onClick={() => {
+                          setEditingInspection({ ...inspection, mode: 'view' });
+                          setActiveTab('newInspection');
+                        }}
+                        className="text-blue-600 hover:text-blue-900 p-1 rounded"
+                        title="View Inspection"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </button>
+                    </td>
+                  </tr>
                 );
               })}
             </tbody>
           </table>
         </div>
-        
+
         {/* Mobile Recent Inspections */}
         <div className="md:hidden">
           {inspections.slice(0, 5).map((inspection) => {
@@ -726,7 +699,7 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-base md:text-lg font-semibold text-gray-900">{t('fims.inspections')}</h3>
           <div className="flex items-center space-x-3">
-            <button 
+            <button
               onClick={() => setActiveTab('newInspection')}
               className="flex items-center space-x-2 px-3 md:px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all duration-200 text-sm md:text-base"
             >
@@ -735,7 +708,7 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
             </button>
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -784,7 +757,7 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
         <div className="px-4 md:px-6 py-3 md:py-4 border-b border-gray-200">
           <h3 className="text-base md:text-lg font-semibold text-gray-900">{t('fims.inspections')}</h3>
         </div>
-        
+
         {/* Desktop Table */}
         <div className="overflow-x-auto hidden md:block">
           <table className="w-full bg-gradient-to-br from-blue-50 to-cyan-50 divide-y divide-blue-200">
@@ -818,11 +791,11 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
                 getFilteredInspections().map((inspection, index) => {
                   const category = categories.find(c => c.id === inspection.category_id);
                   return (
-                    <tr 
-                      key={inspection.id} 
+                    <tr
+                      key={inspection.id}
                       className={`
                         ${index % 2 === 0 ? 'bg-gradient-to-r from-blue-50 to-cyan-50' : 'bg-gradient-to-r from-white to-blue-25'}
-                        hover:bg-gradient-to-r hover:from-blue-100 hover:to-cyan-100 
+                        hover:bg-gradient-to-r hover:from-blue-100 hover:to-cyan-100
                         transition-all duration-300 ease-in-out
                         border-l-4 border-transparent hover:border-blue-400
                       `}
@@ -858,7 +831,7 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {inspection.inspection_date ? new Date(inspection.inspection_date).toLocaleDateString() : 
+                        {inspection.inspection_date ? new Date(inspection.inspection_date).toLocaleDateString() :
                          inspection.planned_date ? new Date(inspection.planned_date).toLocaleDateString() : '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -868,7 +841,7 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
                         <div className="flex items-center space-x-2">
                           <button
                             onClick={() => {
-                              setEditingInspection({...inspection, mode: 'view'});
+                              setEditingInspection({ ...inspection, mode: 'view' });
                               setActiveTab('newInspection');
                             }}
                             className="
@@ -886,7 +859,7 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
                           </button>
                           <button
                             onClick={() => {
-                              setEditingInspection({...inspection, mode: 'edit'});
+                              setEditingInspection({ ...inspection, mode: 'edit' });
                               setActiveTab('newInspection');
                             }}
                             className="
@@ -953,13 +926,11 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
             </tbody>
           </table>
         </div>
-        
+
         {/* Mobile Cards */}
         <div className="md:hidden">
           {getFilteredInspections().length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
-              {t('fims.noInspectionsFound')}
-            </div>
+            <div className="p-8 text-center text-gray-500">{t('fims.noInspectionsFound')}</div>
           ) : (
             getFilteredInspections().map((inspection) => {
               const category = categories.find(c => c.id === inspection.category_id);
@@ -982,27 +953,24 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
                       {getStatusText(inspection.status)}
                     </span>
                   </div>
-                  
                   <div className="text-sm text-gray-600 mb-1">
                     <div className="font-medium">{inspection.location_name}</div>
                     {inspection.address && (
                       <div className="text-xs text-gray-500 mt-1">{inspection.address}</div>
                     )}
                   </div>
-                  
                   <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
                     <span>{category ? t(`categories.${category.form_type}`, category.name) : '-'}</span>
                     <span>
-                      {inspection.inspection_date ? new Date(inspection.inspection_date).toLocaleDateString() : 
+                      {inspection.inspection_date ? new Date(inspection.inspection_date).toLocaleDateString() :
                        inspection.planned_date ? new Date(inspection.planned_date).toLocaleDateString() : '-'}
                     </span>
                   </div>
-                  
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <button
                         onClick={() => {
-                          setEditingInspection({...inspection, mode: 'view'});
+                          setEditingInspection({ ...inspection, mode: 'view' });
                           setActiveTab('newInspection');
                         }}
                         className="text-blue-600 hover:text-blue-900 p-1 rounded"
@@ -1012,7 +980,7 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
                       </button>
                       <button
                         onClick={() => {
-                          setEditingInspection({...inspection, mode: 'edit'});
+                          setEditingInspection({ ...inspection, mode: 'edit' });
                           setActiveTab('newInspection');
                         }}
                         className="text-green-600 hover:text-green-900 p-1 rounded"
@@ -1028,7 +996,6 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
                         <Camera className="h-4 w-4" />
                       </button>
                     </div>
-                    
                     <div className="flex items-center space-x-2">
                       <button
                         onClick={() => handleCompleteInspection(inspection.id)}
@@ -1053,23 +1020,8 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
     </div>
   );
 
-  const renderAnalytics = () => (
-    <div className="text-center py-12">
-      <p className="text-gray-500 text-lg">{t('fims.comingSoon')}</p>
-      <p className="text-gray-400 text-sm mt-2">Analytics and reporting features will be available soon.</p>
-    </div>
-  );
-
-  const renderReports = () => (
-    <div className="text-center py-12">
-      <p className="text-gray-500 text-lg">{t('fims.comingSoon')}</p>
-      <p className="text-gray-400 text-sm mt-2">Reports and export features will be available soon.</p>
-    </div>
-  );
-
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Mobile Header */}
       {isMobile && renderMobileHeader()}
 
       {/* Desktop Header */}
@@ -1087,61 +1039,50 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
                 <p className="text-gray-600">{t('fims.fullName')}</p>
               </div>
             </div>
-            
+
             {/* Desktop Navigation */}
             <div className="flex items-center space-x-6">
               <nav className="flex space-x-6">
                 <button
                   onClick={() => setActiveTab('dashboard')}
                   className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
-                    activeTab === 'dashboard'
-                      ? 'bg-purple-100 text-purple-700'
-                      : 'text-gray-600 hover:text-purple-600 hover:bg-gray-50'
+                    activeTab === 'dashboard' ? 'bg-purple-100 text-purple-700' : 'text-gray-600 hover:text-purple-600 hover:bg-gray-50'
                   }`}
                 >
                   <Home className="h-5 w-5" />
                   <span>{t('fims.dashboard')}</span>
                 </button>
-                
                 <button
                   onClick={() => setActiveTab('inspections')}
                   className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
-                    activeTab === 'inspections'
-                      ? 'bg-purple-100 text-purple-700'
-                      : 'text-gray-600 hover:text-purple-600 hover:bg-gray-50'
+                    activeTab === 'inspections' ? 'bg-purple-100 text-purple-700' : 'text-gray-600 hover:text-purple-600 hover:bg-gray-50'
                   }`}
                 >
                   <FileText className="h-5 w-5" />
                   <span>{t('fims.inspections')}</span>
                 </button>
-                
                 <button
                   onClick={() => setActiveTab('newInspection')}
                   className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
-                    activeTab === 'newInspection'
-                      ? 'bg-purple-100 text-purple-700'
-                      : 'text-gray-600 hover:text-purple-600 hover:bg-gray-50'
+                    activeTab === 'newInspection' ? 'bg-purple-100 text-purple-700' : 'text-gray-600 hover:text-purple-600 hover:bg-gray-50'
                   }`}
                 >
                   <Plus className="h-5 w-5" />
                   <span>{t('fims.newInspection')}</span>
                 </button>
-                
                 <button
                   onClick={() => setActiveTab('analytics')}
                   className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
-                    activeTab === 'analytics'
-                      ? 'bg-purple-100 text-purple-700'
-                      : 'text-gray-600 hover:text-purple-600 hover:bg-gray-50'
+                    activeTab === 'analytics' ? 'bg-purple-100 text-purple-700' : 'text-gray-600 hover:text-purple-600 hover:bg-gray-50'
                   }`}
                 >
                   <BarChart3 className="h-5 w-5" />
                   <span>{t('fims.analytics')}</span>
                 </button>
               </nav>
-              
+
               <LanguageSwitcher />
-              
+
               {/* Desktop Profile */}
               <div className="relative">
                 <button
@@ -1155,19 +1096,15 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
                 </button>
 
                 {isProfileOpen && (
-                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-[60]">
+                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-60">
                     <div className="px-4 py-3 border-b border-gray-100">
                       <div className="flex items-center space-x-3">
                         <div className="bg-purple-100 p-2 rounded-full">
                           <User className="h-5 w-5 text-purple-600" />
                         </div>
                         <div>
-                          <div className="font-medium text-gray-900">
-                            {user.email?.split('@')[0]}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            Field Inspector
-                          </div>
+                          <div className="font-medium text-gray-900">{user.email?.split('@')[0]}</div>
+                          <div className="text-sm text-gray-500">Field Inspector</div>
                         </div>
                       </div>
                     </div>
@@ -1203,71 +1140,48 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
         <div className="p-4 md:p-6 overflow-y-auto h-full pb-20 md:pb-6">
           {activeTab === 'dashboard' && renderDashboard()}
           {activeTab === 'inspections' && renderInspections()}
-          {activeTab === 'newInspection' && (
-            <FIMSNewInspection 
-              user={user} 
-              onBack={() => {
-                setEditingInspection(null);
-                setActiveTab('dashboard');
-              }}
-              categories={categories}
-              onInspectionCreated={fetchInspectionsData}
-              editingInspection={editingInspection}
-            />
-          )}
-          {activeTab === 'analytics' && renderAnalytics()}
-          {activeTab === 'reports' && renderReports()}
         </div>
       </div>
 
-      {/* Mobile Navigation */}
       {isMobile && renderMobileNavigation()}
 
       {/* Photo Modal */}
       {showPhotoModal && viewingPhotos.length > 0 && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-          <div className="max-w-4xl max-h-[90vh] bg-white rounded-lg overflow-hidden">
+          <div className="max-w-4xl max-h-90vh bg-white rounded-lg overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900">
                 Photo {selectedPhotoIndex + 1} of {viewingPhotos.length}
               </h3>
-              <button
-                onClick={() => setShowPhotoModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
+              <button onClick={() => setShowPhotoModal(false)} className="text-gray-400 hover:text-gray-600">
                 <X className="h-5 w-5" />
               </button>
             </div>
-            
             <div className="p-4">
               <img
                 src={viewingPhotos[selectedPhotoIndex]?.photo_url}
-                alt={viewingPhotos[selectedPhotoIndex]?.photo_name || 'Inspection photo'}
-                className="max-w-full max-h-[70vh] object-contain mx-auto"
+                alt={viewingPhotos[selectedPhotoIndex]?.photo_name}
+                className="max-w-full max-h-70vh object-contain mx-auto"
               />
-              
               <div className="mt-4 text-center">
-                <p className="text-sm text-gray-600">
-                  {viewingPhotos[selectedPhotoIndex]?.description}
-                </p>
+                <p className="text-sm text-gray-600">{viewingPhotos[selectedPhotoIndex]?.description}</p>
               </div>
-              
-              <div className="flex items-center justify-center space-x-4 mt-4">
-                <button
-                  onClick={() => setSelectedPhotoIndex(Math.max(0, selectedPhotoIndex - 1))}
-                  disabled={selectedPhotoIndex === 0}
-                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg disabled:opacity-50"
-                >
-                  Previous
-                </button>
-                <button
-                  onClick={() => setSelectedPhotoIndex(Math.min(viewingPhotos.length - 1, selectedPhotoIndex + 1))}
-                  disabled={selectedPhotoIndex === viewingPhotos.length - 1}
-                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg disabled:opacity-50"
-                >
-                  Next
-                </button>
-              </div>
+            </div>
+            <div className="flex items-center justify-center space-x-4 mt-4">
+              <button
+                onClick={() => setSelectedPhotoIndex(Math.max(0, selectedPhotoIndex - 1))}
+                disabled={selectedPhotoIndex === 0}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg disabled:opacity-50"
+              >
+                Previous
+              </button>
+              <button
+                onClick={() => setSelectedPhotoIndex(Math.min(viewingPhotos.length - 1, selectedPhotoIndex + 1))}
+                disabled={selectedPhotoIndex === viewingPhotos.length - 1}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg disabled:opacity-50"
+              >
+                Next
+              </button>
             </div>
           </div>
         </div>
@@ -1281,14 +1195,10 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
               <h3 className="text-lg font-semibold text-gray-900">
                 {t('fims.assignForRevisit', 'Assign for Revisit')}
               </h3>
-              <button
-                onClick={() => setShowRevisitModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
+              <button onClick={() => setShowRevisitModal(false)} className="text-gray-400 hover:text-gray-600">
                 <X className="h-5 w-5" />
               </button>
             </div>
-            
             <div className="p-6">
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1302,24 +1212,22 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
                   <option value="">{t('fims.chooseInspector', 'Choose Inspector')}</option>
                   {availableInspectors.map(inspector => (
                     <option key={inspector.user_id} value={inspector.user_id}>
-                      {inspector.name} ({inspector.roles?.name || 'Inspector'})
+                      {inspector.name} ({inspector.roles?.name} Inspector)
                     </option>
                   ))}
                 </select>
               </div>
-              
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
                 <div className="flex items-start space-x-2">
                   <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
                   <div>
                     <p className="text-sm text-amber-800">
-                      {t('fims.revisitNote', 'This inspection will be reassigned to the selected inspector for revisit. The status will be changed to "In Progress".')}
+                      {t('fims.revisitNote', 'This inspection will be reassigned to the selected inspector for revisit. The status will be changed to In Progress.')}
                     </p>
                   </div>
                 </div>
               </div>
             </div>
-            
             <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200">
               <button
                 onClick={() => setShowRevisitModal(false)}
@@ -1336,6 +1244,12 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {isLoading && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-4 rounded-lg">Loading...</div>
         </div>
       )}
     </div>
