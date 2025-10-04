@@ -258,25 +258,22 @@ export const FIMSDashboard: React.FC<FIMSDashboardProps> = ({ user, onSignOut })
   };
 
   const handleDeleteInspection = async (inspectionId: string) => {
-    if (!confirm(t('fims.confirmDeleteInspection'))) {
-      return;
-    }
+    if (!confirm(t('fims.confirmDeleteInspection') || 'Are you sure you want to delete this inspection?')) return;
+
     try {
       setIsLoading(true);
+      
       await deleteInspection(inspectionId);
-      // Immediately update local state to remove the deleted item from UI
-      setInspections(prevInspections => prevInspections.filter(inspection => inspection.id !== inspectionId));
-      alert(t('fims.inspectionDeletedSuccessfully'));
-      // Optionally refetch to ensure consistency
+      alert(t('fims.inspectionDeletedSuccessfully') || 'Inspection deleted successfully');
       await fetchInspectionsData();
+      
     } catch (error) {
       console.error('Error deleting inspection:', error);
-      alert(t('fims.errorDeletingInspection') + (error as Error).message);
+      alert(t('fims.errorDeletingInspection') || 'Error deleting inspection: ' + (error as Error).message);
     } finally {
       setIsLoading(false);
     }
   };
-
 
   const handleCompleteInspection = async (inspectionId: string) => {
     try {
