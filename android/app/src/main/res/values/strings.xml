@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">FIMS</string>
+    <string name="title_activity_main">FIMS</string>
+    <string name="package_name">com.fims.app</string>
+    <string name="custom_url_scheme">com.fims.app</string>
+</resources>
