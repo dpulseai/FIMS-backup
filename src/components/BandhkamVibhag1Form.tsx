@@ -1147,7 +1147,8 @@ export const BandhkamVibhag1Form: React.FC<BandhkamVibhag1FormProps> = ({
             ) : (
               <button
                 onClick={() => setCurrentStep(prev => Math.min(4, prev + 1))}
-                disabled={!canProceedToNext() || isViewMode}
+                //disabled={!canProceedToNext() || isViewMode}
+                disabled={!isViewMode && !canProceedToNext()}
                 className="px-4 md:px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 text-sm md:text-base"
               >
                 {t('common.next')}
