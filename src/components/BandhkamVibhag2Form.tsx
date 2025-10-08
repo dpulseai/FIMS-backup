@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, MapPin, Camera, Save, Send, Building, FileText, Calendar, User, Users, ClipboardCheck, Award, Clock } from 'lucide-react';
-import supabase from '../lib/supabase';
+import { supabase } from '../lib/supabase';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface BandhkamVibhag2FormProps {
