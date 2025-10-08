@@ -1,7 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, MapPin, Camera, Save, Send, Building, FileText, Calendar, User, Users, ClipboardCheck, Award, Clock } from 'lucide-react';
-import supabase from '../lib/supabase';
+import { 
+  ArrowLeft,
+  MapPin,
+  Camera,
+  Save,
+  Send,
+  Building,
+  FileText,
+  Calendar,
+  User,
+  Users,
+  ClipboardCheck,
+  Award,
+  Clock
+} from 'lucide-react';
+import { supabase } from '../lib/supabase';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface BandhkamVibhag2FormProps {
@@ -14,29 +28,39 @@ interface BandhkamVibhag2FormProps {
 
 interface BandhkamVibhag2FormData {
   // Basic inspection information
-  inspectiondate: string;
+  inspection_date: string;
+  
   // Present officers/staff (up to 4 entries)
-  officer1name: string;
-  officer1designation: string;
-  officer2name: string;
-  officer2designation: string;
-  officer3name: string;
-  officer3designation: string;
-  officer4name: string;
-  officer4designation: string;
+  officer_1_name: string;
+  officer_1_designation: string;
+  officer_2_name: string;
+  officer_2_designation: string;
+  officer_3_name: string;
+  officer_3_designation: string;
+  officer_4_name: string;
+  officer_4_designation: string;
+  
   // Work details
-  currentworkstatus: string;
-  workquality: string;
-  defectliabilityperiod: string;
+  current_work_status: string;
+  work_quality: string;
+  defect_liability_period: string;
+  
   // Inspection report
-  workname: string;
-  inspectionreport: string;
+  work_name: string;
+  inspection_report: string;
+  
   // Inspector information
-  inspectorname: string;
-  inspectordesignation: string;
+  inspector_name: string;
+  inspector_designation: string;
 }
 
-export const BandhkamVibhag2Form: React.FC<BandhkamVibhag2FormProps> = ({ user, onBack, categories, onInspectionCreated, editingInspection }) => {
+export const BandhkamVibhag2Form: React.FC<BandhkamVibhag2FormProps> = ({
+  user,
+  onBack,
+  categories,
+  onInspectionCreated,
+  editingInspection
+}) => {
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -49,41 +73,44 @@ export const BandhkamVibhag2Form: React.FC<BandhkamVibhag2FormProps> = ({ user, 
 
   // Basic inspection data
   const [inspectionData, setInspectionData] = useState({
-    categoryid: '',
-    locationname: '',
+    category_id: '',
+    location_name: '',
     address: '',
-    planneddate: '',
+    planned_date: '',
     latitude: null as number | null,
     longitude: null as number | null,
-    locationaccuracy: null as number | null,
+    location_accuracy: null as number | null
   });
 
   // Bandhkam Vibhag 2 form data
   const [bandhkamVibhag2FormData, setBandhkamVibhag2FormData] = useState<BandhkamVibhag2FormData>({
-    inspectiondate: '',
-    officer1name: '',
-    officer1designation: '',
-    officer2name: '',
-    officer2designation: '',
-    officer3name: '',
-    officer3designation: '',
-    officer4name: '',
-    officer4designation: '',
-    currentworkstatus: '',
-    workquality: '',
-    defectliabilityperiod: '',
-    workname: '',
-    inspectionreport: '',
-    inspectorname: '',
-    inspectordesignation: '',
+    inspection_date: '',
+    officer_1_name: '',
+    officer_1_designation: '',
+    officer_2_name: '',
+    officer_2_designation: '',
+    officer_3_name: '',
+    officer_3_designation: '',
+    officer_4_name: '',
+    officer_4_designation: '',
+    current_work_status: '',
+    work_quality: '',
+    defect_liability_period: '',
+    work_name: '',
+    inspection_report: '',
+    inspector_name: '',
+    inspector_designation: ''
   });
 
   // Get bandhkam vibhag 2 category
-  const bandhkamVibhag2Category = categories.find(cat => cat.formtype === 'bandhkamvibhag2');
+  const bandhkamVibhag2Category = categories.find(cat => cat.form_type === 'bandhkam_vibhag2');
 
   useEffect(() => {
     if (bandhkamVibhag2Category) {
-      setInspectionData(prev => ({ ...prev, categoryid: bandhkamVibhag2Category.id }), bandhkamVibhag2Category);
+      setInspectionData(prev => ({
+        ...prev,
+        category_id: bandhkamVibhag2Category.id
+      }));
     }
   }, [bandhkamVibhag2Category]);
 
@@ -92,21 +119,20 @@ export const BandhkamVibhag2Form: React.FC<BandhkamVibhag2FormProps> = ({ user, 
     if (editingInspection && editingInspection.id) {
       // Load basic inspection data
       setInspectionData({
-        categoryid: editingInspection.categoryid,
-        locationname: editingInspection.locationname,
-        address: editingInspection.address,
-        planneddate: editingInspection.planneddate ? editingInspection.planneddate.split('T')[0] : '',
+        category_id: editingInspection.category_id || '',
+        location_name: editingInspection.location_name || '',
+        address: editingInspection.address || '',
+        planned_date: editingInspection.planned_date ? editingInspection.planned_date.split('T')[0] : '',
         latitude: editingInspection.latitude,
         longitude: editingInspection.longitude,
-        locationaccuracy: editingInspection.locationaccuracy,
+        location_accuracy: editingInspection.location_accuracy
       });
 
       // Load form data if it exists
-      if (editingInspection.formdata) {
+      if (editingInspection.form_data) {
         setBandhkamVibhag2FormData({
           ...bandhkamVibhag2FormData,
-          ...editingInspection.formdata,
-          ...editingInspection,
+          ...editingInspection.form_data
         });
       }
     }
@@ -125,22 +151,27 @@ export const BandhkamVibhag2Form: React.FC<BandhkamVibhag2FormProps> = ({ user, 
           ...prev,
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
-          locationaccuracy: position.coords.accuracy,
+          location_accuracy: position.coords.accuracy
         }));
-
+        
         // Get location name using reverse geocoding
         try {
           const response = await fetch(
             `https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=${import.meta.env.VITE_GOOGLE_API_KEY}`
           );
           const data = await response.json();
+          
           if (data.results && data.results.length > 0) {
             const locationName = data.results[0].formatted_address;
-            setInspectionData(prev => ({ ...prev, address: locationName }));
+            setInspectionData(prev => ({
+              ...prev,
+              address: locationName
+            }));
           }
         } catch (error) {
           console.error('Error getting location name:', error);
         }
+        
         setIsLoading(false);
       },
       (error) => {
@@ -154,10 +185,12 @@ export const BandhkamVibhag2Form: React.FC<BandhkamVibhag2FormProps> = ({ user, 
 
   const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
+    
     if (uploadedPhotos.length + files.length > 5) {
       alert(t('fims.maxPhotosAllowed'));
       return;
     }
+
     setUploadedPhotos(prev => [...prev, ...files]);
   };
 
@@ -173,29 +206,31 @@ export const BandhkamVibhag2Form: React.FC<BandhkamVibhag2FormProps> = ({ user, 
       for (let i = 0; i < uploadedPhotos.length; i++) {
         const file = uploadedPhotos[i];
         const fileExt = file.name.split('.').pop();
-        const fileName = `bandhkamvibhag2-${inspectionId}-${Date.now()}-${i}.${fileExt}`;
+        const fileName = `bandhkam_vibhag2_${inspectionId}_${Date.now()}_${i}.${fileExt}`;
 
         // Upload to Supabase Storage
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('field-visit-images')
           .upload(fileName, file);
+
         if (uploadError) throw uploadError;
 
         // Get public URL
-        const { data: publicUrl } = supabase.storage
+        const { data: { publicUrl } } = supabase.storage
           .from('field-visit-images')
           .getPublicUrl(fileName);
 
         // Save photo record to database
         const { error: dbError } = await supabase
-          .from('fimsinspectionphotos')
+          .from('fims_inspection_photos')
           .insert({
-            inspectionid: inspectionId,
-            photourl: publicUrl,
-            photoname: file.name,
+            inspection_id: inspectionId,
+            photo_url: publicUrl,
+            photo_name: file.name,
             description: `Bandhkam Vibhag 2 inspection photo ${i + 1}`,
-            photoorder: i + 1,
+            photo_order: i + 1
           });
+
         if (dbError) throw dbError;
       }
     } catch (error) {
@@ -222,7 +257,7 @@ export const BandhkamVibhag2Form: React.FC<BandhkamVibhag2FormProps> = ({ user, 
       // Convert empty date strings to null for database compatibility
       const sanitizedInspectionData = {
         ...inspectionData,
-        planneddate: inspectionData.planneddate || null,
+        planned_date: inspectionData.planned_date || null
       };
 
       let inspectionResult;
@@ -230,105 +265,118 @@ export const BandhkamVibhag2Form: React.FC<BandhkamVibhag2FormProps> = ({ user, 
       if (editingInspection && editingInspection.id) {
         // Update existing inspection
         const { data: updateResult, error: updateError } = await supabase
-          .from('fimsinspections')
+          .from('fims_inspections')
           .update({
-            locationname: sanitizedInspectionData.locationname,
+            location_name: sanitizedInspectionData.location_name,
             latitude: sanitizedInspectionData.latitude,
             longitude: sanitizedInspectionData.longitude,
-            locationaccuracy: sanitizedInspectionData.locationaccuracy,
+            location_accuracy: sanitizedInspectionData.location_accuracy,
             address: sanitizedInspectionData.address,
-            planneddate: sanitizedInspectionData.planneddate,
-            inspectiondate: new Date().toISOString(),
+            planned_date: sanitizedInspectionData.planned_date,
+            inspection_date: new Date().toISOString(),
             status: isDraft ? 'draft' : 'submitted',
-            formdata: bandhkamVibhag2FormData,
+            form_data: bandhkamVibhag2FormData
           })
           .eq('id', editingInspection.id)
           .select()
           .single();
+
         if (updateError) throw updateError;
         inspectionResult = updateResult;
 
-        // Upsert bandhakamvibhag2 form record
+        // Upsert bandhakam_vibhag2 form record
         const officersArray = [
-          bandhkamVibhag2FormData.officer1name && bandhkamVibhag2FormData.officer1designation
-            ? { name: bandhkamVibhag2FormData.officer1name, designation: bandhkamVibhag2FormData.officer1designation }
-            : null,
-          bandhkamVibhag2FormData.officer2name && bandhkamVibhag2FormData.officer2designation
-            ? { name: bandhkamVibhag2FormData.officer2name, designation: bandhkamVibhag2FormData.officer2designation }
-            : null,
-          bandhkamVibhag2FormData.officer3name && bandhkamVibhag2FormData.officer3designation
-            ? { name: bandhkamVibhag2FormData.officer3name, designation: bandhkamVibhag2FormData.officer3designation }
-            : null,
-          bandhkamVibhag2FormData.officer4name && bandhkamVibhag2FormData.officer4designation
-            ? { name: bandhkamVibhag2FormData.officer4name, designation: bandhkamVibhag2FormData.officer4designation }
-            : null,
+          bandhkamVibhag2FormData.officer_1_name && bandhkamVibhag2FormData.officer_1_designation ? {
+            name: bandhkamVibhag2FormData.officer_1_name,
+            designation: bandhkamVibhag2FormData.officer_1_designation
+          } : null,
+          bandhkamVibhag2FormData.officer_2_name && bandhkamVibhag2FormData.officer_2_designation ? {
+            name: bandhkamVibhag2FormData.officer_2_name,
+            designation: bandhkamVibhag2FormData.officer_2_designation
+          } : null,
+          bandhkamVibhag2FormData.officer_3_name && bandhkamVibhag2FormData.officer_3_designation ? {
+            name: bandhkamVibhag2FormData.officer_3_name,
+            designation: bandhkamVibhag2FormData.officer_3_designation
+          } : null,
+          bandhkamVibhag2FormData.officer_4_name && bandhkamVibhag2FormData.officer_4_designation ? {
+            name: bandhkamVibhag2FormData.officer_4_name,
+            designation: bandhkamVibhag2FormData.officer_4_designation
+          } : null
         ].filter(officer => officer !== null);
 
         const { error: formError } = await supabase
-          .from('bandhakamvibhag2')
+          .from('bandhakam_vibhag2')
           .upsert({
-            inspectionid: editingInspection.id,
-            inspectiondate: bandhkamVibhag2FormData.inspectiondate,
+            inspection_id: editingInspection.id,
+            inspection_date: bandhkamVibhag2FormData.inspection_date,
             officers: officersArray,
-            currentworkstatus: bandhkamVibhag2FormData.currentworkstatus,
-            workquality: bandhkamVibhag2FormData.workquality,
-            liabilityperiod: bandhkamVibhag2FormData.defectliabilityperiod,
-            reportworkname: bandhkamVibhag2FormData.workname,
-            detailedreport: bandhkamVibhag2FormData.inspectionreport,
+            current_work_status: bandhkamVibhag2FormData.current_work_status,
+            work_quality: bandhkamVibhag2FormData.work_quality,
+            liability_period: bandhkamVibhag2FormData.defect_liability_period,
+            report_work_name: bandhkamVibhag2FormData.work_name,
+            detailed_report: bandhkamVibhag2FormData.inspection_report
           });
+
         if (formError) throw formError;
       } else {
         // Create new inspection
         const inspectionNumber = generateInspectionNumber();
+
         const { data: createResult, error: createError } = await supabase
-          .from('fimsinspections')
+          .from('fims_inspections')
           .insert({
-            inspectionnumber: inspectionNumber,
-            categoryid: sanitizedInspectionData.categoryid,
-            inspectorid: user.id,
-            locationname: sanitizedInspectionData.locationname,
+            inspection_number: inspectionNumber,
+            category_id: sanitizedInspectionData.category_id,
+            inspector_id: user.id,
+            location_name: sanitizedInspectionData.location_name,
             latitude: sanitizedInspectionData.latitude,
             longitude: sanitizedInspectionData.longitude,
-            locationaccuracy: sanitizedInspectionData.locationaccuracy,
+            location_accuracy: sanitizedInspectionData.location_accuracy,
             address: sanitizedInspectionData.address,
-            planneddate: sanitizedInspectionData.planneddate,
-            inspectiondate: new Date().toISOString(),
+            planned_date: sanitizedInspectionData.planned_date,
+            inspection_date: new Date().toISOString(),
             status: isDraft ? 'draft' : 'submitted',
-            formdata: bandhkamVibhag2FormData,
+            form_data: bandhkamVibhag2FormData
           })
           .select()
           .single();
+
         if (createError) throw createError;
         inspectionResult = createResult;
 
-        // Create bandhakamvibhag2 form record
+        // Create bandhakam_vibhag2 form record
         const officersArray = [
-          bandhkamVibhag2FormData.officer1name && bandhkamVibhag2FormData.officer1designation
-            ? { name: bandhkamVibhag2FormData.officer1name, designation: bandhkamVibhag2FormData.officer1designation }
-            : null,
-          bandhkamVibhag2FormData.officer2name && bandhkamVibhag2FormData.officer2designation
-            ? { name: bandhkamVibhag2FormData.officer2name, designation: bandhkamVibhag2FormData.officer2designation }
-            : null,
-          bandhkamVibhag2FormData.officer3name && bandhkamVibhag2FormData.officer3designation
-            ? { name: bandhkamVibhag2FormData.officer3name, designation: bandhkamVibhag2FormData.officer3designation }
-            : null,
-          bandhkamVibhag2FormData.officer4name && bandhkamVibhag2FormData.officer4designation
-            ? { name: bandhkamVibhag2FormData.officer4name, designation: bandhkamVibhag2FormData.officer4designation }
-            : null,
+          bandhkamVibhag2FormData.officer_1_name && bandhkamVibhag2FormData.officer_1_designation ? {
+            name: bandhkamVibhag2FormData.officer_1_name,
+            designation: bandhkamVibhag2FormData.officer_1_designation
+          } : null,
+          bandhkamVibhag2FormData.officer_2_name && bandhkamVibhag2FormData.officer_2_designation ? {
+            name: bandhkamVibhag2FormData.officer_2_name,
+            designation: bandhkamVibhag2FormData.officer_2_designation
+          } : null,
+          bandhkamVibhag2FormData.officer_3_name && bandhkamVibhag2FormData.officer_3_designation ? {
+            name: bandhkamVibhag2FormData.officer_3_name,
+            designation: bandhkamVibhag2FormData.officer_3_designation
+          } : null,
+          bandhkamVibhag2FormData.officer_4_name && bandhkamVibhag2FormData.officer_4_designation ? {
+            name: bandhkamVibhag2FormData.officer_4_name,
+            designation: bandhkamVibhag2FormData.officer_4_designation
+          } : null
         ].filter(officer => officer !== null);
 
         const { error: formError } = await supabase
-          .from('bandhakamvibhag2')
+          .from('bandhakam_vibhag2')
           .insert({
-            inspectionid: inspectionResult.id,
-            inspectiondate: bandhkamVibhag2FormData.inspectiondate,
+            inspection_id: inspectionResult.id,
+            inspection_date: bandhkamVibhag2FormData.inspection_date,
             officers: officersArray,
-            currentworkstatus: bandhkamVibhag2FormData.currentworkstatus,
-            workquality: bandhkamVibhag2FormData.workquality,
-            liabilityperiod: bandhkamVibhag2FormData.defectliabilityperiod,
-            reportworkname: bandhkamVibhag2FormData.workname,
-            detailedreport: bandhkamVibhag2FormData.inspectionreport,
+            current_work_status: bandhkamVibhag2FormData.current_work_status,
+            work_quality: bandhkamVibhag2FormData.work_quality,
+            liability_period: bandhkamVibhag2FormData.defect_liability_period,
+            report_work_name: bandhkamVibhag2FormData.work_name,
+            detailed_report: bandhkamVibhag2FormData.inspection_report
           });
+
         if (formError) throw formError;
       }
 
@@ -338,20 +386,17 @@ export const BandhkamVibhag2Form: React.FC<BandhkamVibhag2FormProps> = ({ user, 
       }
 
       const isUpdate = editingInspection && editingInspection.id;
-      const message = isDraft
-        ? isUpdate
-          ? t('fims.inspectionUpdatedAsDraft')
-          : t('fims.inspectionSavedAsDraft')
-        : isUpdate
-        ? t('fims.inspectionUpdatedSuccessfully')
-        : t('fims.inspectionSubmittedSuccessfully');
-
+      const message = isDraft 
+        ? (isUpdate ? t('fims.inspectionUpdatedAsDraft') : t('fims.inspectionSavedAsDraft'))
+        : (isUpdate ? t('fims.inspectionUpdatedSuccessfully') : t('fims.inspectionSubmittedSuccessfully'));
+      
       alert(message);
       onInspectionCreated();
       onBack();
+
     } catch (error) {
       console.error('Error saving inspection:', error);
-      alert(`Error saving inspection: ${error.message}`);
+      alert('Error saving inspection: ' + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -359,14 +404,20 @@ export const BandhkamVibhag2Form: React.FC<BandhkamVibhag2FormProps> = ({ user, 
 
   const renderStepIndicator = () => (
     <div className="flex items-center justify-center mb-8">
-      {[1, 2, 3, 4].map(step => (
+      {[1, 2, 3, 4].map((step) => (
         <div key={step} className="flex items-center">
           <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-            currentStep >= step ? 'bg-teal-600 text-white' : 'bg-gray-200 text-gray-600'
+            currentStep >= step 
+              ? 'bg-teal-600 text-white' 
+              : 'bg-gray-200 text-gray-600'
           }`}>
             {step}
           </div>
-          {step < 4 && <div className={`w-16 h-1 mx-2 ${currentStep > step ? 'bg-teal-600' : 'bg-gray-200'}`} />}
+          {step < 4 && (
+            <div className={`w-16 h-1 mx-2 ${
+              currentStep > step ? 'bg-teal-600' : 'bg-gray-200'
+            }`} />
+          )}
         </div>
       ))}
     </div>
@@ -376,32 +427,34 @@ export const BandhkamVibhag2Form: React.FC<BandhkamVibhag2FormProps> = ({ user, 
     <div className="space-y-6">
       <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
         <Calendar className="h-5 w-5 mr-2 text-teal-600" />
-        Basic Information
+        मूलभूत माहिती (Basic Information)
       </h3>
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t('label.inspectiondate')}
+            तपासणी दिनांक *
           </label>
           <input
             type="date"
-            value={bandhkamVibhag2FormData.inspectiondate}
-            onChange={(e) => setBandhkamVibhag2FormData(prev => ({ ...prev, inspectiondate: e.target.value }))}
+            value={bandhkamVibhag2FormData.inspection_date}
+            onChange={(e) => setBandhkamVibhag2FormData(prev => ({...prev, inspection_date: e.target.value}))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             required
             disabled={isViewMode}
           />
         </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t('label.workname')}
+            कामाचे नाव *
           </label>
           <input
             type="text"
-            value={bandhkamVibhag2FormData.workname}
-            onChange={(e) => setBandhkamVibhag2FormData(prev => ({ ...prev, workname: e.target.value }))}
+            value={bandhkamVibhag2FormData.work_name}
+            onChange={(e) => setBandhkamVibhag2FormData(prev => ({...prev, work_name: e.target.value}))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-            placeholder={t('placeholder.workname')}
+            placeholder="कामाचे नाव प्रविष्ट करा"
             required
             disabled={isViewMode}
           />
@@ -412,34 +465,35 @@ export const BandhkamVibhag2Form: React.FC<BandhkamVibhag2FormProps> = ({ user, 
       <div className="bg-gray-50 p-6 rounded-lg">
         <h4 className="text-md font-semibold text-gray-800 mb-4 flex items-center">
           <Users className="h-5 w-5 mr-2 text-teal-600" />
-          Present Officers/Staff
+          उपस्थित अधिकारी / कर्मचारी (Present Officers/Staff)
         </h4>
+        
         <div className="space-y-4">
-          {[1, 2, 3, 4].map(num => (
+          {[1, 2, 3, 4].map((num) => (
             <div key={num} className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {`${num}- ${t('label.officername')}`}
+                  अधिकारी/कर्मचारी {num} - नाव
                 </label>
                 <input
                   type="text"
-                  value={bandhkamVibhag2FormData[`officer${num}name`] as keyof BandhkamVibhag2FormData as string}
-                  onChange={(e) => setBandhkamVibhag2FormData(prev => ({ ...prev, [`officer${num}name`]: e.target.value }))}
+                  value={bandhkamVibhag2FormData[`officer_${num}_name` as keyof BandhkamVibhag2FormData] as string}
+                  onChange={(e) => setBandhkamVibhag2FormData(prev => ({...prev, [`officer_${num}_name`]: e.target.value}))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                  placeholder={t('placeholder.officername')}
+                  placeholder="नाव प्रविष्ट करा"
                   disabled={isViewMode}
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('label.officerdesignation')}
+                  पदनाम
                 </label>
                 <input
                   type="text"
-                  value={bandhkamVibhag2FormData[`officer${num}designation`] as keyof BandhkamVibhag2FormData as string}
-                  onChange={(e) => setBandhkamVibhag2FormData(prev => ({ ...prev, [`officer${num}designation`]: e.target.value }))}
+                  value={bandhkamVibhag2FormData[`officer_${num}_designation` as keyof BandhkamVibhag2FormData] as string}
+                  onChange={(e) => setBandhkamVibhag2FormData(prev => ({...prev, [`officer_${num}_designation`]: e.target.value}))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                  placeholder={t('placeholder.officerdesignation')}
+                  placeholder="पदनाम प्रविष्ट करा"
                   disabled={isViewMode}
                 />
               </div>
@@ -455,39 +509,44 @@ export const BandhkamVibhag2Form: React.FC<BandhkamVibhag2FormProps> = ({ user, 
       <div className="bg-gradient-to-r from-teal-500 to-teal-600 text-white p-4 rounded-t-lg">
         <h3 className="text-lg font-semibold flex items-center">
           <MapPin className="h-5 w-5 mr-2" />
-          Location Information
+          स्थान माहिती (Location Information)
         </h3>
       </div>
+      
       <div className="bg-white p-6 rounded-b-lg border border-gray-200 space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t('label.locationname')}
+            स्थानाचे नाव *
           </label>
           <input
             type="text"
-            value={inspectionData.locationname}
-            onChange={(e) => setInspectionData(prev => ({ ...prev, locationname: e.target.value }))}
+            value={inspectionData.location_name}
+            onChange={(e) => setInspectionData(prev => ({...prev, location_name: e.target.value}))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-            placeholder={t('placeholder.locationname')}
+            placeholder="स्थानाचे नाव प्रविष्ट करा"
             required
             disabled={isViewMode}
           />
         </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('label.planneddate')}
+              नियोजित तारीख
             </label>
             <input
               type="date"
-              value={inspectionData.planneddate}
-              onChange={(e) => setInspectionData(prev => ({ ...prev, planneddate: e.target.value }))}
+              value={inspectionData.planned_date}
+              onChange={(e) => setInspectionData(prev => ({...prev, planned_date: e.target.value}))}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
               disabled={isViewMode}
             />
           </div>
+
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">GPS Location</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              GPS Location
+            </label>
             <button
               type="button"
               onClick={getCurrentLocation}
@@ -495,30 +554,32 @@ export const BandhkamVibhag2Form: React.FC<BandhkamVibhag2FormProps> = ({ user, 
               className="w-full px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2 disabled:opacity-50"
             >
               <MapPin className="h-4 w-4" />
-              <span>{isLoading ? t('common.gettinglocation') : t('button.getcurrentlocation')}</span>
+              <span>{isLoading ? 'स्थान मिळवत आहे...' : 'सध्याचे स्थान मिळवा'}</span>
             </button>
           </div>
         </div>
+
         {inspectionData.latitude && inspectionData.longitude && (
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <p className="text-sm text-green-800 font-medium mb-2">{t('common.locationcaptured')}</p>
+            <p className="text-sm text-green-800 font-medium mb-2">स्थान कॅप्चर केले</p>
             <div className="text-xs text-green-600 space-y-1">
-              <p>{inspectionData.latitude.toFixed(6)}</p>
-              <p>{inspectionData.longitude.toFixed(6)}</p>
-              <p>{inspectionData.locationaccuracy ? `${Math.round(inspectionData.locationaccuracy)}m` : 'NA'}</p>
+              <p>अक्षांश: {inspectionData.latitude.toFixed(6)}</p>
+              <p>रेखांश: {inspectionData.longitude.toFixed(6)}</p>
+              <p>अचूकता: {inspectionData.location_accuracy ? Math.round(inspectionData.location_accuracy) + 'm' : 'N/A'}</p>
             </div>
           </div>
         )}
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t('label.address')}
+            संपूर्ण पत्ता
           </label>
           <textarea
             value={inspectionData.address}
-            onChange={(e) => setInspectionData(prev => ({ ...prev, address: e.target.value }))}
+            onChange={(e) => setInspectionData(prev => ({...prev, address: e.target.value}))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             rows={3}
-            placeholder={t('placeholder.address')}
+            placeholder="संपूर्ण पत्ता प्रविष्ट करा"
             disabled={isViewMode}
           />
         </div>
@@ -529,57 +590,60 @@ export const BandhkamVibhag2Form: React.FC<BandhkamVibhag2FormProps> = ({ user, 
   const renderBandhkamVibhag2Form = () => (
     <div className="space-y-8">
       <h3 className="text-lg font-semibold text-gray-900 mb-4">
-        - Construction Department Inspection Form-2 -
+        बांधकाम विभाग तपासणी प्रपत्र-२ (Construction Department Inspection Form-2)
       </h3>
 
       {/* Work Status and Quality */}
       <div className="bg-gray-50 p-6 rounded-lg">
         <h4 className="text-md font-semibold text-gray-800 mb-4 flex items-center">
           <ClipboardCheck className="h-5 w-5 mr-2 text-teal-600" />
-          Work Status and Quality
+          कामाची स्थिती आणि दर्जा (Work Status and Quality)
         </h4>
+        
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('label.currentworkstatus')}
+              कामाची सद्यस्थिती
             </label>
             <textarea
-              value={bandhkamVibhag2FormData.currentworkstatus}
-              onChange={(e) => setBandhkamVibhag2FormData(prev => ({ ...prev, currentworkstatus: e.target.value }))}
+              value={bandhkamVibhag2FormData.current_work_status}
+              onChange={(e) => setBandhkamVibhag2FormData(prev => ({...prev, current_work_status: e.target.value}))}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
               rows={4}
-              placeholder={t('placeholder.currentworkstatus')}
+              placeholder="कामाची सद्यस्थिती वर्णन करा"
               disabled={isViewMode}
             />
           </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('label.workquality')}
+              कामाचा दर्जा
             </label>
             <select
-              value={bandhkamVibhag2FormData.workquality}
-              onChange={(e) => setBandhkamVibhag2FormData(prev => ({ ...prev, workquality: e.target.value }))}
+              value={bandhkamVibhag2FormData.work_quality}
+              onChange={(e) => setBandhkamVibhag2FormData(prev => ({...prev, work_quality: e.target.value}))}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
               disabled={isViewMode}
             >
-              <option value="">{t('placeholder.selectquality')}</option>
-              <option value="option1">{t('option.excellent')}</option>
-              <option value="option2">{t('option.good')}</option>
-              <option value="option3">{t('option.average')}</option>
-              <option value="option4">{t('option.poor')}</option>
-              <option value="option5">{t('option.unsatisfactory')}</option>
+              <option value="">दर्जा निवडा</option>
+              <option value="उत्कृष्ट">उत्कृष्ट</option>
+              <option value="उत्तम">उत्तम</option>
+              <option value="चांगला">चांगला</option>
+              <option value="साधारण">साधारण</option>
+              <option value="वाईट">वाईट</option>
             </select>
           </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('label.defectliabilityperiod')}
+              दोषदायित्व कालावधी
             </label>
             <input
               type="text"
-              value={bandhkamVibhag2FormData.defectliabilityperiod}
-              onChange={(e) => setBandhkamVibhag2FormData(prev => ({ ...prev, defectliabilityperiod: e.target.value }))}
+              value={bandhkamVibhag2FormData.defect_liability_period}
+              onChange={(e) => setBandhkamVibhag2FormData(prev => ({...prev, defect_liability_period: e.target.value}))}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-              placeholder={t('placeholder.defectliabilityperiod')}
+              placeholder="दोषदायित्व कालावधी प्रविष्ट करा"
               disabled={isViewMode}
             />
           </div>
@@ -590,18 +654,19 @@ export const BandhkamVibhag2Form: React.FC<BandhkamVibhag2FormProps> = ({ user, 
       <div className="bg-gray-50 p-6 rounded-lg">
         <h4 className="text-md font-semibold text-gray-800 mb-4 flex items-center">
           <FileText className="h-5 w-5 mr-2 text-teal-600" />
-          Inspection Report
+          तपासणी अहवाल (Inspection Report)
         </h4>
+        
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t('label.inspectionreport')}
+            तपासणी अहवाल
           </label>
           <textarea
-            value={bandhkamVibhag2FormData.inspectionreport}
-            onChange={(e) => setBandhkamVibhag2FormData(prev => ({ ...prev, inspectionreport: e.target.value }))}
+            value={bandhkamVibhag2FormData.inspection_report}
+            onChange={(e) => setBandhkamVibhag2FormData(prev => ({...prev, inspection_report: e.target.value}))}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             rows={6}
-            placeholder={t('placeholder.inspectionreport')}
+            placeholder="तपासणी अहवाल तपशीलवार लिहा"
             disabled={isViewMode}
           />
         </div>
@@ -611,32 +676,34 @@ export const BandhkamVibhag2Form: React.FC<BandhkamVibhag2FormProps> = ({ user, 
       <div className="bg-gray-50 p-6 rounded-lg">
         <h4 className="text-md font-semibold text-gray-800 mb-4 flex items-center">
           <User className="h-5 w-5 mr-2 text-teal-600" />
-          Inspector Information
+          निरीक्षकाची माहिती (Inspector Information)
         </h4>
+        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('label.inspectorname')}
+              निरीक्षकाचे नाव
             </label>
             <input
               type="text"
-              value={bandhkamVibhag2FormData.inspectorname}
-              onChange={(e) => setBandhkamVibhag2FormData(prev => ({ ...prev, inspectorname: e.target.value }))}
+              value={bandhkamVibhag2FormData.inspector_name}
+              onChange={(e) => setBandhkamVibhag2FormData(prev => ({...prev, inspector_name: e.target.value}))}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-              placeholder={t('placeholder.inspectorname')}
+              placeholder="निरीक्षकाचे नाव प्रविष्ट करा"
               disabled={isViewMode}
             />
           </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('label.inspectordesignation')}
+              पदनाम
             </label>
             <input
               type="text"
-              value={bandhkamVibhag2FormData.inspectordesignation}
-              onChange={(e) => setBandhkamVibhag2FormData(prev => ({ ...prev, inspectordesignation: e.target.value }))}
+              value={bandhkamVibhag2FormData.inspector_designation}
+              onChange={(e) => setBandhkamVibhag2FormData(prev => ({...prev, inspector_designation: e.target.value}))}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-              placeholder={t('placeholder.inspectordesignation')}
+              placeholder="पदनाम प्रविष्ट करा"
               disabled={isViewMode}
             />
           </div>
@@ -650,12 +717,16 @@ export const BandhkamVibhag2Form: React.FC<BandhkamVibhag2FormProps> = ({ user, 
       <h3 className="text-lg font-semibold text-gray-900 mb-4">
         {t('fims.photoDocumentation')}
       </h3>
+      
       <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
         <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-        <h4 className="text-lg font-medium text-gray-900 mb-2">Upload Construction Work Photos</h4>
+        <h4 className="text-lg font-medium text-gray-900 mb-2">
+          Upload Construction Work Photos
+        </h4>
         <p className="text-gray-600 mb-4">
-          {t('fims.uploadphotosconstruction')}
+          Upload photos of the construction work for documentation and record keeping
         </p>
+        
         {!isViewMode && (
           <>
             <input
@@ -666,11 +737,17 @@ export const BandhkamVibhag2Form: React.FC<BandhkamVibhag2FormProps> = ({ user, 
               className="hidden"
               id="photo-upload"
             />
-            <label htmlFor="photo-upload" className="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg cursor-pointer transition-colors duration-200">
+            <label
+              htmlFor="photo-upload"
+              className="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg cursor-pointer transition-colors duration-200"
+            >
               <Camera className="h-4 w-4 mr-2" />
-              {t('fims.choosefiles')}
+              {t('fims.chooseFiles')}
             </label>
-            <p className="text-xs text-gray-500 mt-2">{t('fims.maxphotosallowed')}</p>
+            
+            <p className="text-xs text-gray-500 mt-2">
+              Maximum 5 photos allowed
+            </p>
           </>
         )}
       </div>
@@ -678,7 +755,7 @@ export const BandhkamVibhag2Form: React.FC<BandhkamVibhag2FormProps> = ({ user, 
       {uploadedPhotos.length > 0 && (
         <div>
           <h4 className="text-md font-medium text-gray-900 mb-3">
-            {t('fims.uploadedphotos')} ({uploadedPhotos.length}/5)
+            {t('fims.uploadedPhotos')} ({uploadedPhotos.length}/5)
           </h4>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {uploadedPhotos.map((photo, index) => (
@@ -696,7 +773,9 @@ export const BandhkamVibhag2Form: React.FC<BandhkamVibhag2FormProps> = ({ user, 
                     ×
                   </button>
                 )}
-                <p className="text-xs text-gray-600 mt-1 truncate">{photo.name}</p>
+                <p className="text-xs text-gray-600 mt-1 truncate">
+                  {photo.name}
+                </p>
               </div>
             ))}
           </div>
@@ -704,22 +783,26 @@ export const BandhkamVibhag2Form: React.FC<BandhkamVibhag2FormProps> = ({ user, 
       )}
 
       {/* Display existing photos when viewing */}
-      {isViewMode && editingInspection?.fimsinspectionphotos && editingInspection.fimsinspectionphotos.length > 0 && (
+      {isViewMode && editingInspection?.fims_inspection_photos && editingInspection.fims_inspection_photos.length > 0 && (
         <div>
           <h4 className="text-md font-medium text-gray-900 mb-3">
-            Inspection Photos ({editingInspection.fimsinspectionphotos.length})
+            Inspection Photos ({editingInspection.fims_inspection_photos.length})
           </h4>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {editingInspection.fimsinspectionphotos.map((photo: any, index: number) => (
+            {editingInspection.fims_inspection_photos.map((photo: any, index: number) => (
               <div key={photo.id} className="relative">
                 <img
-                  src={photo.photourl}
-                  alt={`${photo.description} Construction photo ${index + 1}`}
+                  src={photo.photo_url}
+                  alt={photo.description || `Construction photo ${index + 1}`}
                   className="w-full h-32 object-cover rounded-lg"
                 />
-                <p className="text-xs text-gray-600 mt-1 truncate">{photo.photoname} Photo {index + 1}</p>
+                <p className="text-xs text-gray-600 mt-1 truncate">
+                  {photo.photo_name || `Photo ${index + 1}`}
+                </p>
                 {photo.description && (
-                  <p className="text-xs text-gray-500 truncate">{photo.description}</p>
+                  <p className="text-xs text-gray-500 truncate">
+                    {photo.description}
+                  </p>
                 )}
               </div>
             ))}
@@ -728,17 +811,17 @@ export const BandhkamVibhag2Form: React.FC<BandhkamVibhag2FormProps> = ({ user, 
       )}
 
       {/* Show message when no photos in view mode */}
-      {isViewMode && (!editingInspection?.fimsinspectionphotos || editingInspection.fimsinspectionphotos.length === 0) && (
+      {isViewMode && (!editingInspection?.fims_inspection_photos || editingInspection.fims_inspection_photos.length === 0) && (
         <div className="text-center py-8 text-gray-500">
           <Camera className="h-12 w-12 text-gray-300 mx-auto mb-2" />
-          <p>{t('fims.nophotosfound')}</p>
+          <p>{t('fims.noPhotosFound')}</p>
         </div>
       )}
 
       {isUploading && (
         <div className="text-center py-4">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600 mx-auto mb-2"></div>
-          <p className="text-gray-600">{t('fims.uploadingphotos')}</p>
+          <p className="text-gray-600">{t('fims.uploadingPhotos')}</p>
         </div>
       )}
     </div>
@@ -746,20 +829,25 @@ export const BandhkamVibhag2Form: React.FC<BandhkamVibhag2FormProps> = ({ user, 
 
   const renderStepContent = () => {
     switch (currentStep) {
-      case 1: return renderBasicInfo();
-      case 2: return renderLocationDetails();
-      case 3: return renderBandhkamVibhag2Form();
-      case 4: return renderPhotoUpload();
-      default: return null;
+      case 1:
+        return renderBasicInfo();
+      case 2:
+        return renderLocationDetails();
+      case 3:
+        return renderBandhkamVibhag2Form();
+      case 4:
+        return renderPhotoUpload();
+      default:
+        return null;
     }
   };
 
   const canProceedToNext = () => {
     switch (currentStep) {
       case 1:
-        return bandhkamVibhag2FormData.inspectiondate && bandhkamVibhag2FormData.workname;
+        return bandhkamVibhag2FormData.inspection_date && bandhkamVibhag2FormData.work_name;
       case 2:
-        return inspectionData.locationname;
+        return inspectionData.location_name;
       case 3:
         return true; // Form is optional, can proceed
       case 4:
@@ -777,43 +865,42 @@ export const BandhkamVibhag2Form: React.FC<BandhkamVibhag2FormProps> = ({ user, 
           {editingInspection?.mode === 'view' && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
               <p className="text-blue-800 text-sm font-medium">
-                {t('fims.viewmode')} - {t('fims.formreadonly')}
+                {t('fims.viewMode')} - {t('fims.formReadOnly')}
               </p>
             </div>
           )}
+          
           <div className="flex items-center justify-between mb-4">
             <button
               onClick={onBack}
               className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors duration-200"
             >
               <ArrowLeft className="h-5 w-5" />
-              <span>{t('common.back')}</span>
+              <span>Back</span>
             </button>
             <h1 className="text-lg md:text-2xl font-bold text-gray-900 text-center">
-              {editingInspection?.mode === 'view'
-                ? `${t('fims.viewinspection')} - ${editingInspection?.inspectionnumber}`
-                : editingInspection?.mode === 'edit'
-                ? `${t('fims.editinspection')} - ${editingInspection?.inspectionnumber}`
-                : `${t('fims.newinspection')} - Bandhkam Vibhag 2`}
+              {editingInspection?.mode === 'view' ? t('fims.viewInspection') : 
+               editingInspection?.mode === 'edit' ? t('fims.editInspection') : 
+               t('fims.newInspection')} - बांधकाम विभाग प्रपत्र-२
             </h1>
             <div className="w-20"></div>
           </div>
-        </div>
 
-        {renderStepIndicator()}
+          {renderStepIndicator()}
 
-        <div className="flex justify-center space-x-4 md:space-x-8 text-xs md:text-sm">
-          <div className={currentStep === 1 ? 'text-teal-600 font-medium' : 'text-gray-500'}>
-            1
-          </div>
-          <div className={currentStep === 2 ? 'text-teal-600 font-medium' : 'text-gray-500'}>
-            {t('fims.locationdetails')}
-          </div>
-          <div className={currentStep === 3 ? 'text-teal-600 font-medium' : 'text-gray-500'}>
-            3
-          </div>
-          <div className={currentStep === 4 ? 'text-teal-600 font-medium' : 'text-gray-500'}>
-            {t('fims.photossubmit')}
+          <div className="flex justify-center space-x-4 md:space-x-8 text-xs md:text-sm">
+            <div className={`${currentStep === 1 ? 'text-teal-600 font-medium' : 'text-gray-500'}`}>
+              मूलभूत माहिती
+            </div>
+            <div className={`${currentStep === 2 ? 'text-teal-600 font-medium' : 'text-gray-500'}`}>
+              {t('fims.locationDetails')}
+            </div>
+            <div className={`${currentStep === 3 ? 'text-teal-600 font-medium' : 'text-gray-500'}`}>
+              बांधकाम तपासणी
+            </div>
+            <div className={`${currentStep === 4 ? 'text-teal-600 font-medium' : 'text-gray-500'}`}>
+              {t('fims.photosSubmit')}
+            </div>
           </div>
         </div>
 
@@ -831,34 +918,35 @@ export const BandhkamVibhag2Form: React.FC<BandhkamVibhag2FormProps> = ({ user, 
           >
             {t('common.previous')}
           </button>
+
           <div className="flex space-x-2 md:space-x-3">
             {currentStep === 4 ? (
               <>
                 {!isViewMode && (
-                  <button
-                    onClick={() => handleSubmit(true)}
-                    disabled={isLoading || isUploading}
-                    className="px-3 md:px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors duration-200 flex items-center space-x-2 text-sm md:text-base"
-                  >
-                    <Save className="h-4 w-4" />
-                    <span>{t('fims.saveasdraft')}</span>
-                  </button>
+                <button
+                  onClick={() => handleSubmit(true)}
+                  disabled={isLoading || isUploading}
+                  className="px-3 md:px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors duration-200 flex items-center space-x-2 text-sm md:text-base"
+                >
+                  <Save className="h-4 w-4" />
+                  <span>{t('fims.saveAsDraft')}</span>
+                </button>
                 )}
                 {!isViewMode && (
-                  <button
-                    onClick={() => handleSubmit(false)}
-                    disabled={isLoading || isUploading}
-                    className="px-3 md:px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg disabled:opacity-50 transition-colors duration-200 flex items-center space-x-2 text-sm md:text-base"
-                  >
-                    <Send className="h-4 w-4" />
-                    <span>{isEditMode ? t('fims.updateinspection') : t('fims.submitinspection')}</span>
-                  </button>
+                <button
+                  onClick={() => handleSubmit(false)}
+                  disabled={isLoading || isUploading}
+                  className="px-3 md:px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg disabled:opacity-50 transition-colors duration-200 flex items-center space-x-2 text-sm md:text-base"
+                >
+                  <Send className="h-4 w-4" />
+                  <span>{isEditMode ? t('fims.updateInspection') : t('fims.submitInspection')}</span>
+                </button>
                 )}
               </>
             ) : (
               <button
                 onClick={() => setCurrentStep(prev => Math.min(4, prev + 1))}
-                disabled={(!canProceedToNext() && !isViewMode) || (isViewMode && currentStep === 4)}
+                disabled={!canProceedToNext() || isViewMode}
                 className="px-4 md:px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 text-sm md:text-base"
               >
                 {t('common.next')}
